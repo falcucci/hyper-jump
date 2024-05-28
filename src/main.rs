@@ -71,7 +71,7 @@ pub fn with_tracing() {
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::filter::LevelFilter::INFO)
-        .with(tracing_subscriber::filter::Targets::default().with_target("cardaminal", Level::INFO))
+        .with(tracing_subscriber::filter::Targets::default().with_target("hyper-jump", Level::INFO))
         .with(tracing_subscriber::fmt::layer().with_writer(indicatif_layer.get_stderr_writer()))
         .with(indicatif_layer)
         .init();
@@ -86,6 +86,6 @@ async fn main() -> miette::Result<()> {
     match cli.command {
         Commands::Mithril(args) => mithril::run(args, &ctx).await,
         Commands::CardanoNode(args) => cardano_node::run(args, &ctx).await,
-        Commands::CardanoCli(args) => todo!(),
+        Commands::CardanoCli(args) => cardano_cli::run(args, &ctx).await,
     }
 }
