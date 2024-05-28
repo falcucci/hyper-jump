@@ -68,7 +68,6 @@ impl Context {
 
 pub fn with_tracing() {
     let indicatif_layer = IndicatifLayer::new();
-
     tracing_subscriber::registry()
         .with(tracing_subscriber::filter::LevelFilter::INFO)
         .with(tracing_subscriber::filter::Targets::default().with_target("hyper-jump", Level::INFO))
