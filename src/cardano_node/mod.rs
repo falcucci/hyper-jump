@@ -23,29 +23,12 @@ pub struct Update {
 
 #[derive(Parser)]
 pub enum Commands {
-    Use {
-        /// Version to switch to |nightly|stable|<version-string>|<commit-hash>|
-        version: String,
-    },
-
-    Install {
-        /// Version to install |nightly|stable|<version-string>|<commit-hash>|
-        version: String,
-    },
-
-    Uninstall {
-        /// Version to uninstall |nightly|stable|<version-string>|<commit-hash>|
-        version: String,
-    },
-
+    Use { version: String },
+    Install { version: String },
+    Uninstall { version: String },
     Rollback,
-
-    // Erase any change hyper-jump has made to the system
     Erase,
-
-    // List all installed versions
     List,
-
     Update(Update),
     Run(Run),
 }
