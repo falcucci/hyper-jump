@@ -1,7 +1,7 @@
 use anyhow::Error;
 use reqwest::Client;
 
-use crate::helpers::version::ParsedVersion;
+use crate::{fs::get_downloads_directory, helpers::version::ParsedVersion};
 
 pub enum Package {
   CardanoNode,
@@ -9,7 +9,12 @@ pub enum Package {
   Mithril,
 }
 
-pub fn install(client: &Client, package: Package, version: ParsedVersion) -> Result<(), Error> {
+pub async fn install(
+  client: &Client,
+  package: Package,
+  version: ParsedVersion,
+) -> Result<(), Error> {
+  let root = get_downloads_directory().await?;
   // let package = package::Package::new(package, version)?;
   // let package = package.resolve(client)?;
   //
