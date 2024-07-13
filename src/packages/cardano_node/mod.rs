@@ -2,9 +2,12 @@ use clap::Parser;
 use regex::Regex;
 use tracing::instrument;
 
-use crate::helpers::{
-  client,
-  version::{parse_version_type, ParsedVersion, VersionType},
+use crate::{
+  commands::install::{install, Package},
+  helpers::{
+    client,
+    version::{parse_version_type, ParsedVersion, VersionType},
+  },
 };
 
 #[derive(Parser)]
@@ -55,6 +58,7 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
     Commands::Install { version } => {
       let version = parse_version_type(&version).await.unwrap();
       println!("Install: {:?}", version);
+      let install = install(&client, Package::CardanoNode, version);
     }
     Commands::Uninstall { version } => {
       println!("Uninstall: {}", version);

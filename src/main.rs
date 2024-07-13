@@ -1,15 +1,15 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand, ValueEnum};
+use packages::{cardano_cli, cardano_node, mithril};
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod cardano_cli;
-mod cardano_node;
+mod commands;
 mod dirs;
 mod helpers;
-mod mithril;
+mod packages;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
