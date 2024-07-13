@@ -5,6 +5,36 @@ use anyhow::{anyhow, Context, Result};
 
 use crate::fs;
 
+/// Represents a local version of the software.
+///
+/// This struct contains information about a local version of the software, including the file name, file format, path, and semantic version.
+///
+/// # Fields
+///
+/// * `file_name: String` - The name of the file that contains the local version.
+/// * `file_format: String` - The format of the file that contains the local version.
+/// * `path: String` - The path to the file that contains the local version.
+/// * `semver: Option<Version>` - The semantic version of the local version, or `None` if the version is not a semantic version.
+///
+/// # Example
+///
+/// ```rust
+/// let local_version = LocalVersion {
+///     file_name: "version-1.0.0.tar.gz".to_string(),
+///     file_format: "tar.gz".to_string(),
+///     path: "/path/to/version-1.0.0.tar.gz".to_string(),
+///     semver: Some(Version::parse("1.0.0").unwrap()),
+/// };
+/// println!("The local version is {:?}", local_version);
+/// ```
+#[derive(Clone, PartialEq)]
+pub struct LocalVersion {
+  pub file_name: String,
+  pub file_format: String,
+  pub path: String,
+  pub semver: Option<Version>,
+}
+
 /// Represents a parsed version of the software.
 ///
 /// This struct contains information about a parsed version of the software, including the tag name, version type, non-parsed string, and semantic version.

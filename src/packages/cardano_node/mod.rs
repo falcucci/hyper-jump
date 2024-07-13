@@ -3,12 +3,14 @@ use regex::Regex;
 use tracing::instrument;
 
 use crate::{
-  commands::install::{install, Package},
+  commands::install::{install, CardanoNode, Package},
   helpers::{
     client,
     version::{parse_version_type, ParsedVersion, VersionType},
   },
 };
+
+use super::CARDANO_NODE_PACKAGE_URL;
 
 #[derive(Parser)]
 pub struct Args {
@@ -57,7 +59,13 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
     }
     Commands::Install { version } => {
       let version = parse_version_type(&version).await.unwrap();
-      install(&client, Package::CardanoNode, version)
+      let cardano_node = Package::CardanoNode(CardanoNode {
+        url: CARDANO_NODE_PACKAGE_URL.to_string(),
+        alias: "cardano-node".to_string(),
+        version: version.non_parsed_string.clone(),
+      });
+
+      install(&client, cardano_node, version)
         .await
         .expect("Failed to install")
     }

@@ -1,6 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use anyhow::{anyhow, Result};
+use semver::Version;
 
 /// Returns the home directory path for the current user.
 ///
@@ -106,4 +107,70 @@ pub async fn get_downloads_directory() -> Result<PathBuf> {
   }
 
   Ok(data_dir)
+}
+
+/// Returns the file type binary download based on the target operating system.
+///
+/// This function checks the target operating system using the `cfg!` macro and returns a string that corresponds to the appropriate file type binary download.
+/// For Windows, it returns "zip".
+/// For macOS, it returns "tar.gz".
+/// For other operating systems, it returns "appimage".
+///
+/// # Returns
+///
+/// This function returns a `&'static str` that corresponds to the file type binary download.
+///
+/// # Example
+///
+/// ```rust
+/// let file_type = get_file_type();
+/// ```
+pub fn get_file_type() -> &'static str {
+  if cfg!(target_family = "windows") {
+    "zip"
+  } else if cfg!(target_os = "macos") {
+    "tar.gz"
+  } else {
+    "appimage"
+  }
+}
+
+/// Returns the platform-specific name.
+///
+/// This function takes an `Option<Version>` as an argument, which represents the version to be downloaded.
+/// It checks the target operating system and architecture using the `cfg!` macro and returns a string that corresponds to the appropriate download for the platform.
+/// For Windows, it returns "win64".
+/// For macOS, it checks the version. If the version is less than or equal to 0.9.5, it returns "macos". If the target architecture is "aarch64", it returns "macos-arm64". Otherwise, it returns "macos-x86_64".
+///
+/// # Arguments
+///
+/// * `version` - An `Option<Version>` representing the version to be downloaded.
+///
+/// # Returns
+///
+/// This function returns a `&'static str` that corresponds to the platform-specific name for download.
+///
+/// # Example
+///
+/// ```rust
+/// let version = Some(Version::new(0, 9, 5));
+/// let platform_name = get_platform_name_download(&version);
+/// ```
+pub fn get_platform_name_download(version: &Option<Version>) -> &'static str {
+  if cfg!(target_os = "windows") {
+    "win64"
+  } else if cfg!(target_os = "macos") {
+    if version
+      .as_ref()
+      .map_or(false, |x| x <= &Version::new(0, 9, 5))
+    {
+      "macos"
+    } else if cfg!(target_arch = "aarch64") {
+      "macos-arm64"
+    } else {
+      "macos-x86_64"
+    }
+  } else {
+    "linux"
+  }
 }
