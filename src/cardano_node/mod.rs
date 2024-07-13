@@ -2,7 +2,7 @@ use clap::Parser;
 use regex::Regex;
 use tracing::instrument;
 
-use crate::helpers::version::{ParsedVersion, VersionType};
+use crate::helpers::version::{parse_version_type, ParsedVersion, VersionType};
 
 #[derive(Parser)]
 pub struct Args {
@@ -49,22 +49,8 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
       println!("Use: {}", version);
     }
     Commands::Install { version } => {
-      let version_regex = Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
-      if version_regex.is_match(&version) {
-        let mut returned_version = version.to_string();
-        if !version.contains('v') {
-          returned_version.insert(0, 'v');
-        }
-        let cloned_version = returned_version.clone();
-        let mut version = ParsedVersion {
-          tag_name: returned_version,
-          version_type: VersionType::Normal,
-          non_parsed_string: version.to_string(),
-          semver: None,
-        };
-
-        println!("Install: {:?}", version);
-      }
+      let version = parse_version_type(&version).await.unwrap();
+      println!("Install: {:?}", version);
     }
     Commands::Uninstall { version } => {
       println!("Uninstall: {}", version);

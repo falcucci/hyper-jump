@@ -1,4 +1,7 @@
+use regex::Regex;
 use semver::Version;
+
+use anyhow::{anyhow, Context, Result};
 
 /// Represents a parsed version of the software.
 ///
@@ -55,4 +58,24 @@ pub enum VersionType {
   Normal,
   Latest,
   Hash,
+}
+
+pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
+  let version_regex = Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
+  if version_regex.is_match(&version) {
+    let mut returned_version = version.to_string();
+    if !version.contains('v') {
+      returned_version.insert(0, 'v');
+    }
+    let cloned_version = returned_version.clone();
+
+    return Ok(ParsedVersion {
+      tag_name: returned_version,
+      version_type: VersionType::Normal,
+      non_parsed_string: version.to_string(),
+      semver: None,
+    });
+  }
+
+  Err(anyhow!("Please provide a proper version string"))
 }
