@@ -3,6 +3,8 @@ use semver::Version;
 
 use anyhow::{anyhow, Context, Result};
 
+use crate::fs;
+
 /// Represents a parsed version of the software.
 ///
 /// This struct contains information about a parsed version of the software, including the tag name, version type, non-parsed string, and semantic version.
@@ -78,4 +80,43 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
   }
 
   Err(anyhow!("Please provide a proper version string"))
+}
+
+/// This function reads the downloads directory and checks if there is a directory with the name matching the specified version. If such a directory is found, it means that the version is installed.
+///
+/// # Arguments
+///
+/// * `version` - The version to check.
+///
+/// # Returns
+///
+/// * `Result<bool>` - Returns a `Result` that contains `true` if the version is installed, `false` otherwise, or an error if the operation failed.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The downloads directory cannot be retrieved.
+/// * The downloads directory cannot be read.
+///
+/// # Example
+///
+/// ```rust
+/// let version = "1.0.0";
+/// let is_installed = is_version_installed(version).await.unwrap();
+/// println!("Is version {} installed? {}", version, is_installed);
+/// ```
+pub async fn is_version_installed(version: &str) -> Result<bool> {
+  let downloads_dir = fs::get_downloads_directory().await?;
+  let mut dir = tokio::fs::read_dir(&downloads_dir).await?;
+
+  while let Some(directory) = dir.next_entry().await? {
+    let name = directory.file_name().to_str().unwrap().to_owned();
+    if !version.eq(&name) {
+      continue;
+    } else {
+      return Ok(true);
+    }
+  }
+  Ok(false)
 }

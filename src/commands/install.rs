@@ -1,8 +1,14 @@
+use std::env;
+
 use anyhow::Error;
 use reqwest::Client;
 
-use crate::{fs::get_downloads_directory, helpers::version::ParsedVersion};
+use crate::{
+  fs::get_downloads_directory,
+  helpers::version::{is_version_installed, ParsedVersion},
+};
 
+#[derive(Debug)]
 pub enum Package {
   CardanoNode,
   CardanoCli,
@@ -14,7 +20,17 @@ pub async fn install(
   package: Package,
   version: ParsedVersion,
 ) -> Result<(), Error> {
+  println!("installing package: {:?}", package);
   let root = get_downloads_directory().await?;
+
+  env::set_current_dir(&root)?;
+  let root = root.as_path();
+
+  println!("version: {:?}", version);
+
+  let is_version_installed = is_version_installed(&version.tag_name).await?;
+  println!("is_version_installed: {:?}", is_version_installed);
+
   // let package = package::Package::new(package, version)?;
   // let package = package.resolve(client)?;
   //

@@ -57,8 +57,9 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
     }
     Commands::Install { version } => {
       let version = parse_version_type(&version).await.unwrap();
-      println!("Install: {:?}", version);
-      let install = install(&client, Package::CardanoNode, version);
+      install(&client, Package::CardanoNode, version)
+        .await
+        .expect("Failed to install")
     }
     Commands::Uninstall { version } => {
       println!("Uninstall: {}", version);
