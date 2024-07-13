@@ -2,7 +2,10 @@ use clap::Parser;
 use regex::Regex;
 use tracing::instrument;
 
-use crate::helpers::version::{parse_version_type, ParsedVersion, VersionType};
+use crate::helpers::{
+  client,
+  version::{parse_version_type, ParsedVersion, VersionType},
+};
 
 #[derive(Parser)]
 pub struct Args {
@@ -44,6 +47,7 @@ pub struct Run {
 
 #[instrument("cardano-node", skip_all)]
 pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
+  let client = client::create_reqwest_client().unwrap();
   match args.command {
     Commands::Use { version } => {
       println!("Use: {}", version);
