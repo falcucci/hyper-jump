@@ -8,6 +8,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 mod cardano_cli;
 mod cardano_node;
 mod dirs;
+mod helpers;
 mod mithril;
 
 #[derive(Parser)]
