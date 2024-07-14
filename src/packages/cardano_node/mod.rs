@@ -3,7 +3,10 @@ use regex::Regex;
 use tracing::instrument;
 
 use crate::{
-  commands::install::{install, CardanoNode, Package},
+  commands::{
+    install::{install, CardanoNode, Package},
+    use_cmd::use_cmd,
+  },
   helpers::{
     client,
     version::{parse_version_type, ParsedVersion, VersionType},
@@ -55,7 +58,11 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
   let client = client::create_reqwest_client().unwrap();
   match args.command {
     Commands::Use { version } => {
-      println!("Use: {}", version);
+      let version = parse_version_type(&version).await.unwrap();
+      println!("Use: {:?}", version);
+      use_cmd(&client, version)
+        .await
+        .expect("Failed to set the version")
     }
     Commands::Install { version } => {
       let version = parse_version_type(&version).await.unwrap();

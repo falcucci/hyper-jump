@@ -12,7 +12,7 @@ use reqwest::Client;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
-use crate::fs::{get_file_type, get_platform_name_download};
+use crate::fs::{get_file_type, get_platform_name_download, unarchive};
 use crate::helpers::version::LocalVersion;
 use crate::{
   fs::get_downloads_directory,
@@ -69,43 +69,11 @@ pub async fn install(
       download_version(client, &version, root, package).await?
     }
     VersionType::Hash => todo!(),
-    // VersionType::Hash => handle_building_from_source(version).await,
-    // VersionType::Latest => download_latest_version(client, version, root).await,
   };
 
-  // let package = package::Package::new(package, version)?;
-  // let package = package.resolve(client)?;
-  //
-  // let package_dir = dirs::package_dir(&package.name, &package.version);
-  // let package_dir = package_dir.as_path();
-  //
-  // if package_dir.exists() {
-  //   return Err(Error::PackageAlreadyInstalled {
-  //     package: package.name.clone(),
-  //     version: package.version.clone(),
-  //   });
-  // }
-  //
-  // let package_tarball = dirs::package_tarball(&package.name, &package.version);
-  // let package_tarball = package_tarball.as_path();
-  //
-  // let package_tarball_url = package.tarball_url();
-  // let package_tarball_url = package_tarball_url.as_str();
-  //
-  // let package_tarball_response = client.get(package_tarball_url).send()?;
-  // let package_tarball_response = package_tarball_response.error_for_status()?;
-  //
-  // let package_tarball_bytes = package_tarball_response.bytes()?;
-  // let package_tarball_bytes = package_tarball_bytes.as_ref();
-  //
-  // fs::create_dir_all(package_dir)?;
-  // fs::write(package_tarball, package_tarball_bytes)?;
-  //
-  // let package_tarball = fs::File::open(package_tarball)?;
-  // let package_tarball = flate2::read::GzDecoder::new(package_tarball);
-  // let package_tarball = tar::Archive::new(package_tarball);
-  //
-  // package_tarball.unpack(package_dir)?;
+  if let PostDownloadVersionType::Standard(local_version) = downloaded_file {
+    unarchive(local_version).await?;
+  }
 
   Ok(())
 }
@@ -195,7 +163,7 @@ async fn download_version(
             }))
           } else {
             Err(anyhow!(
-              "Please provide an existing neovim version, {}",
+              "Please provide an existing version, {}",
               response.text().await?
             ))
           }

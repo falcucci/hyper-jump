@@ -3,7 +3,7 @@ use semver::Version;
 
 use anyhow::{anyhow, Context, Result};
 
-use crate::fs;
+use crate::fs::{self, get_downloads_directory};
 
 /// Represents a local version of the software.
 ///
@@ -149,4 +149,39 @@ pub async fn is_version_installed(version: &str) -> Result<bool> {
     }
   }
   Ok(false)
+}
+
+/// Retrieves the current version being used.
+///
+/// This function reads the "used" file from the downloads directory, which contains the current version being used. If the "used" file cannot be found, it means that is not installed through hyper-jump.
+///
+/// # Returns
+///
+/// * `Result<String>` - Returns a `Result` that contains the current version being used, or an error if the operation failed.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The downloads directory cannot be retrieved.
+/// * The "used" file cannot be read.
+///
+/// # Example
+///
+/// ```rust
+/// let current_version = get_current_version().await.unwrap();
+/// println!("The current version is {}", current_version);
+pub async fn get_current_version() -> Result<String> {
+  let mut downloads_dir = get_downloads_directory().await?;
+  downloads_dir.push("used");
+  println!("downloads_dir: {:?}", downloads_dir);
+  tokio::fs::read_to_string(&downloads_dir)
+    .await
+    .map_err(|_| anyhow!("Could not read the current version"))
+}
+
+pub async fn is_version_used(version: &str) -> bool {
+  let current_version = get_current_version().await.unwrap();
+  println!("current_version: {:?}", current_version);
+  current_version == version
 }

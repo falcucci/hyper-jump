@@ -1,7 +1,15 @@
-use std::{fs, path::PathBuf};
+use std::{
+  env, fs,
+  path::{Path, PathBuf},
+  process::Command,
+};
 
 use anyhow::{anyhow, Result};
+
 use semver::Version;
+use tracing::info;
+
+use crate::helpers::version::LocalVersion;
 
 /// Returns the home directory path for the current user.
 ///
@@ -74,10 +82,6 @@ pub fn get_home_dir() -> Result<PathBuf> {
 /// ```
 pub fn get_local_data_dir() -> Result<PathBuf> {
   let mut home_dir = get_home_dir()?;
-  if cfg!(windows) {
-    home_dir.push("AppData/Local");
-    return Ok(home_dir);
-  }
 
   home_dir.push(".local/share");
   Ok(home_dir)
@@ -173,4 +177,302 @@ pub fn get_platform_name_download(version: &Option<Version>) -> &'static str {
   } else {
     "linux"
   }
+}
+
+/// Copies the proxy to the installation directory.
+///
+/// This function gets the current executable's path, determines the installation directory, creates it if it doesn't exist, adds it to the system's PATH, and copies the current executable to the installation directory as "cardano-node".
+///
+/// # Returns
+///
+/// * `Result<()>` - Returns a `Result` that indicates whether the operation was successful or not.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The current executable's path cannot be determined.
+/// * The installation directory cannot be created.
+/// * The installation directory cannot be added to the PATH.
+/// * The version of the existing file cannot be determined.
+/// * The existing file cannot be replaced.
+///
+/// # Example
+///
+/// ```rust
+/// copy_cardano_node_proxy().await.unwrap();
+/// ```
+async fn copy_cardano_node_proxy() -> Result<()> {
+  let exe_path = env::current_exe().unwrap();
+  let mut installation_dir = get_installation_directory().await?;
+
+  if fs::metadata(&installation_dir).is_err() {
+    fs::create_dir_all(&installation_dir)?;
+  }
+
+  add_to_path(&installation_dir)?;
+
+  installation_dir.push("cardano-node");
+
+  if fs::metadata(&installation_dir).is_ok() {
+    let output = Command::new("cardano-node")
+      .arg("--&hyper-jump")
+      .output()?
+      .stdout;
+    let version = String::from_utf8(output)?.trim().to_string();
+
+    if version == env!("CARGO_PKG_VERSION") {
+      return Ok(());
+    }
+  }
+
+  info!("Updating hyper-jump proxy");
+  fs::copy(&exe_path, &installation_dir).map_err(|_| anyhow!("Could not copy the proxy"))?;
+
+  Ok(())
+}
+
+/// Adds the installation directory to the system's PATH.
+///
+/// This function checks if the installation directory is already in the PATH. If not, it adds the directory to the PATH.
+///
+/// # Arguments
+///
+/// * `installation_dir` - The directory to be added to the PATH.
+///
+/// # Returns
+///
+/// * `Result<()>` - Returns a `Result` that indicates whether the operation was successful or not.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The installation directory cannot be converted to a string.
+/// * The current user's environment variables cannot be accessed or modified (Windows only).
+/// * The PATH environment variable cannot be read (non-Windows only).
+///
+/// # Example
+///
+/// ```rust
+/// let installation_dir = Path::new("/usr/local/bin");
+/// add_to_path(&installation_dir).unwrap();
+/// ```
+fn add_to_path(installation_dir: &Path) -> Result<()> {
+  let installation_dir = installation_dir.to_str().unwrap();
+
+  if !std::env::var("PATH")?.contains("cardanoo-node-bin") {
+    info!("Make sure to have {installation_dir} in PATH");
+  }
+
+  Ok(())
+}
+
+/// Asynchronously returns the installation directory path based on the application configuration.
+///
+/// If the `installation_location` field in the `Config` is not set, it gets the downloads directory path by calling the `get_downloads_directory` function and appends "cardano-node-bin" to it.
+///
+/// # Returns
+///
+/// This function returns a `Result` that contains a `PathBuf` representing the installation directory path if the operation was successful.
+/// If the operation failed, the function returns `Err` with a description of the error.
+///
+/// # Example
+///
+/// ```rust
+/// let installation_directory = get_installation_directory().await?;
+/// ```
+pub async fn get_installation_directory() -> Result<PathBuf> {
+  let mut installation_location = get_downloads_directory().await?;
+  installation_location.push("cardano-node-bin");
+
+  Ok(installation_location)
+}
+
+/// Starts the process of expanding a downloaded file.
+///
+/// This function is asynchronous and uses `tokio::task::spawn_blocking` to run the `expand` function in a separate thread.
+/// It takes a `LocalVersion` struct which contains information about the downloaded file, such as its name, format, and path.
+/// The function first clones the `LocalVersion` struct and passes it to the `expand` function.
+/// If the `expand` function returns an error, the `start` function also returns an error.
+/// If the `expand` function is successful, the `start` function removes the original downloaded file.
+///
+/// # Arguments
+///
+/// * `file` - A `LocalVersion` struct representing the downloaded file.
+///
+/// # Returns
+///
+/// This function returns a `Result` that indicates whether the operation was successful.
+/// If the operation was successful, the function returns `Ok(())`.
+/// If the operation failed, the function returns `Err` with a description of the error.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The `expand` function returns an error.
+/// * The original downloaded file could not be removed.
+///
+/// # Example
+///
+/// ```rust
+/// let downloaded_file = LocalVersion {
+///     file_name: "cardano-node-darwin",
+///     file_format: "tar.gz",
+///     semver: semver::Version::parse("8.1.2").unwrap(),
+///     path: "/path/to/downloaded/file",
+/// };
+/// unarchive(downloaded_file).await;
+/// ```
+pub async fn unarchive(file: LocalVersion) -> Result<()> {
+  let temp_file = file.clone();
+  match tokio::task::spawn_blocking(move || match expand(temp_file) {
+    Ok(_) => Ok(()),
+    Err(error) => Err(anyhow!(error)),
+  })
+  .await
+  {
+    Ok(_) => (),
+    Err(error) => return Err(anyhow!(error)),
+  }
+  tokio::fs::remove_file(format!(
+    "{}/{}.{}",
+    file.path, file.file_name, file.file_format
+  ))
+  .await?;
+  Ok(())
+}
+
+/// Expands a downloaded file on macOS.
+///
+/// This function is specific to macOS due to the use of certain features like `os::unix::fs::PermissionsExt`.
+/// It takes a `LocalVersion` struct which contains information about the downloaded file, such as its name and format.
+/// The function then opens the file, decompresses it using `GzDecoder`, and extracts its contents using `tar::Archive`.
+/// During the extraction process, a progress bar is displayed to the user.
+/// After extraction, the function renames the `cardano-node-osx64` directory to `cardano-node-macos` if it exists.
+/// Finally, it sets the permissions of the `cardano-node` binary to `0o551`.
+///
+/// # Arguments
+///
+/// * `downloaded_file` - A `LocalVersion` struct representing the downloaded file.
+///
+/// # Returns
+///
+/// This function returns a `Result` that indicates whether the operation was successful.
+/// If the operation was successful, the function returns `Ok(())`.
+/// If the operation failed, the function returns `Err` with a description of the error.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The downloaded file could not be opened.
+/// * The file could not be decompressed or extracted.
+/// * The `cardano-node-osx64` directory could not be renamed.
+/// * The permissions of the `cardano-node` binary could not be set.
+///
+/// # Example
+///
+/// ```rust
+/// let downloaded_file = LocalVersion {
+///     file_name: "cardano-node-macos",
+///     file_format: "tar.gz",
+///     semver: semver::Version::parse("0.5.0").unwrap(),
+///     path: "/path/to/downloaded/file",
+/// };
+/// expand(downloaded_file);
+/// ```
+#[cfg(target_os = "macos")] // I don't know if its worth making both expand functions into one function, but the API difference will cause so much if statements
+fn expand(downloaded_file: LocalVersion) -> Result<()> {
+  use crate::helpers;
+  use flate2::read::GzDecoder;
+  use indicatif::{ProgressBar, ProgressStyle};
+  use std::cmp::min;
+  use std::fs::File;
+  use std::io;
+  use std::{os::unix::fs::PermissionsExt, path::PathBuf};
+  use tar::Archive;
+
+  if fs::metadata(&downloaded_file.file_name).is_ok() {
+    fs::remove_dir_all(&downloaded_file.file_name)?;
+  }
+
+  let file = match File::open(format!(
+    "{}.{}",
+    downloaded_file.file_name, downloaded_file.file_format
+  )) {
+    Ok(value) => value,
+    Err(error) => {
+      return Err(anyhow!(
+        "Failed to open file {}.{}, file doesn't exist. additional info: {error}",
+        downloaded_file.file_name,
+        downloaded_file.file_format
+      ))
+    }
+  };
+  let decompress_stream = GzDecoder::new(file);
+  let mut archive = Archive::new(decompress_stream);
+
+  let totalsize = 1692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
+  let pb = ProgressBar::new(totalsize);
+  pb.set_style(
+    ProgressStyle::default_bar()
+      .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
+      .unwrap()
+      .progress_chars("█  "),
+  );
+  pb.set_message("Expanding archive");
+
+  let mut downloaded: u64 = 0;
+  for file in archive.entries()? {
+    match file {
+      Ok(mut file) => {
+        let mut outpath = PathBuf::new();
+        outpath.push(&downloaded_file.file_name);
+        outpath.push(file.path()?.to_str().unwrap());
+
+        let file_name = format!("{}", file.path()?.display()); // file.path()?.is_dir() always returns false... weird
+        if file_name.ends_with('/') {
+          fs::create_dir_all(outpath)?;
+        } else {
+          if let Some(parent) = outpath.parent() {
+            if !parent.exists() {
+              fs::create_dir_all(parent)?;
+            }
+          }
+          let mut outfile = fs::File::create(outpath)?;
+          io::copy(&mut file, &mut outfile)?;
+        }
+        let new = min(downloaded + 1, totalsize);
+        downloaded = new;
+        pb.set_position(new);
+      }
+      Err(error) => println!("{error}"),
+    }
+  }
+
+  println!(
+    "Finished expanding to {}/{}",
+    downloaded_file.path, downloaded_file.file_name
+  );
+
+  pb.finish_with_message(format!(
+    "Finished expanding to {}/{}",
+    downloaded_file.path, downloaded_file.file_name
+  ));
+
+  if fs::metadata(format!("{}/cardano-node-osx64", downloaded_file.file_name)).is_ok() {
+    fs::rename(
+      format!("{}/cardano-node-osx64", downloaded_file.file_name),
+      format!("{}/cardano-node-macos", downloaded_file.file_name),
+    )?;
+  }
+
+  let platform = get_platform_name_download(&downloaded_file.semver);
+  let file = &format!("{}/{platform}/bin/cardano-node", downloaded_file.file_name);
+  let mut perms = fs::metadata(file)?.permissions();
+  perms.set_mode(0o551);
+  fs::set_permissions(file, perms)?;
+  Ok(())
 }
