@@ -1,3 +1,5 @@
+use tracing::info;
+
 use crate::{
   fs::copy_cardano_node_proxy,
   helpers::version::{is_version_used, switch_version, ParsedVersion},
@@ -16,11 +18,12 @@ pub async fn use_cmd(
   copy_cardano_node_proxy(package.clone()).await?;
 
   if is_version_used {
-    println!("Version {} is already being used.", version.tag_name);
     return Ok(());
   }
 
-  switch_version(client, version, package.clone()).await?;
+  switch_version(client, &version, package.clone()).await?;
+
+  info!("You can now use {}!", version.tag_name);
 
   Ok(())
 }

@@ -209,7 +209,7 @@ pub async fn is_version_used(version: &str, package: Package) -> bool {
 /// * The version cannot be written to the "used" file.
 pub async fn switch_version(
   client: &reqwest::Client,
-  version: ParsedVersion,
+  version: &ParsedVersion,
   package: Package,
 ) -> Result<()> {
   std::env::set_current_dir(crate::fs::get_downloads_directory(package).await?)?;
