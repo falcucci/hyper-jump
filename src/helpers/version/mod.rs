@@ -184,7 +184,9 @@ pub async fn get_current_version(package: Package) -> Result<String> {
 }
 
 pub async fn is_version_used(version: &str, package: Package) -> bool {
-  let current_version = get_current_version(package).await.unwrap();
-  println!("current_version: {:?}", current_version);
-  current_version == version
+  let current_version = get_current_version(package).await;
+  match current_version {
+    Ok(current_version) => current_version == version,
+    Err(_) => false,
+  }
 }

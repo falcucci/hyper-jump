@@ -208,9 +208,15 @@ pub fn get_platform_name_download(version: &Option<Version>) -> &'static str {
 /// # Example
 ///
 /// ```rust
-/// copy_cardano_node_proxy().await.unwrap();
+/// let package = Package::CardanoNode(CardanoNode {
+///    alias: "cardano-node".to_string(),
+///    version: "1.0.0".to_string(),
+///    url: "https://example.com".to_string(),
+/// });
+///
+/// copy_cardano_node_proxy(package).await.unwrap();
 /// ```
-async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
+pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
   let exe_path = env::current_exe().unwrap();
   let mut installation_dir = get_installation_directory(package).await?;
 
@@ -234,7 +240,6 @@ async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
     }
   }
 
-  info!("Updating hyper-jump proxy");
   fs::copy(&exe_path, &installation_dir).map_err(|_| anyhow!("Could not copy the proxy"))?;
 
   Ok(())
