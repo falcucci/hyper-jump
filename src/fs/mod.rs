@@ -450,40 +450,6 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
       .unwrap()
       .progress_chars("█  "),
   );
-  pb.set_message("Expanding archive");
-
-  let mut downloaded: u64 = 0;
-  // for file in archive.entries()? {
-  //   match file {
-  //     Ok(mut file) => {
-  //       let mut outpath = PathBuf::new();
-  //       outpath.push(&downloaded_file.file_name);
-  //       outpath.push(file.path()?.to_str().unwrap());
-  //
-  //       let file_name = format!("{}", file.path()?.display()); // file.path()?.is_dir() always returns false... weird
-  //       if file_name.ends_with('/') {
-  //         fs::create_dir_all(outpath)?;
-  //       } else {
-  //         if let Some(parent) = outpath.parent() {
-  //           if !parent.exists() {
-  //             fs::create_dir_all(parent)?;
-  //           }
-  //         }
-  //         let mut outfile = fs::File::create(outpath)?;
-  //         io::copy(&mut file, &mut outfile)?;
-  //       }
-  //       let new = min(downloaded + 1, totalsize);
-  //       downloaded = new;
-  //       pb.set_position(new);
-  //     }
-  //     Err(error) => println!("{error}"),
-  //   }
-  // }
-
-  println!(
-    "Finished expanding to {}/{}",
-    downloaded_file.path, downloaded_file.file_name
-  );
 
   pb.finish_with_message(format!(
     "Finished expanding to {}/{}",
