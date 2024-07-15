@@ -6,7 +6,6 @@ use std::{
 
 use anyhow::{anyhow, Result};
 
-use semver::Version;
 use tracing::info;
 
 use crate::{
@@ -203,6 +202,8 @@ pub fn get_platform_name_download() -> &'static str {
 pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
   let exe_path = env::current_exe().unwrap();
   let mut installation_dir = get_installation_directory(package).await?;
+  println!("exe_path: {:?}", exe_path);
+  println!("installation_dir: {:?}", installation_dir);
 
   if fs::metadata(&installation_dir).is_err() {
     fs::create_dir_all(&installation_dir)?;
@@ -213,11 +214,13 @@ pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
   installation_dir.push("cardano-node");
 
   if fs::metadata(&installation_dir).is_ok() {
+    println!("cardano-node already exists in installation directory");
     let output = Command::new("cardano-node")
       .arg("--&hyper-jump")
       .output()?
       .stdout;
     let version = String::from_utf8(output)?.trim().to_string();
+    println!("version: {}", version);
 
     if version == env!("CARGO_PKG_VERSION") {
       return Ok(());
@@ -258,7 +261,7 @@ pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
 fn add_to_path(installation_dir: &Path) -> Result<()> {
   let installation_dir = installation_dir.to_str().unwrap();
 
-  if !std::env::var("PATH")?.contains("cardanoo-node-bin") {
+  if !std::env::var("PATH")?.contains("cardano-node-bin") {
     info!("Make sure to have {installation_dir} in PATH");
   }
 
@@ -442,8 +445,11 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
 
   let platform = get_platform_name_download();
   println!("Platform: {}", platform);
-  let file = &format!("{}/{platform}/bin/cardano-node", downloaded_file.file_name);
+
+  let file = &format!("{}/bin/cardano-node", downloaded_file.file_name);
+  println!("File: {}", file);
   let mut perms = fs::metadata(file)?.permissions();
+  println!("Permissions: {:?}", perms);
   perms.set_mode(0o551);
   fs::set_permissions(file, perms)?;
   Ok(())

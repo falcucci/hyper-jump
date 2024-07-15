@@ -4,12 +4,13 @@ use tracing::instrument;
 
 use crate::{
   commands::{
+    erase::erase,
     install::{install, CardanoNode, Package},
     use_cmd::use_cmd,
   },
   helpers::{
     client,
-    version::{parse_version_type, ParsedVersion, VersionType},
+    version::{get_current_version, parse_version_type, ParsedVersion, VersionType},
   },
 };
 
@@ -64,7 +65,6 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
         alias: "cardano-node".to_string(),
         version: version.non_parsed_string.clone(),
       });
-      println!("Use: {:?}", version);
       use_cmd(&client, version, package)
         .await
         .expect("Failed to set the version")
@@ -88,7 +88,12 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
       println!("Rollback");
     }
     Commands::Erase => {
-      println!("Erase");
+      let cardano_node = Package::CardanoNode(CardanoNode {
+        url: CARDANO_NODE_PACKAGE_URL.to_string(),
+        alias: "cardano-node".to_string(),
+        version: "9.0.0".to_string(),
+      });
+      erase(cardano_node).await.expect("Failed to erase");
     }
     Commands::List => {
       println!("List");

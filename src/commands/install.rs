@@ -12,7 +12,7 @@ use reqwest::Client;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
-use crate::fs::{get_file_type, get_platform_name_download, unarchive};
+use crate::fs::{copy_cardano_node_proxy, get_file_type, get_platform_name_download, unarchive};
 use crate::helpers::version::LocalVersion;
 use crate::{
   fs::get_downloads_directory,
@@ -53,16 +53,14 @@ pub async fn install(
   package: Package,
   version: ParsedVersion,
 ) -> Result<(), Error> {
-  println!("installing package: {:?}", package);
   let root = get_downloads_directory(package.clone()).await?;
 
   env::set_current_dir(&root)?;
   let root = root.as_path();
 
-  println!("version: {:?}", version);
-
   let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await;
-  println!("is_version_installed: {:?}", is_version_installed);
+
+  copy_cardano_node_proxy(package.clone()).await?;
 
   let downloaded_file = match version.version_type {
     VersionType::Normal | VersionType::Latest => {
