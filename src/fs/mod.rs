@@ -165,26 +165,10 @@ pub fn get_file_type() -> &'static str {
 /// # Example
 ///
 /// ```rust
-/// let version = Some(Version::new(0, 9, 5));
-/// let platform_name = get_platform_name_download(&version);
+/// let platform_name = get_platform_name_download();
 /// ```
-pub fn get_platform_name_download(version: &Option<Version>) -> &'static str {
-  if cfg!(target_os = "windows") {
-    "win64"
-  } else if cfg!(target_os = "macos") {
-    if version
-      .as_ref()
-      .map_or(false, |x| x <= &Version::new(0, 9, 5))
-    {
-      "macos"
-    } else if cfg!(target_arch = "aarch64") {
-      "macos-arm64"
-    } else {
-      "macos-x86_64"
-    }
-  } else {
-    "linux"
-  }
+pub fn get_platform_name_download() -> &'static str {
+  std::env::consts::OS
 }
 
 /// Copies the proxy to the installation directory.
@@ -456,14 +440,8 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
     downloaded_file.path, downloaded_file.file_name
   ));
 
-  if fs::metadata(format!("{}/cardano-node-osx64", downloaded_file.file_name)).is_ok() {
-    fs::rename(
-      format!("{}/cardano-node-osx64", downloaded_file.file_name),
-      format!("{}/cardano-node-macos", downloaded_file.file_name),
-    )?;
-  }
-
-  let platform = get_platform_name_download(&downloaded_file.semver);
+  let platform = get_platform_name_download();
+  println!("Platform: {}", platform);
   let file = &format!("{}/{platform}/bin/cardano-node", downloaded_file.file_name);
   let mut perms = fs::metadata(file)?.permissions();
   perms.set_mode(0o551);

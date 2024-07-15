@@ -118,7 +118,7 @@ async fn download_version(
   println!("package: {:?}", package);
   match version.version_type {
     VersionType::Normal | VersionType::Latest => {
-      let response = send_request(client, version, package).await;
+      let response = send_request(client, package).await;
 
       match response {
         Ok(response) => {
@@ -196,7 +196,6 @@ async fn download_version(
 ///
 /// ```rust
 /// let client = Client::new();
-/// let version = ParsedVersion { tag_name: "v8.1.2", semver: Version::parse("8.1.2").unwrap() };
 /// let response = send_request(&client, &version).await?;
 /// ```
 ///
@@ -210,10 +209,9 @@ async fn download_version(
 /// * [`helpers::get_file_type`](src/helpers/file.rs)
 async fn send_request(
   client: &Client,
-  version: &ParsedVersion,
   package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
-  let platform = get_platform_name_download(&version.semver);
+  let platform = get_platform_name_download();
   println!("platform: {:?}", platform);
   let file_type = get_file_type();
 

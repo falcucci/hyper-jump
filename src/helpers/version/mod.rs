@@ -2,11 +2,9 @@ use regex::Regex;
 use semver::Version;
 
 use anyhow::{anyhow, Context, Result};
+use tokio::fs;
 
-use crate::{
-  commands::install::Package,
-  fs::{self, get_downloads_directory},
-};
+use crate::commands::install::Package;
 
 /// Represents a local version of the software.
 ///
@@ -140,7 +138,7 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
 /// println!("Is version {} installed? {}", version, is_installed);
 /// ```
 pub async fn is_version_installed(version: &str, package: Package) -> Result<bool> {
-  let downloads_dir = fs::get_downloads_directory(package).await?;
+  let downloads_dir = crate::fs::get_downloads_directory(package).await?;
   let mut dir = tokio::fs::read_dir(&downloads_dir).await?;
 
   while let Some(directory) = dir.next_entry().await? {
@@ -175,7 +173,7 @@ pub async fn is_version_installed(version: &str, package: Package) -> Result<boo
 /// let current_version = get_current_version().await.unwrap();
 /// println!("The current version is {}", current_version);
 pub async fn get_current_version(package: Package) -> Result<String> {
-  let mut downloads_dir = get_downloads_directory(package).await?;
+  let mut downloads_dir = crate::fs::get_downloads_directory(package).await?;
   downloads_dir.push("used");
   println!("downloads_dir: {:?}", downloads_dir);
   tokio::fs::read_to_string(&downloads_dir)
@@ -186,7 +184,39 @@ pub async fn get_current_version(package: Package) -> Result<String> {
 pub async fn is_version_used(version: &str, package: Package) -> bool {
   let current_version = get_current_version(package).await;
   match current_version {
-    Ok(current_version) => current_version == version,
+    Ok(current_version) => current_version.eq(version),
     Err(_) => false,
   }
+}
+
+/// Switches to a specified version.
+///
+/// # Arguments
+///
+/// * `version` - The version to switch to.
+/// * `package` - The package to switch versions for.
+///
+/// # Returns
+///
+/// * `Result<()>` - Returns a `Result` that indicates whether the operation was successful or not.
+///
+/// # Errors
+///
+/// This function will return an error if:
+///
+/// * The downloads directory cannot be determined.
+/// * The current directory cannot be changed to the downloads directory.
+/// * The version cannot be written to the "used" file.
+pub async fn switch_version(
+  client: &reqwest::Client,
+  version: ParsedVersion,
+  package: Package,
+) -> Result<()> {
+  std::env::set_current_dir(crate::fs::get_downloads_directory(package).await?)?;
+
+  let file_version: String = version.tag_name.to_string();
+
+  fs::write("used", &file_version).await?;
+
+  Ok(())
 }
