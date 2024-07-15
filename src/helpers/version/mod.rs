@@ -3,7 +3,10 @@ use semver::Version;
 
 use anyhow::{anyhow, Context, Result};
 
-use crate::fs::{self, get_downloads_directory};
+use crate::{
+  commands::install::Package,
+  fs::{self, get_downloads_directory},
+};
 
 /// Represents a local version of the software.
 ///
@@ -136,8 +139,8 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
 /// let is_installed = is_version_installed(version).await.unwrap();
 /// println!("Is version {} installed? {}", version, is_installed);
 /// ```
-pub async fn is_version_installed(version: &str) -> Result<bool> {
-  let downloads_dir = fs::get_downloads_directory().await?;
+pub async fn is_version_installed(version: &str, package: Package) -> Result<bool> {
+  let downloads_dir = fs::get_downloads_directory(package).await?;
   let mut dir = tokio::fs::read_dir(&downloads_dir).await?;
 
   while let Some(directory) = dir.next_entry().await? {
@@ -171,8 +174,8 @@ pub async fn is_version_installed(version: &str) -> Result<bool> {
 /// ```rust
 /// let current_version = get_current_version().await.unwrap();
 /// println!("The current version is {}", current_version);
-pub async fn get_current_version() -> Result<String> {
-  let mut downloads_dir = get_downloads_directory().await?;
+pub async fn get_current_version(package: Package) -> Result<String> {
+  let mut downloads_dir = get_downloads_directory(package).await?;
   downloads_dir.push("used");
   println!("downloads_dir: {:?}", downloads_dir);
   tokio::fs::read_to_string(&downloads_dir)
@@ -180,8 +183,8 @@ pub async fn get_current_version() -> Result<String> {
     .map_err(|_| anyhow!("Could not read the current version"))
 }
 
-pub async fn is_version_used(version: &str) -> bool {
-  let current_version = get_current_version().await.unwrap();
+pub async fn is_version_used(version: &str, package: Package) -> bool {
+  let current_version = get_current_version(package).await.unwrap();
   println!("current_version: {:?}", current_version);
   current_version == version
 }

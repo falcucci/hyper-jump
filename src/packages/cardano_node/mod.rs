@@ -59,8 +59,13 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
   match args.command {
     Commands::Use { version } => {
       let version = parse_version_type(&version).await.unwrap();
+      let package = Package::CardanoNode(CardanoNode {
+        url: CARDANO_NODE_PACKAGE_URL.to_string(),
+        alias: "cardano-node".to_string(),
+        version: version.non_parsed_string.clone(),
+      });
       println!("Use: {:?}", version);
-      use_cmd(&client, version)
+      use_cmd(&client, version, package)
         .await
         .expect("Failed to set the version")
     }

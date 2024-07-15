@@ -21,14 +21,14 @@ use crate::{
 
 use super::PostDownloadVersionType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CardanoNode {
   pub url: String,
   pub alias: String,
   pub version: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Package {
   CardanoNode(CardanoNode),
   CardanoCli,
@@ -54,25 +54,25 @@ pub async fn install(
   version: ParsedVersion,
 ) -> Result<(), Error> {
   println!("installing package: {:?}", package);
-  let root = get_downloads_directory().await?;
+  let root = get_downloads_directory(package.clone()).await?;
 
   env::set_current_dir(&root)?;
   let root = root.as_path();
 
   println!("version: {:?}", version);
 
-  let is_version_installed = is_version_installed(&version.tag_name).await?;
+  let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await;
   println!("is_version_installed: {:?}", is_version_installed);
 
   let downloaded_file = match version.version_type {
     VersionType::Normal | VersionType::Latest => {
-      download_version(client, &version, root, package).await?
+      download_version(client, &version, root, package.clone()).await?
     }
     VersionType::Hash => todo!(),
   };
 
   if let PostDownloadVersionType::Standard(local_version) = downloaded_file {
-    unarchive(local_version).await?;
+    unarchive(package, local_version).await?;
   }
 
   Ok(())

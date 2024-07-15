@@ -9,7 +9,10 @@ use anyhow::{anyhow, Result};
 use semver::Version;
 use tracing::info;
 
-use crate::helpers::version::LocalVersion;
+use crate::{
+  commands::install::{CardanoNode, Package},
+  helpers::version::LocalVersion,
+};
 
 /// Returns the home directory path for the current user.
 ///
@@ -99,10 +102,15 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 /// ```rust
 /// let downloads_directory = get_downloads_directory().await?;
 /// ```
-pub async fn get_downloads_directory() -> Result<PathBuf> {
+pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
   let mut data_dir = get_local_data_dir()?;
 
   data_dir.push("hyper-jump");
+
+  if let Package::CardanoNode(CardanoNode { alias, .. }) = package {
+    data_dir.push(alias);
+  }
+
   let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();
   let is_folder_created = tokio::fs::create_dir_all(&data_dir).await.is_ok();
 
@@ -202,9 +210,9 @@ pub fn get_platform_name_download(version: &Option<Version>) -> &'static str {
 /// ```rust
 /// copy_cardano_node_proxy().await.unwrap();
 /// ```
-async fn copy_cardano_node_proxy() -> Result<()> {
+async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
   let exe_path = env::current_exe().unwrap();
-  let mut installation_dir = get_installation_directory().await?;
+  let mut installation_dir = get_installation_directory(package).await?;
 
   if fs::metadata(&installation_dir).is_err() {
     fs::create_dir_all(&installation_dir)?;
@@ -282,8 +290,8 @@ fn add_to_path(installation_dir: &Path) -> Result<()> {
 /// ```rust
 /// let installation_directory = get_installation_directory().await?;
 /// ```
-pub async fn get_installation_directory() -> Result<PathBuf> {
-  let mut installation_location = get_downloads_directory().await?;
+pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
+  let mut installation_location = get_downloads_directory(package).await?;
   installation_location.push("cardano-node-bin");
 
   Ok(installation_location)
@@ -325,9 +333,9 @@ pub async fn get_installation_directory() -> Result<PathBuf> {
 /// };
 /// unarchive(downloaded_file).await;
 /// ```
-pub async fn unarchive(file: LocalVersion) -> Result<()> {
+pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
   let temp_file = file.clone();
-  match tokio::task::spawn_blocking(move || match expand(temp_file) {
+  match tokio::task::spawn_blocking(move || match expand(package, temp_file) {
     Ok(_) => Ok(()),
     Err(error) => Err(anyhow!(error)),
   })
@@ -383,9 +391,10 @@ pub async fn unarchive(file: LocalVersion) -> Result<()> {
 /// };
 /// expand(downloaded_file);
 /// ```
-#[cfg(target_os = "macos")] // I don't know if its worth making both expand functions into one function, but the API difference will cause so much if statements
-fn expand(downloaded_file: LocalVersion) -> Result<()> {
+#[cfg(target_os = "macos")]
+fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
   use crate::helpers;
+  use anyhow::Context;
   use flate2::read::GzDecoder;
   use indicatif::{ProgressBar, ProgressStyle};
   use std::cmp::min;
@@ -398,9 +407,13 @@ fn expand(downloaded_file: LocalVersion) -> Result<()> {
     fs::remove_dir_all(&downloaded_file.file_name)?;
   }
 
+  println!(
+    "Expanding archive to {}/{}.{}",
+    downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
+  );
   let file = match File::open(format!(
-    "{}.{}",
-    downloaded_file.file_name, downloaded_file.file_format
+    "{}/{}.{}",
+    downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
   )) {
     Ok(value) => value,
     Err(error) => {
@@ -412,9 +425,19 @@ fn expand(downloaded_file: LocalVersion) -> Result<()> {
     }
   };
   let decompress_stream = GzDecoder::new(file);
-  let mut archive = Archive::new(decompress_stream);
+  Archive::new(decompress_stream)
+    .unpack(format!(
+      "{}/{}",
+      downloaded_file.path, downloaded_file.file_name
+    ))
+    .with_context(|| {
+      format!(
+        "Failed to decompress or extract file {}.{}",
+        downloaded_file.file_name, downloaded_file.file_format
+      )
+    })?;
 
-  let totalsize = 1692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
+  let totalsize = 4692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
   let pb = ProgressBar::new(totalsize);
   pb.set_style(
     ProgressStyle::default_bar()
@@ -425,32 +448,32 @@ fn expand(downloaded_file: LocalVersion) -> Result<()> {
   pb.set_message("Expanding archive");
 
   let mut downloaded: u64 = 0;
-  for file in archive.entries()? {
-    match file {
-      Ok(mut file) => {
-        let mut outpath = PathBuf::new();
-        outpath.push(&downloaded_file.file_name);
-        outpath.push(file.path()?.to_str().unwrap());
-
-        let file_name = format!("{}", file.path()?.display()); // file.path()?.is_dir() always returns false... weird
-        if file_name.ends_with('/') {
-          fs::create_dir_all(outpath)?;
-        } else {
-          if let Some(parent) = outpath.parent() {
-            if !parent.exists() {
-              fs::create_dir_all(parent)?;
-            }
-          }
-          let mut outfile = fs::File::create(outpath)?;
-          io::copy(&mut file, &mut outfile)?;
-        }
-        let new = min(downloaded + 1, totalsize);
-        downloaded = new;
-        pb.set_position(new);
-      }
-      Err(error) => println!("{error}"),
-    }
-  }
+  // for file in archive.entries()? {
+  //   match file {
+  //     Ok(mut file) => {
+  //       let mut outpath = PathBuf::new();
+  //       outpath.push(&downloaded_file.file_name);
+  //       outpath.push(file.path()?.to_str().unwrap());
+  //
+  //       let file_name = format!("{}", file.path()?.display()); // file.path()?.is_dir() always returns false... weird
+  //       if file_name.ends_with('/') {
+  //         fs::create_dir_all(outpath)?;
+  //       } else {
+  //         if let Some(parent) = outpath.parent() {
+  //           if !parent.exists() {
+  //             fs::create_dir_all(parent)?;
+  //           }
+  //         }
+  //         let mut outfile = fs::File::create(outpath)?;
+  //         io::copy(&mut file, &mut outfile)?;
+  //       }
+  //       let new = min(downloaded + 1, totalsize);
+  //       downloaded = new;
+  //       pb.set_position(new);
+  //     }
+  //     Err(error) => println!("{error}"),
+  //   }
+  // }
 
   println!(
     "Finished expanding to {}/{}",
