@@ -91,7 +91,7 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
       let cardano_node = Package::CardanoNode(CardanoNode {
         url: CARDANO_NODE_PACKAGE_URL.to_string(),
         alias: "cardano-node".to_string(),
-        version: "9.0.0".to_string(),
+        version: "9.0.0".to_string(), // TODO: Get the current version
       });
       erase(cardano_node).await.expect("Failed to erase");
     }
