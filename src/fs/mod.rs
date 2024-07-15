@@ -220,7 +220,6 @@ pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
       .output()?
       .stdout;
     let version = String::from_utf8(output)?.trim().to_string();
-    println!("version: {}", version);
 
     if version == env!("CARGO_PKG_VERSION") {
       return Ok(());
@@ -385,22 +384,20 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
 /// ```
 #[cfg(target_os = "macos")]
 fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
-  use crate::helpers;
   use anyhow::Context;
   use flate2::read::GzDecoder;
   use indicatif::{ProgressBar, ProgressStyle};
-  use std::cmp::min;
   use std::fs::File;
-  use std::io;
-  use std::{os::unix::fs::PermissionsExt, path::PathBuf};
+  use std::os::unix::fs::PermissionsExt;
   use tar::Archive;
 
+  println!("file_name {}", downloaded_file.file_name);
   if fs::metadata(&downloaded_file.file_name).is_ok() {
     fs::remove_dir_all(&downloaded_file.file_name)?;
   }
 
   println!(
-    "Expanding archive to {}/{}.{}",
+    "File::open {}/{}.{}",
     downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
   );
   let file = match File::open(format!(
@@ -416,6 +413,11 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
       ))
     }
   };
+
+  println!(
+    "File unpack {}/{}",
+    downloaded_file.path, downloaded_file.file_name
+  );
   let decompress_stream = GzDecoder::new(file);
   Archive::new(decompress_stream)
     .unpack(format!(
@@ -437,7 +439,6 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
       .unwrap()
       .progress_chars("█  "),
   );
-
   pb.finish_with_message(format!(
     "Finished expanding to {}/{}",
     downloaded_file.path, downloaded_file.file_name

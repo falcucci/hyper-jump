@@ -58,9 +58,14 @@ pub async fn install(
   env::set_current_dir(&root)?;
   let root = root.as_path();
 
-  let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await;
+  let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await?;
 
   copy_cardano_node_proxy(package.clone()).await?;
+
+  if is_version_installed {
+    println!("Version {} is already installed", version.tag_name);
+    return Ok(());
+  }
 
   let downloaded_file = match version.version_type {
     VersionType::Normal | VersionType::Latest => {
@@ -113,7 +118,6 @@ async fn download_version(
   root: &Path,
   package: Package,
 ) -> Result<PostDownloadVersionType> {
-  println!("package: {:?}", package);
   match version.version_type {
     VersionType::Normal | VersionType::Latest => {
       let response = send_request(client, package).await;
@@ -171,7 +175,6 @@ async fn download_version(
     }
     // VersionType::Hash => handle_building_from_source(version).await,
     VersionType::Hash => todo!(),
-    VersionType::Latest => todo!(),
   }
 }
 

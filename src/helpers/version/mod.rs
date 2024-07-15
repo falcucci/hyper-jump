@@ -58,7 +58,7 @@ pub struct LocalVersion {
 /// };
 /// println!("The parsed version is {:?}", parsed_version);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedVersion {
   pub tag_name: String,
   pub version_type: VersionType,
@@ -86,7 +86,7 @@ pub struct ParsedVersion {
 ///     VersionType::Hash => println!("This is a version identified by a hash."),
 /// }
 /// ```
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum VersionType {
   Normal,
   Latest,

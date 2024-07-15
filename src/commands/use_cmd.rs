@@ -1,6 +1,7 @@
 use tracing::info;
 
 use crate::{
+  commands::install::install,
   fs::copy_cardano_node_proxy,
   helpers::version::{is_version_used, switch_version, ParsedVersion},
 };
@@ -20,6 +21,8 @@ pub async fn use_cmd(
   if is_version_used {
     return Ok(());
   }
+
+  install(client, package.clone(), version.clone()).await?;
 
   switch_version(client, &version, package.clone()).await?;
 
