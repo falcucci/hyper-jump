@@ -1,8 +1,8 @@
 use anyhow::Error;
-use reqwest::{
-    header::{HeaderMap, HeaderValue, AUTHORIZATION},
-    Client,
-};
+use reqwest::header::HeaderMap;
+use reqwest::header::HeaderValue;
+use reqwest::header::AUTHORIZATION;
+use reqwest::Client;
 
 /// Creates a new `reqwest::Client` with default headers.
 ///
@@ -15,7 +15,7 @@ use reqwest::{
 /// # Example
 ///
 /// ```rust
-/// let client = create_reqwest_client();
+/// let client = create_reqwest_client(); 
 /// ```
 ///
 /// # Errors

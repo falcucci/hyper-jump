@@ -1,7 +1,9 @@
 use regex::Regex;
 use semver::Version;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::anyhow;
+use anyhow::Context;
+use anyhow::Result;
 use tokio::fs;
 
 use crate::commands::install::Package;
