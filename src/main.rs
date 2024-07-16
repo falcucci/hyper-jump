@@ -6,7 +6,7 @@ use std::{
 extern crate core;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use commands::install::{CardanoNode, Package};
+use commands::install::Package;
 use packages::{
     cardano_cli,
     cardano_node::{self, processes::handle_cardano_node_process},
@@ -90,11 +90,9 @@ pub fn with_tracing() {
 #[tokio::main]
 async fn main() -> miette::Result<()> {
     let args: Vec<String> = env::args().collect();
-
+    let rest_args = &args[1..];
     let exe_name_path = Path::new(&args[0]);
     let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
-
-    let rest_args = &args[1..];
 
     if !exe_name.eq("hyper-jump") {
         if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
@@ -111,9 +109,7 @@ async fn main() -> miette::Result<()> {
     }
 
     let cli = Cli::parse();
-
     let ctx = Context::for_cli(&cli)?;
-
     match cli.command {
         Commands::Mithril(args) => mithril::run(args, &ctx).await,
         Commands::CardanoNode(args) => cardano_node::run(args, &ctx).await,

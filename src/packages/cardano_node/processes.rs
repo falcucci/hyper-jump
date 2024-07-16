@@ -6,13 +6,15 @@ use std::{
 use anyhow::{anyhow, Result};
 use tokio::time::sleep;
 
-use crate::{commands::install::Package, helpers::version::get_current_version};
+use crate::{
+    commands::install::{CardanoNode, Package},
+    helpers::version::get_current_version,
+};
 
-/// Handles the execution of the Neovim process.
+/// Handles the execution process.
 ///
-/// This function takes a reference to a `Config` struct and a slice of `String` arguments.
-/// It retrieves the downloads directory and the currently used version of Neovim from the configuration.
-/// It then constructs the path to the Neovim binary and spawns a new process with the given arguments.
+/// It retrieves the downloads directory and the currently used version from the configuration.
+/// It then constructs the path to the binary and spawns a new process with the given arguments.
 /// The function then enters a loop where it continuously checks the status of the spawned process.
 /// If the process exits with a status code of `0`, the function returns `Ok(())`.
 /// If the process exits with a non-zero status code, the function returns an error with the status code as the error message.
@@ -21,8 +23,7 @@ use crate::{commands::install::Package, helpers::version::get_current_version};
 ///
 /// # Arguments
 ///
-/// * `config` - A reference to a `Config` struct containing the configuration for the Neovim process.
-/// * `args` - A slice of `String` arguments to be passed to the Neovim process.
+/// * `args` - A slice of `String` arguments to be passed to the process.
 ///
 /// # Returns
 ///
@@ -34,8 +35,8 @@ use crate::{commands::install::Package, helpers::version::get_current_version};
 ///
 /// This function will return an error if:
 ///
-/// * The Neovim process exits with a non-zero status code.
-/// * The Neovim process is terminated by a signal.
+/// * The process exits with a non-zero status code.
+/// * The process is terminated by a signal.
 /// * The function fails to wait on the child process.
 ///
 /// # Example
@@ -48,10 +49,13 @@ pub async fn handle_cardano_node_process(args: &[String], package: Package) -> R
     let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
     let used_version = get_current_version(package.clone()).await?;
 
-    let location = downloads_dir
-        .join(used_version)
-        .join("bin")
-        .join("cardano-node");
+    let mut location = downloads_dir.join(used_version).join("bin");
+
+    if let Package::CardanoNode(CardanoNode { alias, .. }) = package {
+        location = location.join(alias);
+    }
+
+    println!("Running: {:?}", location);
 
     let _term = Arc::new(AtomicBool::new(false));
 
