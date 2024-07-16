@@ -136,7 +136,6 @@ async fn download_version(
         .ok_or_else(|| anyhow!("Failed to get content length of the response"))?;
 
     let mut response_bytes = response.bytes_stream();
-
     let pb = ProgressBar::new(total_size);
     let file_type = get_file_type();
     let file_path = format!("{}/{}.{}", root.display(), version.tag_name, file_type);
@@ -162,7 +161,6 @@ async fn download_version(
         path: root.display().to_string(),
         semver: version.semver.clone(),
     }))
-    // VersionType::Hash => handle_building_from_source(version).await,
 }
 
 /// Sends a GET request to the specified URL to download a specific version.
@@ -178,7 +176,7 @@ async fn download_version(
 /// # Returns
 ///
 /// * `Result<reqwest::Response, reqwest::Error>` - Returns a `Result` containing the server's
-/// response to the GET request. If the request fails, it returns an error.
+/// * response to the GET request. If the request fails, it returns an error.
 ///
 /// # Example
 ///
