@@ -78,7 +78,7 @@ pub struct ParsedVersion {
 /// # Example
 ///
 /// ```rust
-/// let version_type = VersionType::Nightly;
+/// let version_type = VersionType::Normal;
 /// match version_type {
 ///     VersionType::Normal => println!("This is a normal version."),
 ///     VersionType::Latest => println!("This is the latest version."),
