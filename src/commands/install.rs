@@ -88,10 +88,11 @@ pub async fn install(
     Ok(())
 }
 
-/// This function sends a request to download the specified version based on the version type.
-/// If the version type is Normal, Nightly, or Latest, it sends a request to download the version.
-/// If the version type is Hash, it handles building from source.
-/// If the version type is NightlyRollback, it does nothing.
+/// This function sends a request to download the specified version based on the
+/// version type. If the version type is Normal, Nightly, or Latest, it sends a
+/// request to download the version. If the version type is Hash, it handles
+/// building from source. If the version type is NightlyRollback, it does
+/// nothing.
 ///
 /// # Arguments
 ///
@@ -101,14 +102,16 @@ pub async fn install(
 ///
 /// # Returns
 ///
-/// * `Result<PostDownloadVersionType>` - Returns a `Result` that contains a `PostDownloadVersionType` on success, or an error on failure.
+/// * `Result<PostDownloadVersionType>` - Returns a `Result` that contains a
+///   `PostDownloadVersionType` on success, or an error on failure.
 ///
 /// # Errors
 ///
 /// This function will return an error if:
 /// * There is a failure in sending the request to download the version.
 /// * The response status is not 200.
-/// * There is a failure in creating the file where the downloaded version will be saved.
+/// * There is a failure in creating the file where the downloaded version will
+///   be saved.
 /// * There is a failure in writing the downloaded bytes to the file.
 ///
 /// # Example
@@ -162,8 +165,9 @@ async fn download_version(
 
 /// Retrieves the content length from an HTTP response.
 ///
-/// This function extracts the `Content-Length` header from the given HTTP response
-/// and returns it as a `u64`. If the header is not present, it returns an error.
+/// This function extracts the `Content-Length` header from the given HTTP
+/// response and returns it as a `u64`. If the header is not present, it returns
+/// an error.
 ///
 /// # Arguments
 ///
@@ -171,10 +175,12 @@ async fn download_version(
 ///
 /// # Returns
 ///
-/// This function returns a `Result` indicating the success or failure of the operation.
+/// This function returns a `Result` indicating the success or failure of the
+/// operation.
 ///
 /// * `Ok(u64)` - The content length of the response.
-/// * `Err(anyhow::Error)` - An error occurred if the `Content-Length` header is missing.
+/// * `Err(anyhow::Error)` - An error occurred if the `Content-Length` header is
+///   missing.
 ///
 /// # Examples
 ///
@@ -195,11 +201,13 @@ async fn get_content_length(response: &reqwest::Response) -> Result<u64> {
 ///
 /// # Arguments
 ///
-/// * `file_path` - A string slice that holds the path where the file should be created.
+/// * `file_path` - A string slice that holds the path where the file should be
+///   created.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` indicating the success or failure of the file creation.
+/// This function returns a `Result` indicating the success or failure of the
+/// file creation.
 ///
 /// * `Ok(tokio::fs::File)` - The created file handle.
 /// * `Err(anyhow::Error)` - An error occurred during file creation.
@@ -214,14 +222,17 @@ async fn create_file(file_path: &str) -> Result<tokio::fs::File> {
     Ok(tokio::fs::File::create(&file_path).await?)
 }
 
-/// Constructs a file path string based on the version, root path, and file type.
+/// Constructs a file path string based on the version, root path, and file
+/// type.
 ///
-/// This function generates a file path string by combining the root path, version tag name,
-/// and file type. The resulting path is formatted as `root/tag_name.file_type`.
+/// This function generates a file path string by combining the root path,
+/// version tag name, and file type. The resulting path is formatted as
+/// `root/tag_name.file_type`.
 ///
 /// # Arguments
 ///
-/// * `version` - A reference to a `ParsedVersion` object containing the version information.
+/// * `version` - A reference to a `ParsedVersion` object containing the version
+///   information.
 /// * `root` - A reference to a `Path` object representing the root directory.
 /// * `file_type` - A string slice representing the file extension or type.
 ///
@@ -248,14 +259,16 @@ fn create_file_path(version: &ParsedVersion, root: &Path, file_type: &str) -> St
 /// # Arguments
 ///
 /// * `client: &Client` - A reference to the `Client` used for making requests.
-/// * `version: &ParsedVersion` - Contains the version information to be downloaded.
+/// * `version: &ParsedVersion` - Contains the version information to be
+///   downloaded.
 ///
-/// It then sends a GET request to the constructed URL with the header "user-agent" set to
-/// "hyper-jump".
+/// It then sends a GET request to the constructed URL with the header
+/// "user-agent" set to "hyper-jump".
 ///
 /// # Returns
 ///
-/// * `Result<reqwest::Response, reqwest::Error>` - Returns a `Result` containing the server's
+/// * `Result<reqwest::Response, reqwest::Error>` - Returns a `Result`
+///   containing the server's
 /// * response to the GET request. If the request fails, it returns an error.
 ///
 /// # Example

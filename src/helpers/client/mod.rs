@@ -6,11 +6,14 @@ use reqwest::Client;
 
 /// Creates a new `reqwest::Client` with default headers.
 ///
-/// This function fetches the `GITHUB_TOKEN` environment variable and uses it to set the `Authorization` header for the client.
+/// This function fetches the `GITHUB_TOKEN` environment variable and uses it to
+/// set the `Authorization` header for the client.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that contains a `reqwest::Client` if the client was successfully created, or an `Error` if the client could not be created.
+/// This function returns a `Result` that contains a `reqwest::Client` if the
+/// client was successfully created, or an `Error` if the client could not be
+/// created.
 ///
 /// # Example
 ///
@@ -20,7 +23,8 @@ use reqwest::Client;
 ///
 /// # Errors
 ///
-/// This function will return an error if the `reqwest::Client` could not be built.
+/// This function will return an error if the `reqwest::Client` could not be
+/// built.
 pub fn create_reqwest_client() -> Result<Client, Error> {
     // fetch env variable
     let github_token = std::env::var("GITHUB_TOKEN");
