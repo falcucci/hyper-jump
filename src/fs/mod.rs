@@ -440,5 +440,6 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
     let mut perms = fs::metadata(file)?.permissions();
     perms.set_mode(0o551);
     fs::set_permissions(file, perms)?;
+
     Ok(())
 }
