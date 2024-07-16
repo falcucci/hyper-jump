@@ -1,18 +1,4 @@
-use std::borrow::Cow;
-use std::cmp::min;
-use std::env;
-use std::path::Path;
-
-use anyhow::anyhow;
-use anyhow::Error;
-use anyhow::Result;
-use futures_util::stream::StreamExt;
-use indicatif::ProgressBar;
-use indicatif::ProgressStyle;
-use reqwest::Client;
-
-use tokio::io::AsyncWriteExt;
-
+use super::PostDownloadVersionType;
 use crate::fs::copy_cardano_node_proxy;
 use crate::fs::get_downloads_directory;
 use crate::fs::get_file_type;
@@ -23,8 +9,18 @@ use crate::helpers::version::LocalVersion;
 use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
 use crate::packages::CARDANO_NODE_PACKAGE_URL;
-
-use super::PostDownloadVersionType;
+use anyhow::anyhow;
+use anyhow::Error;
+use anyhow::Result;
+use futures_util::stream::StreamExt;
+use indicatif::ProgressBar;
+use indicatif::ProgressStyle;
+use reqwest::Client;
+use std::borrow::Cow;
+use std::cmp::min;
+use std::env;
+use std::path::Path;
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Clone)]
 pub struct CardanoNode {

@@ -1,17 +1,14 @@
+use crate::commands::install::CardanoNode;
+use crate::commands::install::Package;
+use crate::helpers::version::LocalVersion;
+use anyhow::anyhow;
+use anyhow::Result;
 use std::env;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-
-use anyhow::anyhow;
-use anyhow::Result;
-
 use tracing::info;
-
-use crate::commands::install::CardanoNode;
-use crate::commands::install::Package;
-use crate::helpers::version::LocalVersion;
 
 /// Returns the home directory path for the current user.
 ///
