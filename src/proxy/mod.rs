@@ -3,11 +3,8 @@ use crate::{
     helpers::version::get_current_version,
 };
 use anyhow::{anyhow, Result};
-use std::{
-    sync::{atomic::AtomicBool, Arc},
-    time::Duration,
-};
-use tokio::time::sleep;
+use std::sync::{atomic::AtomicBool, Arc};
+use tokio::time::{sleep, Duration};
 
 pub async fn handle_proxy(rest_args: &[String]) -> miette::Result<()> {
     if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
@@ -75,34 +72,63 @@ pub async fn handle_package_process(args: &[String], package: Package) -> Result
         signal_hook::flag::register(signal_hook::consts::SIGUSR1, Arc::clone(&_term))?;
     }
 
-    let mut child = std::process::Command::new(location);
+    let mut child = tokio::process::Command::new(location);
     child.args(args);
 
     let mut spawned_child = child.spawn()?;
-    loop {
-        let child_done = spawned_child.try_wait();
-        match child_done {
-            Ok(Some(status)) => match status.code() {
-                Some(0) => return Ok(()),
-                Some(code) => return Err(anyhow!("Process exited with error code {}", code)),
-                None => return Err(anyhow!("Process terminated by signal")),
-            },
-            Ok(None) => {
-                #[cfg(unix)]
-                {
-                    use nix::sys::signal::{self, Signal};
-                    use nix::unistd::Pid;
-                    use std::sync::atomic::Ordering;
-                    if _term.load(Ordering::Relaxed) {
-                        let pid = spawned_child.id() as i32;
-                        signal::kill(Pid::from_raw(pid), Signal::SIGUSR1)?;
-                        _term.store(false, Ordering::Relaxed);
-                    }
-                }
-                // short delay to a void high cpu usage
-                sleep(Duration::from_millis(200)).await;
-            }
-            Err(_) => return Err(anyhow!("Failed to wait on child process")),
-        }
+
+    watch_process(&mut spawned_child, &_term).await
+}
+
+async fn watch_process(
+    spawned_child: &mut tokio::process::Child,
+    term_signal: &Arc<AtomicBool>,
+) -> Result<()> {
+    tokio::select! {
+        status = spawned_child.wait() => handle_process_exit(status).await,
+        _ = tokio::signal::ctrl_c() => handle_ctrl_c(spawned_child, term_signal).await,
     }
+}
+
+async fn handle_process_exit(
+    status: Result<std::process::ExitStatus, std::io::Error>,
+) -> Result<()> {
+    match status?.code() {
+        Some(0) => Ok(()),
+        Some(code) => Err(anyhow!("Process exited with error code {}", code)),
+        None => Err(anyhow!("Process terminated by signal")),
+    }
+}
+
+async fn handle_ctrl_c(
+    spawned_child: &mut tokio::process::Child,
+    term_signal: &Arc<AtomicBool>,
+) -> Result<()> {
+    term_signal.store(true, std::sync::atomic::Ordering::Relaxed);
+
+    #[cfg(unix)]
+    handle_unix_signals(spawned_child, term_signal)?;
+
+    sleep(Duration::from_millis(200)).await;
+    Ok(())
+}
+
+#[cfg(unix)]
+fn handle_unix_signals(
+    spawned_child: &mut tokio::process::Child,
+    term_signal: &Arc<AtomicBool>,
+) -> Result<()> {
+    use nix::{
+        sys::signal::{self, Signal},
+        unistd::Pid,
+    };
+    use std::sync::atomic::Ordering;
+
+    if term_signal.load(Ordering::Relaxed) {
+        let pid = spawned_child.id().expect("Failed to get child process ID") as i32;
+        signal::kill(Pid::from_raw(pid), Signal::SIGUSR1)?;
+        term_signal.store(false, Ordering::Relaxed);
+    }
+
+    Ok(())
 }
