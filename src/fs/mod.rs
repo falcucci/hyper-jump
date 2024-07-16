@@ -457,8 +457,8 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
             )
         })?;
 
-    // hard coding this is pretty unwise, but you cant get the length of an archive
-    // in tar-rs unlike zip-rs
+    // hard coding this is pretty unwise, but you cant get the length of an
+    // archive in tar-rs unlike zip-rs
     let totalsize = 4692;
     let pb = ProgressBar::new(totalsize);
     let pb_style = ProgressStyle::default_bar()
