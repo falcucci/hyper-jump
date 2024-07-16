@@ -131,21 +131,17 @@ async fn download_version(
         return Err(anyhow!("Failed to send request to download version"));
     }
 
-    let total_size = response
-        .content_length()
-        .ok_or_else(|| anyhow!("Failed to get content length of the response"))?;
-
-    let mut response_bytes = response.bytes_stream();
-    let pb = ProgressBar::new(total_size);
-    let file_type = get_file_type();
-    let file_path = format!("{}/{}.{}", root.display(), version.tag_name, file_type);
-    let mut file = tokio::fs::File::create(&file_path).await?;
-
     let mut downloaded: u64 = 0;
+    let content_length = get_content_length(&response).await?;
+    let pb = ProgressBar::new(content_length);
+    let mut response_bytes = response.bytes_stream();
+    let file_type = get_file_type();
+    let file_path = create_file_path(version, root, file_type).await?;
+    let mut file = create_file(&file_path).await?;
     while let Some(item) = response_bytes.next().await {
         let chunk = item.map_err(|_| anyhow!("Failed to get chunk"))?;
         file.write_all(&chunk).await?;
-        let new = min(downloaded + (chunk.len() as u64), total_size);
+        let new = min(downloaded + (chunk.len() as u64), content_length);
         downloaded = new;
         pb.set_position(new);
     }
@@ -163,6 +159,24 @@ async fn download_version(
     };
 
     Ok(PostDownloadVersionType::Standard(local_version))
+}
+
+async fn get_content_length(response: &reqwest::Response) -> Result<u64> {
+    let content_length = response
+        .content_length()
+        .ok_or_else(|| anyhow!("Failed to get content length of the response"))?;
+
+    Ok(content_length)
+}
+
+async fn create_file(file_path: &str) -> Result<tokio::fs::File> {
+    Ok(tokio::fs::File::create(&file_path).await?)
+}
+
+async fn create_file_path(version: &ParsedVersion, root: &Path, file_type: &str) -> Result<String> {
+    let file_path = format!("{}/{}.{}", root.display(), version.tag_name, file_type);
+
+    Ok(file_path)
 }
 
 /// Sends a GET request to the specified URL to download a specific version.

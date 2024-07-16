@@ -1,6 +1,5 @@
 use crate::commands::install::Package;
 use anyhow::anyhow;
-use anyhow::Context;
 use anyhow::Result;
 use regex::Regex;
 use semver::Version;
