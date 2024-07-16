@@ -337,6 +337,7 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
         file.path, file.file_name, file.file_format
     ))
     .await?;
+
     Ok(())
 }
 
@@ -422,14 +423,11 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
 
     let totalsize = 4692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
     let pb = ProgressBar::new(totalsize);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template(
-                "{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}",
-            )
-            .unwrap()
-            .progress_chars("█  "),
-    );
+    let pb_style = ProgressStyle::default_bar()
+        .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
+        .unwrap()
+        .progress_chars("=> ");
+    pb.set_style(pb_style);
 
     pb.finish_with_message(format!(
         "Finished expanding to {}/{}",
