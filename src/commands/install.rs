@@ -127,59 +127,42 @@ async fn download_version(
 ) -> Result<PostDownloadVersionType> {
     match version.version_type {
         VersionType::Normal | VersionType::Latest => {
-            let response = send_request(client, package).await;
-
-            match response {
-                Ok(response) => {
-                    if response.status() == 200 {
-                        let total_size = response.content_length().unwrap();
-                        let mut response_bytes = response.bytes_stream();
-
-                        // Progress Bar Setup
-                        let pb = ProgressBar::new(total_size);
-                        pb.set_style(ProgressStyle::default_bar()
-                    .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-                    .unwrap()
-                    .progress_chars("█  "));
-                        pb.set_message(format!("Downloading version: {}", version.tag_name));
-
-                        let file_type = get_file_type();
-                        let mut file =
-                            tokio::fs::File::create(format!("{}.{file_type}", version.tag_name))
-                                .await?;
-
-                        let mut downloaded: u64 = 0;
-
-                        while let Some(item) = response_bytes.next().await {
-                            let chunk = item.map_err(|_| anyhow!("hello"))?;
-                            file.write_all(&chunk).await?;
-                            let new = min(downloaded + (chunk.len() as u64), total_size);
-                            downloaded = new;
-                            pb.set_position(new);
-                        }
-
-                        pb.finish_with_message(format!(
-                            "Downloaded version {} to {}/{}.{file_type}",
-                            version.tag_name,
-                            root.display(),
-                            version.tag_name
-                        ));
-
-                        Ok(PostDownloadVersionType::Standard(LocalVersion {
-                            file_name: version.tag_name.to_owned(),
-                            file_format: file_type.to_string(),
-                            path: root.display().to_string(),
-                            semver: version.semver.clone(),
-                        }))
-                    } else {
-                        Err(anyhow!(
-                            "Please provide an existing version, {}",
-                            response.text().await?
-                        ))
-                    }
-                }
-                Err(error) => Err(anyhow!(error)),
+            let response = send_request(client, package).await?;
+            if response.status() != reqwest::StatusCode::OK {
+                return Err(anyhow!("Failed to send request to download version"));
             }
+
+            let total_size = response
+                .content_length()
+                .ok_or_else(|| anyhow!("Failed to get content length of the response"))?;
+
+            let mut response_bytes = response.bytes_stream();
+
+            let pb = ProgressBar::new(total_size);
+            let file_type = get_file_type();
+            let file_path = format!("{}/{}.{}", root.display(), version.tag_name, file_type);
+            let mut file = tokio::fs::File::create(&file_path).await?;
+
+            let mut downloaded: u64 = 0;
+            while let Some(item) = response_bytes.next().await {
+                let chunk = item.map_err(|_| anyhow!("Failed to get chunk"))?;
+                file.write_all(&chunk).await?;
+                let new = min(downloaded + (chunk.len() as u64), total_size);
+                downloaded = new;
+                pb.set_position(new);
+            }
+
+            pb.finish_with_message(format!(
+                "Downloaded version {} to {}",
+                version.tag_name, file_path
+            ));
+
+            Ok(PostDownloadVersionType::Standard(LocalVersion {
+                file_name: version.tag_name.to_owned(),
+                file_format: file_type.to_string(),
+                path: root.display().to_string(),
+                semver: version.semver.clone(),
+            }))
         }
         // VersionType::Hash => handle_building_from_source(version).await,
         VersionType::Hash => todo!(),
