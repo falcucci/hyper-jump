@@ -6,6 +6,34 @@ use anyhow::{anyhow, Result};
 use std::sync::{atomic::AtomicBool, Arc};
 use tokio::time::{sleep, Duration};
 
+/// Handles the proxy command with optional arguments.
+///
+/// This function processes the provided arguments and executes the appropriate
+/// action based on the input. If the first argument is `--hyper-jump`, it prints
+/// the version information of itself. Otherwise, it constructs a new `Package` to
+/// processes it.
+///
+/// # Arguments
+///
+/// * `rest_args` - A slice of strings containing the command-line arguments.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the operation.
+///
+/// * `Ok(())` - The operation was successful.
+/// * `Err(miette::Error)` - An error occurred during the operation.
+///
+/// # Examples
+///
+/// ```rust
+/// let args = vec!["some-other-arg".to_string()];
+/// handle_proxy(&args).await?;
+/// ```
+///
+/// # Errors
+///
+/// This function will return an error if the `handle_package_process` function fails.
 pub async fn handle_proxy(rest_args: &[String]) -> miette::Result<()> {
     if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
         print!("hyper-jump v{}", env!("CARGO_PKG_VERSION"));
@@ -80,6 +108,36 @@ pub async fn handle_package_process(args: &[String], package: Package) -> Result
     watch_process(&mut spawned_child, &_term).await
 }
 
+/// Watches a spawned child process and handles termination signals.
+///
+/// This function concurrently waits for the spawned child process to exit or for a
+/// Ctrl-C signal to be received. It handles each scenario appropriately.
+///
+/// # Arguments
+///
+/// * `spawned_child` - A mutable reference to the spawned child process.
+/// * `term_signal` - An `Arc` containing an `AtomicBool` used to signal termination.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the operation.
+///
+/// * `Ok(())` - The operation was successful.
+/// * `Err(anyhow::Error)` - An error occurred during the operation.
+///
+/// # Errors
+///
+/// This function will return an error if either `handle_process_exit` or `handle_ctrl_c`
+/// encounters an error.
+///
+/// # Examples
+///
+/// ```rust
+/// # async fn example() -> Result<()> {
+/// let term_signal = Arc::new(AtomicBool::new(false));
+/// let mut child = tokio::process::Command::new("some_command").spawn()?;
+/// watch_process(&mut child, &term_signal).await?.
+/// ```
 async fn watch_process(
     spawned_child: &mut tokio::process::Child,
     term_signal: &Arc<AtomicBool>,
@@ -90,6 +148,33 @@ async fn watch_process(
     }
 }
 
+/// Handles the exit of a spawned child process.
+///
+/// This function processes the exit status of the child process and returns an appropriate
+/// result based on the exit code.
+///
+/// # Arguments
+///
+/// * `status` - The exit status of the child process.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the operation.
+///
+/// * `Ok(())` - The process exited successfully.
+/// * `Err(anyhow::Error)` - The process exited with an error code or was terminated by a signal.
+///
+/// # Errors
+///
+/// This function will return an error if the process exited with a non-zero exit code or was
+/// terminated by a signal.
+///
+/// # Examples
+///
+/// ```rust
+/// let status = Ok(std::process::ExitStatus::from_raw(0));
+/// handle_process_exit(status).await?;
+/// ```
 async fn handle_process_exit(
     status: Result<std::process::ExitStatus, std::io::Error>,
 ) -> Result<()> {
@@ -100,6 +185,33 @@ async fn handle_process_exit(
     }
 }
 
+/// Handles the Ctrl-C signal.
+///
+/// This function sets the termination signal and handles Unix-specific signals if applicable.
+///
+/// # Arguments
+///
+/// * `spawned_child` - A mutable reference to the spawned child process.
+/// * `term_signal` - An `Arc` containing an `AtomicBool` used to signal termination.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the operation.
+///
+/// * `Ok(())` - The operation was successful.
+/// * `Err(anyhow::Error)` - An error occurred during the operation.
+///
+/// # Errors
+///
+/// This function will return an error if `handle_unix_signals` encounters an error.
+///
+/// # Examples
+///
+/// ```rust
+/// let term_signal = Arc::new(AtomicBool::new(false));
+/// let mut child = tokio::process::Command::new("some_command").spawn()?;
+/// handle_ctrl_c(&mut child, &term_signal).await?;
+/// ```
 async fn handle_ctrl_c(
     spawned_child: &mut tokio::process::Child,
     term_signal: &Arc<AtomicBool>,
@@ -113,6 +225,33 @@ async fn handle_ctrl_c(
     Ok(())
 }
 
+/// Handles Unix-specific termination signals.
+///
+/// This function sends a Unix signal to the spawned child process if the termination signal is set.
+///
+/// # Arguments
+///
+/// * `spawned_child` - A mutable reference to the spawned child process.
+/// * `term_signal` - An `Arc` containing an `AtomicBool` used to signal termination.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the operation.
+///
+/// * `Ok(())` - The operation was successful.
+/// * `Err(anyhow::Error)` - An error occurred during the operation.
+///
+/// # Errors
+///
+/// This function will return an error if it fails to send the Unix signal.
+///
+/// # Examples
+///
+/// ```rust
+/// let term_signal = Arc::new(AtomicBool::new(true));
+/// let mut child = tokio::process::Command::new("some_command").spawn()?;
+/// handle_unix_signals(&mut child, &term_signal)?;
+/// ```
 #[cfg(unix)]
 fn handle_unix_signals(
     spawned_child: &mut tokio::process::Child,
