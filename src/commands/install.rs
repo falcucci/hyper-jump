@@ -71,7 +71,6 @@ pub async fn install(
     copy_cardano_node_proxy(package.clone()).await?;
 
     if is_version_installed {
-        println!("Version {} is already installed", version.tag_name);
         return Ok(());
     }
 
@@ -222,11 +221,9 @@ async fn send_request(
     package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
     let platform = get_platform_name_download();
-    println!("platform: {:?}", platform);
     let file_type = get_file_type();
 
     let package_url = package.url().unwrap();
-    println!("package_url: {:?}", package_url);
 
     client
         .get(package_url.to_string())
