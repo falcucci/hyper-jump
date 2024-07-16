@@ -1,5 +1,5 @@
 use super::PostDownloadVersionType;
-use crate::fs::copy_cardano_node_proxy;
+use crate::fs::copy_package_proxy;
 use crate::fs::get_downloads_directory;
 use crate::fs::get_file_type;
 use crate::fs::get_platform_name_download;
@@ -14,7 +14,6 @@ use anyhow::Error;
 use anyhow::Result;
 use futures_util::stream::StreamExt;
 use indicatif::ProgressBar;
-use indicatif::ProgressStyle;
 use reqwest::Client;
 use std::borrow::Cow;
 use std::cmp::min;
@@ -68,7 +67,7 @@ pub async fn install(
 
     let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await?;
 
-    copy_cardano_node_proxy(package.clone()).await?;
+    copy_package_proxy(package.clone()).await?;
 
     if is_version_installed {
         return Ok(());

@@ -192,11 +192,11 @@ pub fn get_platform_name_download() -> &'static str { std::env::consts::OS }
 ///     url: "https://example.com".to_string(),
 /// });
 ///
-/// copy_cardano_node_proxy(package).await.unwrap();
+/// copy_package_proxy(package).await.unwrap();
 /// ```
-pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
+pub async fn copy_package_proxy(package: Package) -> Result<()> {
     let exe_path = env::current_exe().unwrap();
-    let mut installation_dir = get_installation_directory(package).await?;
+    let mut installation_dir = get_installation_directory(package.clone()).await?;
     println!("exe_path: {:?}", exe_path);
     println!("installation_dir: {:?}", installation_dir);
 
@@ -204,16 +204,18 @@ pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
         fs::create_dir_all(&installation_dir)?;
     }
 
+    let alias = match package {
+        Package::CardanoNode(CardanoNode { alias, .. }) => alias,
+        Package::CardanoCli => todo!(),
+        Package::Mithril => todo!(),
+    };
+
     add_to_path(&installation_dir)?;
 
-    installation_dir.push("cardano-node");
+    installation_dir.push(&alias);
 
     if fs::metadata(&installation_dir).is_ok() {
-        println!("cardano-node already exists in installation directory");
-        let output = Command::new("cardano-node")
-            .arg("--&hyper-jump")
-            .output()?
-            .stdout;
+        let output = Command::new(&alias).arg("--&hyper-jump").output()?.stdout;
         let version = String::from_utf8(output)?.trim().to_string();
 
         if version == env!("CARGO_PKG_VERSION") {
