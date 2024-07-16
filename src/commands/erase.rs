@@ -10,14 +10,14 @@ pub async fn erase(package: Package) -> Result<(), Error> {
     let installation_dir = crate::fs::get_installation_directory(package.clone()).await?;
 
     if fs::remove_dir_all(&installation_dir).await.is_ok() {
-        info!("Successfully removed neovim's installation folder");
+        info!("Successfully removed hyper-jump installation folder");
     }
 
     if fs::remove_dir_all(downloads).await.is_ok() {
         // For some weird reason this check doesn't really work for downloads folder
         // as it keeps thinking the folder exists and it runs with no issues even tho the folder
         // doesn't exist damn...
-        info!("Successfully removed neovim downloads folder");
+        info!("Successfully removed hyper-jump downloads folder");
     } else {
         return Err(anyhow!("There's nothing to erase"));
     }
