@@ -6,13 +6,11 @@ use tracing::instrument;
 use crate::{
     commands::{
         erase::erase,
-        install::{install, CardanoNode, Package},
+        install::{install, Package},
         use_cmd::use_cmd,
     },
     helpers::{client, version::parse_version_type},
 };
-
-use super::CARDANO_NODE_PACKAGE_URL;
 
 #[derive(Parser)]
 pub struct Args {
@@ -58,24 +56,16 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::CardanoNode(CardanoNode {
-                url: CARDANO_NODE_PACKAGE_URL.to_string(),
-                alias: "cardano-node".to_string(),
-                version: version.non_parsed_string.clone(),
-            });
+            let package = Package::new_cardano_node(version.non_parsed_string.clone());
             use_cmd(&client, version, package)
                 .await
                 .expect("Failed to set the version")
         }
         Commands::Install { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let cardano_node = Package::CardanoNode(CardanoNode {
-                url: CARDANO_NODE_PACKAGE_URL.to_string(),
-                alias: "cardano-node".to_string(),
-                version: version.non_parsed_string.clone(),
-            });
+            let package = Package::new_cardano_node(version.non_parsed_string.clone());
 
-            install(&client, cardano_node, version)
+            install(&client, package, version)
                 .await
                 .expect("Failed to install")
         }
@@ -86,12 +76,8 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
             println!("Rollback");
         }
         Commands::Erase => {
-            let cardano_node = Package::CardanoNode(CardanoNode {
-                url: CARDANO_NODE_PACKAGE_URL.to_string(),
-                alias: "cardano-node".to_string(),
-                version: "9.0.0".to_string(), // TODO: Get the current version
-            });
-            erase(cardano_node).await.expect("Failed to erase");
+            let package = Package::new_cardano_node("9.0.0".to_string());
+            erase(package).await.expect("Failed to erase");
         }
         Commands::List => {
             println!("List");

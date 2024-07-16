@@ -10,7 +10,7 @@ use commands::install::{CardanoNode, Package};
 use packages::{
     cardano_cli,
     cardano_node::{self, processes::handle_cardano_node_process},
-    mithril, CARDANO_NODE_PACKAGE_URL,
+    mithril,
 };
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
@@ -102,12 +102,7 @@ async fn main() -> miette::Result<()> {
             return Ok(());
         }
 
-        let package = Package::CardanoNode(CardanoNode {
-            url: CARDANO_NODE_PACKAGE_URL.to_string(),
-            alias: "cardano-node".to_string(),
-            version: "9.0.0".to_string(),
-        });
-
+        let package = Package::new_cardano_node("9.0.0".to_string());
         handle_cardano_node_process(rest_args, package)
             .await
             .unwrap();

@@ -14,6 +14,7 @@ use tokio::io::AsyncWriteExt;
 
 use crate::fs::{copy_cardano_node_proxy, get_file_type, get_platform_name_download, unarchive};
 use crate::helpers::version::LocalVersion;
+use crate::packages::CARDANO_NODE_PACKAGE_URL;
 use crate::{
     fs::get_downloads_directory,
     helpers::version::{is_version_installed, ParsedVersion, VersionType},
@@ -23,7 +24,6 @@ use super::PostDownloadVersionType;
 
 #[derive(Debug, Clone)]
 pub struct CardanoNode {
-    pub url: String,
     pub alias: String,
     pub version: String,
 }
@@ -38,13 +38,21 @@ pub enum Package {
 impl Package {
     pub fn url(&self) -> Option<Cow<str>> {
         match self {
-            Package::CardanoNode(CardanoNode { url, version, .. }) => {
+            Package::CardanoNode(CardanoNode { version, .. }) => {
+                let url = CARDANO_NODE_PACKAGE_URL;
                 let package_url = url.replace("{version}", version);
 
                 Some(Cow::Owned(format!("https://github.com/{}", package_url)))
             }
             _ => None,
         }
+    }
+
+    pub fn new_cardano_node(version: String) -> Self {
+        Package::CardanoNode(CardanoNode {
+            alias: "cardano-node".to_string(),
+            version,
+        })
     }
 }
 
