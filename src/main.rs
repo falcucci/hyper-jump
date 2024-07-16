@@ -95,7 +95,6 @@ async fn main() -> miette::Result<()> {
     let rest_args = &args[1..];
     let exe_name_path = Path::new(&args[0]);
     let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
-
     if !exe_name.eq(env!("CARGO_PKG_NAME")) {
         return handle_proxy(rest_args).await;
     }
