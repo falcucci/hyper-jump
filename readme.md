@@ -1,4 +1,8 @@
-# Hyper Jump
+<div align="center">
+
+# hyper-jump
+
+</div>
 
 The hyper-jump project.
 
