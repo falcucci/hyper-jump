@@ -14,9 +14,7 @@ fn default_root_dir() -> miette::Result<PathBuf> {
 }
 
 pub fn ensure_root_dir(explicit: Option<&Path>) -> miette::Result<PathBuf> {
-    let defined = explicit
-        .map(|p| p.join(DEFAULT_PATH_NAME))
-        .unwrap_or(default_root_dir()?);
+    let defined = explicit.map(|p| p.join(DEFAULT_PATH_NAME)).unwrap_or(default_root_dir()?);
 
     std::fs::create_dir_all(&defined).into_diagnostic()?;
 

@@ -57,7 +57,6 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
         Commands::Install { version } => {
             let version = parse_version_type(&version).await.unwrap();
             let package = Package::new_cardano_node(version.non_parsed_string.clone());
-
             install(&client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
