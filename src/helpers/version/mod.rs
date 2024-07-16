@@ -7,14 +7,18 @@ use tokio::fs;
 
 /// Represents a local version of the software.
 ///
-/// This struct contains information about a local version of the software, including the file name, file format, path, and semantic version.
+/// This struct contains information about a local version of the software,
+/// including the file name, file format, path, and semantic version.
 ///
 /// # Fields
 ///
-/// * `file_name: String` - The name of the file that contains the local version.
-/// * `file_format: String` - The format of the file that contains the local version.
+/// * `file_name: String` - The name of the file that contains the local
+///   version.
+/// * `file_format: String` - The format of the file that contains the local
+///   version.
 /// * `path: String` - The path to the file that contains the local version.
-/// * `semver: Option<Version>` - The semantic version of the local version, or `None` if the version is not a semantic version.
+/// * `semver: Option<Version>` - The semantic version of the local version, or
+///   `None` if the version is not a semantic version.
 ///
 /// # Example
 ///
@@ -37,14 +41,17 @@ pub struct LocalVersion {
 
 /// Represents a parsed version of the software.
 ///
-/// This struct contains information about a parsed version of the software, including the tag name, version type, non-parsed string, and semantic version.
+/// This struct contains information about a parsed version of the software,
+/// including the tag name, version type, non-parsed string, and semantic
+/// version.
 ///
 /// # Fields
 ///
 /// * `tag_name: String` - The tag name of the parsed version.
 /// * `version_type: VersionType` - The type of the parsed version.
 /// * `non_parsed_string: String` - The non-parsed string of the parsed version.
-/// * `semver: Option<Version>` - The semantic version of the parsed version, or `None` if the version is not a semantic version.
+/// * `semver: Option<Version>` - The semantic version of the parsed version, or
+///   `None` if the version is not a semantic version.
 ///
 /// # Example
 ///
@@ -67,7 +74,10 @@ pub struct ParsedVersion {
 
 /// Represents the type of a software version.
 ///
-/// This enum is used to distinguish between different types of software versions, such as normal versions, the latest version, nightly versions, versions identified by a hash, and nightly versions that have been rolled back.
+/// This enum is used to distinguish between different types of software
+/// versions, such as normal versions, the latest version, nightly versions,
+/// versions identified by a hash, and nightly versions that have been rolled
+/// back.
 ///
 /// # Variants
 ///
@@ -111,7 +121,9 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
     Err(anyhow!("Please provide a proper version string"))
 }
 
-/// This function reads the downloads directory and checks if there is a directory with the name matching the specified version. If such a directory is found, it means that the version is installed.
+/// This function reads the downloads directory and checks if there is a
+/// directory with the name matching the specified version. If such a directory
+/// is found, it means that the version is installed.
 ///
 /// # Arguments
 ///
@@ -119,7 +131,8 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
 ///
 /// # Returns
 ///
-/// * `Result<bool>` - Returns a `Result` that contains `true` if the version is installed, `false` otherwise, or an error if the operation failed.
+/// * `Result<bool>` - Returns a `Result` that contains `true` if the version is
+///   installed, `false` otherwise, or an error if the operation failed.
 ///
 /// # Errors
 ///
@@ -152,11 +165,14 @@ pub async fn is_version_installed(version: &str, package: Package) -> Result<boo
 
 /// Retrieves the current version being used.
 ///
-/// This function reads the "used" file from the downloads directory, which contains the current version being used. If the "used" file cannot be found, it means that is not installed through hyper-jump.
+/// This function reads the "used" file from the downloads directory, which
+/// contains the current version being used. If the "used" file cannot be found,
+/// it means that is not installed through hyper-jump.
 ///
 /// # Returns
 ///
-/// * `Result<String>` - Returns a `Result` that contains the current version being used, or an error if the operation failed.
+/// * `Result<String>` - Returns a `Result` that contains the current version
+///   being used, or an error if the operation failed.
 ///
 /// # Errors
 ///
@@ -170,6 +186,7 @@ pub async fn is_version_installed(version: &str, package: Package) -> Result<boo
 /// ```rust
 /// let current_version = get_current_version().await.unwrap();
 /// println!("The current version is {}", current_version);
+/// ```
 pub async fn get_current_version(package: Package) -> Result<String> {
     let mut downloads_dir = crate::fs::get_downloads_directory(package).await?;
     downloads_dir.push("used");
@@ -196,7 +213,8 @@ pub async fn is_version_used(version: &str, package: Package) -> bool {
 ///
 /// # Returns
 ///
-/// * `Result<()>` - Returns a `Result` that indicates whether the operation was successful or not.
+/// * `Result<()>` - Returns a `Result` that indicates whether the operation was
+///   successful or not.
 ///
 /// # Errors
 ///
