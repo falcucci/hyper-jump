@@ -58,6 +58,7 @@ enum Commands {
     Mithril(mithril::Args),
     CardanoNode(cardano_node::Args),
     CardanoCli(cardano_cli::Args),
+    Erase,
 }
 
 pub struct Context {
@@ -112,5 +113,6 @@ async fn main() -> miette::Result<()> {
         Commands::Mithril(args) => mithril::run(args, &ctx).await,
         Commands::CardanoNode(args) => cardano_node::run(args, &ctx).await,
         Commands::CardanoCli(args) => cardano_cli::run(args, &ctx).await,
+        Commands::Erase => todo!(),
     }
 }
