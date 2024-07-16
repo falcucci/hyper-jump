@@ -29,7 +29,7 @@ use crate::{
 /// # Example
 ///
 /// ```rust
-/// let home_dir = get_home_dir()?;
+/// let home_dir = get_home_dir()?; 
 /// ```
 pub fn get_home_dir() -> Result<PathBuf> {
     let mut home_str = PathBuf::new();
@@ -80,7 +80,7 @@ pub fn get_home_dir() -> Result<PathBuf> {
 /// # Example
 ///
 /// ```rust
-/// let local_data_dir = get_local_data_dir()?;
+/// let local_data_dir = get_local_data_dir()?; 
 /// ```
 pub fn get_local_data_dir() -> Result<PathBuf> {
     let mut home_dir = get_home_dir()?;
@@ -99,7 +99,7 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 /// # Example
 ///
 /// ```rust
-/// let downloads_directory = get_downloads_directory().await?;
+/// let downloads_directory = get_downloads_directory().await?; 
 /// ```
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     let mut data_dir = get_local_data_dir()?;
@@ -134,7 +134,7 @@ pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
 /// # Example
 ///
 /// ```rust
-/// let file_type = get_file_type();
+/// let file_type = get_file_type(); 
 /// ```
 pub fn get_file_type() -> &'static str {
     if cfg!(target_family = "windows") {
@@ -164,11 +164,9 @@ pub fn get_file_type() -> &'static str {
 /// # Example
 ///
 /// ```rust
-/// let platform_name = get_platform_name_download();
+/// let platform_name = get_platform_name_download(); 
 /// ```
-pub fn get_platform_name_download() -> &'static str {
-    std::env::consts::OS
-}
+pub fn get_platform_name_download() -> &'static str { std::env::consts::OS }
 
 /// Copies the proxy to the installation directory.
 ///
@@ -192,9 +190,9 @@ pub fn get_platform_name_download() -> &'static str {
 ///
 /// ```rust
 /// let package = Package::CardanoNode(CardanoNode {
-///    alias: "cardano-node".to_string(),
-///    version: "1.0.0".to_string(),
-///    url: "https://example.com".to_string(),
+///     alias: "cardano-node".to_string(),
+///     version: "1.0.0".to_string(),
+///     url: "https://example.com".to_string(),
 /// });
 ///
 /// copy_cardano_node_proxy(package).await.unwrap();
@@ -279,7 +277,7 @@ fn add_to_path(installation_dir: &Path) -> Result<()> {
 /// # Example
 ///
 /// ```rust
-/// let installation_directory = get_installation_directory().await?;
+/// let installation_directory = get_installation_directory().await?; 
 /// ```
 pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
     let mut installation_location = get_downloads_directory(package).await?;
@@ -387,19 +385,13 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
     use anyhow::Context;
     use flate2::read::GzDecoder;
     use indicatif::{ProgressBar, ProgressStyle};
-    use std::fs::File;
-    use std::os::unix::fs::PermissionsExt;
+    use std::{fs::File, os::unix::fs::PermissionsExt};
     use tar::Archive;
 
-    println!("file_name {}", downloaded_file.file_name);
     if fs::metadata(&downloaded_file.file_name).is_ok() {
         fs::remove_dir_all(&downloaded_file.file_name)?;
     }
 
-    println!(
-        "File::open {}/{}.{}",
-        downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
-    );
     let file = match File::open(format!(
         "{}/{}.{}",
         downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
@@ -414,10 +406,6 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
         }
     };
 
-    println!(
-        "File unpack {}/{}",
-        downloaded_file.path, downloaded_file.file_name
-    );
     let decompress_stream = GzDecoder::new(file);
     Archive::new(decompress_stream)
         .unpack(format!(
@@ -448,12 +436,9 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
     ));
 
     let platform = get_platform_name_download();
-    println!("Platform: {}", platform);
 
     let file = &format!("{}/bin/cardano-node", downloaded_file.file_name);
-    println!("File: {}", file);
     let mut perms = fs::metadata(file)?.permissions();
-    println!("Permissions: {:?}", perms);
     perms.set_mode(0o551);
     fs::set_permissions(file, perms)?;
     Ok(())
