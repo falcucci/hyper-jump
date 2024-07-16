@@ -96,7 +96,7 @@ async fn main() -> miette::Result<()> {
 
     let rest_args = &args[1..];
 
-    if exe_name.eq("cardano-node") {
+    if !exe_name.eq("hyper-jump") {
         if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
             print!("hyper-jump v{}", env!("CARGO_PKG_VERSION"));
             return Ok(());
