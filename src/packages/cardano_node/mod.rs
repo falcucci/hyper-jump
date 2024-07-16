@@ -1,5 +1,6 @@
+pub mod processes;
+
 use clap::Parser;
-use regex::Regex;
 use tracing::instrument;
 
 use crate::{
@@ -8,10 +9,7 @@ use crate::{
     install::{install, CardanoNode, Package},
     use_cmd::use_cmd,
   },
-  helpers::{
-    client,
-    version::{get_current_version, parse_version_type, ParsedVersion, VersionType},
-  },
+  helpers::{client, version::parse_version_type},
 };
 
 use super::CARDANO_NODE_PACKAGE_URL;

@@ -1,7 +1,17 @@
-use std::path::PathBuf;
+use std::{
+  env,
+  path::{Path, PathBuf},
+};
+
+extern crate core;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use packages::{cardano_cli, cardano_node, mithril};
+use commands::install::{CardanoNode, Package};
+use packages::{
+  cardano_cli,
+  cardano_node::{self, processes::handle_cardano_node_process},
+  mithril, CARDANO_NODE_PACKAGE_URL,
+};
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -79,6 +89,32 @@ pub fn with_tracing() {
 
 #[tokio::main]
 async fn main() -> miette::Result<()> {
+  let args: Vec<String> = env::args().collect();
+
+  let exe_name_path = Path::new(&args[0]);
+  let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
+
+  let rest_args = &args[1..];
+
+  if exe_name.eq("cardano-node") {
+    if !rest_args.is_empty() && rest_args[0].eq("--&hyper-jump") {
+      print!("{}", env!("CARGO_PKG_VERSION"));
+      return Ok(());
+    }
+
+    let package = Package::CardanoNode(CardanoNode {
+      url: CARDANO_NODE_PACKAGE_URL.to_string(),
+      alias: "cardano-node".to_string(),
+      version: "9.0.0".to_string(),
+    });
+
+    handle_cardano_node_process(rest_args, package)
+      .await
+      .unwrap();
+
+    return Ok(());
+  }
+
   let cli = Cli::parse();
 
   let ctx = Context::for_cli(&cli)?;
