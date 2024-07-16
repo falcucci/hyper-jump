@@ -6,12 +6,12 @@ use std::{
 extern crate core;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use commands::install::Package;
 use packages::{
     cardano_cli,
-    cardano_node::{self, processes::handle_package_process},
+    cardano_node::{self},
     mithril,
 };
+use proxy::handle_proxy;
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -21,6 +21,7 @@ mod dirs;
 mod fs;
 mod helpers;
 mod packages;
+mod proxy;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -96,15 +97,7 @@ async fn main() -> miette::Result<()> {
     let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
 
     if !exe_name.eq("hyper-jump") {
-        if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
-            print!("hyper-jump v{}", env!("CARGO_PKG_VERSION"));
-            return Ok(());
-        }
-
-        let package = Package::new_cardano_node("9.0.0".to_string());
-        handle_package_process(rest_args, package).await.unwrap();
-
-        return Ok(());
+        return handle_proxy(rest_args).await;
     }
 
     let cli = Cli::parse();

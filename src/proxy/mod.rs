@@ -1,15 +1,25 @@
-use std::{
-    sync::{atomic::AtomicBool, Arc},
-    time::Duration,
-};
-
-use anyhow::{anyhow, Result};
-use tokio::time::sleep;
-
 use crate::{
     commands::install::{CardanoNode, Package},
     helpers::version::get_current_version,
 };
+use anyhow::{anyhow, Result};
+use std::{
+    sync::{atomic::AtomicBool, Arc},
+    time::Duration,
+};
+use tokio::time::sleep;
+
+pub async fn handle_proxy(rest_args: &[String]) -> miette::Result<()> {
+    if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
+        print!("hyper-jump v{}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
+
+    let package = Package::new_cardano_node("9.0.0".to_string());
+    handle_package_process(rest_args, package).await.unwrap();
+
+    Ok(())
+}
 
 /// Handles the execution process.
 ///
