@@ -1,6 +1,7 @@
 use crate::commands::erase::erase;
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::client;
 use crate::helpers::version::parse_version_type;
@@ -31,9 +32,8 @@ pub struct Update {
 pub enum Commands {
     Use { version: String },
     Install { version: String },
-    Uninstall { version: String },
+    Uninstall,
     Rollback,
-    Erase,
     List,
     Update(Update),
     Run(Run),
@@ -59,15 +59,12 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
             let package = Package::new_cardano_node(version.non_parsed_string.clone());
             install(&client, package, version).await.expect("Failed to install")
         }
-        Commands::Uninstall { version } => {
-            println!("Uninstall: {}", version);
+        Commands::Uninstall => {
+            let package = Package::new_cardano_node("9.0.0".to_string());
+            uninstall(package).await.expect("Failed to erase");
         }
         Commands::Rollback => {
             println!("Rollback");
-        }
-        Commands::Erase => {
-            let package = Package::new_cardano_node("9.0.0".to_string());
-            erase(package).await.expect("Failed to erase");
         }
         Commands::List => {
             println!("List");
