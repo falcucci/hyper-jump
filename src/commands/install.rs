@@ -136,7 +136,7 @@ async fn download_version(
     let pb = ProgressBar::new(content_length);
     let mut response_bytes = response.bytes_stream();
     let file_type = get_file_type();
-    let file_path = create_file_path(version, root, file_type).await?;
+    let file_path = create_file_path(version, root, file_type);
     let mut file = create_file(&file_path).await?;
     while let Some(item) = response_bytes.next().await {
         let chunk = item.map_err(|_| anyhow!("Failed to get chunk"))?;
@@ -161,22 +161,87 @@ async fn download_version(
     Ok(PostDownloadVersionType::Standard(local_version))
 }
 
+/// Retrieves the content length from an HTTP response.
+///
+/// This function extracts the `Content-Length` header from the given HTTP response
+/// and returns it as a `u64`. If the header is not present, it returns an error.
+///
+/// # Arguments
+///
+/// * `response` - A reference to the `reqwest::Response` object.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the operation.
+///
+/// * `Ok(u64)` - The content length of the response.
+/// * `Err(anyhow::Error)` - An error occurred if the `Content-Length` header is missing.
+///
+/// # Examples
+///
+/// ```rust
+/// let response = reqwest::get("https://example.com").await?;
+/// let content_length = get_content_length(&response).await?;
+/// ```
 async fn get_content_length(response: &reqwest::Response) -> Result<u64> {
-    let content_length = response
-        .content_length()
-        .ok_or_else(|| anyhow!("Failed to get content length of the response"))?;
+    let content_length = response.content_length();
 
-    Ok(content_length)
+    content_length.ok_or(anyhow!("Failed to get content length of the response"))
 }
 
+/// Creates a new file asynchronously at the specified path.
+///
+/// This function creates a new file at the given file path using asynchronous
+/// file operations provided by `tokio::fs`.
+///
+/// # Arguments
+///
+/// * `file_path` - A string slice that holds the path where the file should be created.
+///
+/// # Returns
+///
+/// This function returns a `Result` indicating the success or failure of the file creation.
+///
+/// * `Ok(tokio::fs::File)` - The created file handle.
+/// * `Err(anyhow::Error)` - An error occurred during file creation.
+///
+/// # Examples
+///
+/// ```rust
+/// let file_path = "/tmp/example.txt";
+/// let file = create_file(file_path).await?;
+/// ```
 async fn create_file(file_path: &str) -> Result<tokio::fs::File> {
     Ok(tokio::fs::File::create(&file_path).await?)
 }
 
-async fn create_file_path(version: &ParsedVersion, root: &Path, file_type: &str) -> Result<String> {
-    let file_path = format!("{}/{}.{}", root.display(), version.tag_name, file_type);
-
-    Ok(file_path)
+/// Constructs a file path string based on the version, root path, and file type.
+///
+/// This function generates a file path string by combining the root path, version tag name,
+/// and file type. The resulting path is formatted as `root/tag_name.file_type`.
+///
+/// # Arguments
+///
+/// * `version` - A reference to a `ParsedVersion` object containing the version information.
+/// * `root` - A reference to a `Path` object representing the root directory.
+/// * `file_type` - A string slice representing the file extension or type.
+///
+/// # Returns
+///
+/// This function returns a `String` representing the constructed file path.
+///
+/// # Examples
+///
+/// ```rust
+/// let version = ParsedVersion {
+///     tag_name: "v1.0.0".to_string(),
+/// };
+/// let root = Path::new("/tmp");
+/// let file_type = "txt";
+/// let file_path = create_file_path(&version, &root, file_type);
+/// ```
+fn create_file_path(version: &ParsedVersion, root: &Path, file_type: &str) -> String {
+    format!("{}/{}.{}", root.display(), version.tag_name, file_type)
 }
 
 /// Sends a GET request to the specified URL to download a specific version.
