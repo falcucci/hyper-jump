@@ -155,12 +155,14 @@ async fn download_version(
         version.tag_name, file_path
     ));
 
-    Ok(PostDownloadVersionType::Standard(LocalVersion {
+    let local_version = LocalVersion {
         file_name: version.tag_name.to_owned(),
         file_format: file_type.to_string(),
         path: root.display().to_string(),
         semver: version.semver.clone(),
-    }))
+    };
+
+    Ok(PostDownloadVersionType::Standard(local_version))
 }
 
 /// Sends a GET request to the specified URL to download a specific version.
