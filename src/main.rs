@@ -9,7 +9,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use commands::install::Package;
 use packages::{
     cardano_cli,
-    cardano_node::{self, processes::handle_cardano_node_process},
+    cardano_node::{self, processes::handle_package_process},
     mithril,
 };
 use tracing::Level;
@@ -101,9 +101,7 @@ async fn main() -> miette::Result<()> {
         }
 
         let package = Package::new_cardano_node("9.0.0".to_string());
-        handle_cardano_node_process(rest_args, package)
-            .await
-            .unwrap();
+        handle_package_process(rest_args, package).await.unwrap();
 
         return Ok(());
     }

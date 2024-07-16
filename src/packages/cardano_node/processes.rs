@@ -43,18 +43,19 @@ use crate::{
 ///
 /// ```rust
 /// let args = vec!["-v".to_string()];
-/// handle_cardano_node_process(&args).await;
+/// handle_package_process(&args).await;
 /// ```
-pub async fn handle_cardano_node_process(args: &[String], package: Package) -> Result<()> {
+pub async fn handle_package_process(args: &[String], package: Package) -> Result<()> {
     let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
     let used_version = get_current_version(package.clone()).await?;
 
-    let mut location = downloads_dir.join(used_version).join("bin");
+    let alias = match package {
+        Package::CardanoNode(CardanoNode { alias, .. }) => alias,
+        Package::CardanoCli => todo!(),
+        Package::Mithril => todo!(),
+    };
 
-    if let Package::CardanoNode(CardanoNode { alias, .. }) = package {
-        location = location.join(alias);
-    }
-
+    let location = downloads_dir.join(used_version).join("bin").join(alias);
     println!("Running: {:?}", location);
 
     let _term = Arc::new(AtomicBool::new(false));
@@ -68,7 +69,6 @@ pub async fn handle_cardano_node_process(args: &[String], package: Package) -> R
     child.args(args);
 
     let mut spawned_child = child.spawn()?;
-
     loop {
         let child_done = spawned_child.try_wait();
         match child_done {
