@@ -30,10 +30,10 @@ use crate::commands::install::Package;
 /// ```
 #[derive(Clone, PartialEq)]
 pub struct LocalVersion {
-  pub file_name: String,
-  pub file_format: String,
-  pub path: String,
-  pub semver: Option<Version>,
+    pub file_name: String,
+    pub file_format: String,
+    pub path: String,
+    pub semver: Option<Version>,
 }
 
 /// Represents a parsed version of the software.
@@ -60,10 +60,10 @@ pub struct LocalVersion {
 /// ```
 #[derive(Debug, Clone)]
 pub struct ParsedVersion {
-  pub tag_name: String,
-  pub version_type: VersionType,
-  pub non_parsed_string: String,
-  pub semver: Option<Version>,
+    pub tag_name: String,
+    pub version_type: VersionType,
+    pub non_parsed_string: String,
+    pub semver: Option<Version>,
 }
 
 /// Represents the type of a software version.
@@ -88,28 +88,28 @@ pub struct ParsedVersion {
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum VersionType {
-  Normal,
-  Latest,
-  Hash,
+    Normal,
+    Latest,
+    Hash,
 }
 
 pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
-  let version_regex = Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
-  if version_regex.is_match(version) {
-    let mut returned_version = version.to_string();
-    if !version.contains('v') {
-      returned_version.insert(0, 'v');
+    let version_regex = Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
+    if version_regex.is_match(version) {
+        let mut returned_version = version.to_string();
+        if !version.contains('v') {
+            returned_version.insert(0, 'v');
+        }
+
+        return Ok(ParsedVersion {
+            tag_name: returned_version,
+            version_type: VersionType::Normal,
+            non_parsed_string: version.to_string(),
+            semver: None,
+        });
     }
 
-    return Ok(ParsedVersion {
-      tag_name: returned_version,
-      version_type: VersionType::Normal,
-      non_parsed_string: version.to_string(),
-      semver: None,
-    });
-  }
-
-  Err(anyhow!("Please provide a proper version string"))
+    Err(anyhow!("Please provide a proper version string"))
 }
 
 /// This function reads the downloads directory and checks if there is a directory with the name matching the specified version. If such a directory is found, it means that the version is installed.
@@ -137,18 +137,18 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
 /// println!("Is version {} installed? {}", version, is_installed);
 /// ```
 pub async fn is_version_installed(version: &str, package: Package) -> Result<bool> {
-  let downloads_dir = crate::fs::get_downloads_directory(package).await?;
-  let mut dir = tokio::fs::read_dir(&downloads_dir).await?;
+    let downloads_dir = crate::fs::get_downloads_directory(package).await?;
+    let mut dir = tokio::fs::read_dir(&downloads_dir).await?;
 
-  while let Some(directory) = dir.next_entry().await? {
-    let name = directory.file_name().to_str().unwrap().to_owned();
-    if !version.eq(&name) {
-      continue;
-    } else {
-      return Ok(true);
+    while let Some(directory) = dir.next_entry().await? {
+        let name = directory.file_name().to_str().unwrap().to_owned();
+        if !version.eq(&name) {
+            continue;
+        } else {
+            return Ok(true);
+        }
     }
-  }
-  Ok(false)
+    Ok(false)
 }
 
 /// Retrieves the current version being used.
@@ -172,20 +172,20 @@ pub async fn is_version_installed(version: &str, package: Package) -> Result<boo
 /// let current_version = get_current_version().await.unwrap();
 /// println!("The current version is {}", current_version);
 pub async fn get_current_version(package: Package) -> Result<String> {
-  let mut downloads_dir = crate::fs::get_downloads_directory(package).await?;
-  downloads_dir.push("used");
-  println!("downloads_dir: {:?}", downloads_dir);
-  tokio::fs::read_to_string(&downloads_dir)
-    .await
-    .map_err(|_| anyhow!("Could not read the current version"))
+    let mut downloads_dir = crate::fs::get_downloads_directory(package).await?;
+    downloads_dir.push("used");
+    println!("downloads_dir: {:?}", downloads_dir);
+    tokio::fs::read_to_string(&downloads_dir)
+        .await
+        .map_err(|_| anyhow!("Could not read the current version"))
 }
 
 pub async fn is_version_used(version: &str, package: Package) -> bool {
-  let current_version = get_current_version(package).await;
-  match current_version {
-    Ok(current_version) => current_version.eq(version),
-    Err(_) => false,
-  }
+    let current_version = get_current_version(package).await;
+    match current_version {
+        Ok(current_version) => current_version.eq(version),
+        Err(_) => false,
+    }
 }
 
 /// Switches to a specified version.
@@ -207,15 +207,15 @@ pub async fn is_version_used(version: &str, package: Package) -> bool {
 /// * The current directory cannot be changed to the downloads directory.
 /// * The version cannot be written to the "used" file.
 pub async fn switch_version(
-  client: &reqwest::Client,
-  version: &ParsedVersion,
-  package: Package,
+    client: &reqwest::Client,
+    version: &ParsedVersion,
+    package: Package,
 ) -> Result<()> {
-  std::env::set_current_dir(crate::fs::get_downloads_directory(package).await?)?;
+    std::env::set_current_dir(crate::fs::get_downloads_directory(package).await?)?;
 
-  let file_version: String = version.tag_name.to_string();
+    let file_version: String = version.tag_name.to_string();
 
-  fs::write("used", &file_version).await?;
+    fs::write("used", &file_version).await?;
 
-  Ok(())
+    Ok(())
 }

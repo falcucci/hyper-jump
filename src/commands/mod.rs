@@ -19,8 +19,8 @@ pub mod use_cmd;
 /// * `NightlyIsUpdated` - The nightly version is updated.
 /// * `GivenNightlyRollback` - The given nightly version is a rollback.
 pub enum InstallResult {
-  InstallationSuccess(String),
-  VersionAlreadyInstalled,
+    InstallationSuccess(String),
+    VersionAlreadyInstalled,
 }
 
 /// Represents the type of a version after it has been downloaded.
@@ -32,7 +32,7 @@ pub enum InstallResult {
 /// * `Hash` - The version is identified by a hash.
 #[derive(PartialEq)]
 pub enum PostDownloadVersionType {
-  None,
-  Standard(LocalVersion),
-  Hash,
+    None,
+    Standard(LocalVersion),
+    Hash,
 }

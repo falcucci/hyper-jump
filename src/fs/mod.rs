@@ -1,7 +1,7 @@
 use std::{
-  env, fs,
-  path::{Path, PathBuf},
-  process::Command,
+    env, fs,
+    path::{Path, PathBuf},
+    process::Command,
 };
 
 use anyhow::{anyhow, Result};
@@ -9,8 +9,8 @@ use anyhow::{anyhow, Result};
 use tracing::info;
 
 use crate::{
-  commands::install::{CardanoNode, Package},
-  helpers::version::LocalVersion,
+    commands::install::{CardanoNode, Package},
+    helpers::version::LocalVersion,
 };
 
 /// Returns the home directory path for the current user.
@@ -32,37 +32,37 @@ use crate::{
 /// let home_dir = get_home_dir()?;
 /// ```
 pub fn get_home_dir() -> Result<PathBuf> {
-  let mut home_str = PathBuf::new();
+    let mut home_str = PathBuf::new();
 
-  if cfg!(windows) {
-    home_str.push(std::env::var("USERPROFILE")?);
-    return Ok(home_str);
-  }
-
-  if cfg!(target_os = "macos") {
-    home_str.push("/Users/");
-  } else {
-    home_str.push("/home/")
-  };
-
-  if let Ok(value) = std::env::var("SUDO_USER") {
-    home_str.push(&value);
-    if fs::metadata(&home_str).is_ok() {
-      return Ok(home_str);
+    if cfg!(windows) {
+        home_str.push(std::env::var("USERPROFILE")?);
+        return Ok(home_str);
     }
-  }
 
-  if let Ok(value) = std::env::var("USER") {
-    home_str.push(&value);
-    if fs::metadata(&home_str).is_ok() {
-      return Ok(home_str);
+    if cfg!(target_os = "macos") {
+        home_str.push("/Users/");
+    } else {
+        home_str.push("/home/")
+    };
+
+    if let Ok(value) = std::env::var("SUDO_USER") {
+        home_str.push(&value);
+        if fs::metadata(&home_str).is_ok() {
+            return Ok(home_str);
+        }
     }
-  }
 
-  let home_value = std::env::var("HOME")?;
-  home_str = PathBuf::from(home_value);
+    if let Ok(value) = std::env::var("USER") {
+        home_str.push(&value);
+        if fs::metadata(&home_str).is_ok() {
+            return Ok(home_str);
+        }
+    }
 
-  Ok(home_str)
+    let home_value = std::env::var("HOME")?;
+    home_str = PathBuf::from(home_value);
+
+    Ok(home_str)
 }
 
 /// Returns the local data directory path for the current user.
@@ -83,10 +83,10 @@ pub fn get_home_dir() -> Result<PathBuf> {
 /// let local_data_dir = get_local_data_dir()?;
 /// ```
 pub fn get_local_data_dir() -> Result<PathBuf> {
-  let mut home_dir = get_home_dir()?;
+    let mut home_dir = get_home_dir()?;
 
-  home_dir.push(".local/share");
-  Ok(home_dir)
+    home_dir.push(".local/share");
+    Ok(home_dir)
 }
 
 /// Asynchronously returns the downloads directory path based on the application configuration.
@@ -102,22 +102,22 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 /// let downloads_directory = get_downloads_directory().await?;
 /// ```
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
-  let mut data_dir = get_local_data_dir()?;
+    let mut data_dir = get_local_data_dir()?;
 
-  data_dir.push("hyper-jump");
+    data_dir.push("hyper-jump");
 
-  if let Package::CardanoNode(CardanoNode { alias, .. }) = package {
-    data_dir.push(alias);
-  }
+    if let Package::CardanoNode(CardanoNode { alias, .. }) = package {
+        data_dir.push(alias);
+    }
 
-  let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();
-  let is_folder_created = tokio::fs::create_dir_all(&data_dir).await.is_ok();
+    let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();
+    let is_folder_created = tokio::fs::create_dir_all(&data_dir).await.is_ok();
 
-  if !does_folder_exist && !is_folder_created {
-    return Err(anyhow!("Couldn't create downloads directory"));
-  }
+    if !does_folder_exist && !is_folder_created {
+        return Err(anyhow!("Couldn't create downloads directory"));
+    }
 
-  Ok(data_dir)
+    Ok(data_dir)
 }
 
 /// Returns the file type binary download based on the target operating system.
@@ -137,13 +137,13 @@ pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
 /// let file_type = get_file_type();
 /// ```
 pub fn get_file_type() -> &'static str {
-  if cfg!(target_family = "windows") {
-    "zip"
-  } else if cfg!(target_os = "macos") {
-    "tar.gz"
-  } else {
-    "appimage"
-  }
+    if cfg!(target_family = "windows") {
+        "zip"
+    } else if cfg!(target_os = "macos") {
+        "tar.gz"
+    } else {
+        "appimage"
+    }
 }
 
 /// Returns the platform-specific name.
@@ -167,7 +167,7 @@ pub fn get_file_type() -> &'static str {
 /// let platform_name = get_platform_name_download();
 /// ```
 pub fn get_platform_name_download() -> &'static str {
-  std::env::consts::OS
+    std::env::consts::OS
 }
 
 /// Copies the proxy to the installation directory.
@@ -200,35 +200,35 @@ pub fn get_platform_name_download() -> &'static str {
 /// copy_cardano_node_proxy(package).await.unwrap();
 /// ```
 pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
-  let exe_path = env::current_exe().unwrap();
-  let mut installation_dir = get_installation_directory(package).await?;
-  println!("exe_path: {:?}", exe_path);
-  println!("installation_dir: {:?}", installation_dir);
+    let exe_path = env::current_exe().unwrap();
+    let mut installation_dir = get_installation_directory(package).await?;
+    println!("exe_path: {:?}", exe_path);
+    println!("installation_dir: {:?}", installation_dir);
 
-  if fs::metadata(&installation_dir).is_err() {
-    fs::create_dir_all(&installation_dir)?;
-  }
-
-  add_to_path(&installation_dir)?;
-
-  installation_dir.push("cardano-node");
-
-  if fs::metadata(&installation_dir).is_ok() {
-    println!("cardano-node already exists in installation directory");
-    let output = Command::new("cardano-node")
-      .arg("--&hyper-jump")
-      .output()?
-      .stdout;
-    let version = String::from_utf8(output)?.trim().to_string();
-
-    if version == env!("CARGO_PKG_VERSION") {
-      return Ok(());
+    if fs::metadata(&installation_dir).is_err() {
+        fs::create_dir_all(&installation_dir)?;
     }
-  }
 
-  fs::copy(&exe_path, &installation_dir).map_err(|_| anyhow!("Could not copy the proxy"))?;
+    add_to_path(&installation_dir)?;
 
-  Ok(())
+    installation_dir.push("cardano-node");
+
+    if fs::metadata(&installation_dir).is_ok() {
+        println!("cardano-node already exists in installation directory");
+        let output = Command::new("cardano-node")
+            .arg("--&hyper-jump")
+            .output()?
+            .stdout;
+        let version = String::from_utf8(output)?.trim().to_string();
+
+        if version == env!("CARGO_PKG_VERSION") {
+            return Ok(());
+        }
+    }
+
+    fs::copy(&exe_path, &installation_dir).map_err(|_| anyhow!("Could not copy the proxy"))?;
+
+    Ok(())
 }
 
 /// Adds the installation directory to the system's PATH.
@@ -258,13 +258,13 @@ pub async fn copy_cardano_node_proxy(package: Package) -> Result<()> {
 /// add_to_path(&installation_dir).unwrap();
 /// ```
 fn add_to_path(installation_dir: &Path) -> Result<()> {
-  let installation_dir = installation_dir.to_str().unwrap();
+    let installation_dir = installation_dir.to_str().unwrap();
 
-  if !std::env::var("PATH")?.contains("cardano-node-bin") {
-    info!("Make sure to have {installation_dir} in PATH");
-  }
+    if !std::env::var("PATH")?.contains("cardano-node-bin") {
+        info!("Make sure to have {installation_dir} in PATH");
+    }
 
-  Ok(())
+    Ok(())
 }
 
 /// Asynchronously returns the installation directory path based on the application configuration.
@@ -282,10 +282,10 @@ fn add_to_path(installation_dir: &Path) -> Result<()> {
 /// let installation_directory = get_installation_directory().await?;
 /// ```
 pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
-  let mut installation_location = get_downloads_directory(package).await?;
-  installation_location.push("cardano-node-bin");
+    let mut installation_location = get_downloads_directory(package).await?;
+    installation_location.push("cardano-node-bin");
 
-  Ok(installation_location)
+    Ok(installation_location)
 }
 
 /// Starts the process of expanding a downloaded file.
@@ -325,22 +325,22 @@ pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
 /// unarchive(downloaded_file).await;
 /// ```
 pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
-  let temp_file = file.clone();
-  match tokio::task::spawn_blocking(move || match expand(package, temp_file) {
-    Ok(_) => Ok(()),
-    Err(error) => Err(anyhow!(error)),
-  })
-  .await
-  {
-    Ok(_) => (),
-    Err(error) => return Err(anyhow!(error)),
-  }
-  tokio::fs::remove_file(format!(
-    "{}/{}.{}",
-    file.path, file.file_name, file.file_format
-  ))
-  .await?;
-  Ok(())
+    let temp_file = file.clone();
+    match tokio::task::spawn_blocking(move || match expand(package, temp_file) {
+        Ok(_) => Ok(()),
+        Err(error) => Err(anyhow!(error)),
+    })
+    .await
+    {
+        Ok(_) => (),
+        Err(error) => return Err(anyhow!(error)),
+    }
+    tokio::fs::remove_file(format!(
+        "{}/{}.{}",
+        file.path, file.file_name, file.file_format
+    ))
+    .await?;
+    Ok(())
 }
 
 /// Expands a downloaded file on macOS.
@@ -384,74 +384,77 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
 /// ```
 #[cfg(target_os = "macos")]
 fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
-  use anyhow::Context;
-  use flate2::read::GzDecoder;
-  use indicatif::{ProgressBar, ProgressStyle};
-  use std::fs::File;
-  use std::os::unix::fs::PermissionsExt;
-  use tar::Archive;
+    use anyhow::Context;
+    use flate2::read::GzDecoder;
+    use indicatif::{ProgressBar, ProgressStyle};
+    use std::fs::File;
+    use std::os::unix::fs::PermissionsExt;
+    use tar::Archive;
 
-  println!("file_name {}", downloaded_file.file_name);
-  if fs::metadata(&downloaded_file.file_name).is_ok() {
-    fs::remove_dir_all(&downloaded_file.file_name)?;
-  }
-
-  println!(
-    "File::open {}/{}.{}",
-    downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
-  );
-  let file = match File::open(format!(
-    "{}/{}.{}",
-    downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
-  )) {
-    Ok(value) => value,
-    Err(error) => {
-      return Err(anyhow!(
-        "Failed to open file {}.{}, file doesn't exist. additional info: {error}",
-        downloaded_file.file_name,
-        downloaded_file.file_format
-      ))
+    println!("file_name {}", downloaded_file.file_name);
+    if fs::metadata(&downloaded_file.file_name).is_ok() {
+        fs::remove_dir_all(&downloaded_file.file_name)?;
     }
-  };
 
-  println!(
-    "File unpack {}/{}",
-    downloaded_file.path, downloaded_file.file_name
-  );
-  let decompress_stream = GzDecoder::new(file);
-  Archive::new(decompress_stream)
-    .unpack(format!(
-      "{}/{}",
-      downloaded_file.path, downloaded_file.file_name
-    ))
-    .with_context(|| {
-      format!(
-        "Failed to decompress or extract file {}.{}",
-        downloaded_file.file_name, downloaded_file.file_format
-      )
-    })?;
+    println!(
+        "File::open {}/{}.{}",
+        downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
+    );
+    let file = match File::open(format!(
+        "{}/{}.{}",
+        downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
+    )) {
+        Ok(value) => value,
+        Err(error) => {
+            return Err(anyhow!(
+                "Failed to open file {}.{}, file doesn't exist. additional info: {error}",
+                downloaded_file.file_name,
+                downloaded_file.file_format
+            ))
+        }
+    };
 
-  let totalsize = 4692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
-  let pb = ProgressBar::new(totalsize);
-  pb.set_style(
-    ProgressStyle::default_bar()
-      .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
-      .unwrap()
-      .progress_chars("█  "),
-  );
-  pb.finish_with_message(format!(
-    "Finished expanding to {}/{}",
-    downloaded_file.path, downloaded_file.file_name
-  ));
+    println!(
+        "File unpack {}/{}",
+        downloaded_file.path, downloaded_file.file_name
+    );
+    let decompress_stream = GzDecoder::new(file);
+    Archive::new(decompress_stream)
+        .unpack(format!(
+            "{}/{}",
+            downloaded_file.path, downloaded_file.file_name
+        ))
+        .with_context(|| {
+            format!(
+                "Failed to decompress or extract file {}.{}",
+                downloaded_file.file_name, downloaded_file.file_format
+            )
+        })?;
 
-  let platform = get_platform_name_download();
-  println!("Platform: {}", platform);
+    let totalsize = 4692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
+    let pb = ProgressBar::new(totalsize);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template(
+                "{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}",
+            )
+            .unwrap()
+            .progress_chars("█  "),
+    );
 
-  let file = &format!("{}/bin/cardano-node", downloaded_file.file_name);
-  println!("File: {}", file);
-  let mut perms = fs::metadata(file)?.permissions();
-  println!("Permissions: {:?}", perms);
-  perms.set_mode(0o551);
-  fs::set_permissions(file, perms)?;
-  Ok(())
+    pb.finish_with_message(format!(
+        "Finished expanding to {}/{}",
+        downloaded_file.path, downloaded_file.file_name
+    ));
+
+    let platform = get_platform_name_download();
+    println!("Platform: {}", platform);
+
+    let file = &format!("{}/bin/cardano-node", downloaded_file.file_name);
+    println!("File: {}", file);
+    let mut perms = fs::metadata(file)?.permissions();
+    println!("Permissions: {:?}", perms);
+    perms.set_mode(0o551);
+    fs::set_permissions(file, perms)?;
+    Ok(())
 }

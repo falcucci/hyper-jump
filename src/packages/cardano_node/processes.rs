@@ -1,6 +1,6 @@
 use std::{
-  sync::{atomic::AtomicBool, Arc},
-  time::Duration,
+    sync::{atomic::AtomicBool, Arc},
+    time::Duration,
 };
 
 use anyhow::{anyhow, Result};
@@ -45,50 +45,50 @@ use crate::{commands::install::Package, helpers::version::get_current_version};
 /// handle_cardano_node_process(&args).await;
 /// ```
 pub async fn handle_cardano_node_process(args: &[String], package: Package) -> Result<()> {
-  let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
-  let used_version = get_current_version(package.clone()).await?;
+    let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
+    let used_version = get_current_version(package.clone()).await?;
 
-  let location = downloads_dir
-    .join(used_version)
-    .join("bin")
-    .join("cardano-node");
+    let location = downloads_dir
+        .join(used_version)
+        .join("bin")
+        .join("cardano-node");
 
-  let _term = Arc::new(AtomicBool::new(false));
+    let _term = Arc::new(AtomicBool::new(false));
 
-  #[cfg(unix)]
-  {
-    signal_hook::flag::register(signal_hook::consts::SIGUSR1, Arc::clone(&_term))?;
-  }
-
-  let mut child = std::process::Command::new(location);
-  child.args(args);
-
-  let mut spawned_child = child.spawn()?;
-
-  loop {
-    let child_done = spawned_child.try_wait();
-    match child_done {
-      Ok(Some(status)) => match status.code() {
-        Some(0) => return Ok(()),
-        Some(code) => return Err(anyhow!("Process exited with error code {}", code)),
-        None => return Err(anyhow!("Process terminated by signal")),
-      },
-      Ok(None) => {
-        #[cfg(unix)]
-        {
-          use nix::sys::signal::{self, Signal};
-          use nix::unistd::Pid;
-          use std::sync::atomic::Ordering;
-          if _term.load(Ordering::Relaxed) {
-            let pid = spawned_child.id() as i32;
-            signal::kill(Pid::from_raw(pid), Signal::SIGUSR1)?;
-            _term.store(false, Ordering::Relaxed);
-          }
-        }
-        // short delay to a void high cpu usage
-        sleep(Duration::from_millis(200)).await;
-      }
-      Err(_) => return Err(anyhow!("Failed to wait on child process")),
+    #[cfg(unix)]
+    {
+        signal_hook::flag::register(signal_hook::consts::SIGUSR1, Arc::clone(&_term))?;
     }
-  }
+
+    let mut child = std::process::Command::new(location);
+    child.args(args);
+
+    let mut spawned_child = child.spawn()?;
+
+    loop {
+        let child_done = spawned_child.try_wait();
+        match child_done {
+            Ok(Some(status)) => match status.code() {
+                Some(0) => return Ok(()),
+                Some(code) => return Err(anyhow!("Process exited with error code {}", code)),
+                None => return Err(anyhow!("Process terminated by signal")),
+            },
+            Ok(None) => {
+                #[cfg(unix)]
+                {
+                    use nix::sys::signal::{self, Signal};
+                    use nix::unistd::Pid;
+                    use std::sync::atomic::Ordering;
+                    if _term.load(Ordering::Relaxed) {
+                        let pid = spawned_child.id() as i32;
+                        signal::kill(Pid::from_raw(pid), Signal::SIGUSR1)?;
+                        _term.store(false, Ordering::Relaxed);
+                    }
+                }
+                // short delay to a void high cpu usage
+                sleep(Duration::from_millis(200)).await;
+            }
+            Err(_) => return Err(anyhow!("Failed to wait on child process")),
+        }
+    }
 }

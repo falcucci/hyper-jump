@@ -15,70 +15,70 @@ use tokio::io::AsyncWriteExt;
 use crate::fs::{copy_cardano_node_proxy, get_file_type, get_platform_name_download, unarchive};
 use crate::helpers::version::LocalVersion;
 use crate::{
-  fs::get_downloads_directory,
-  helpers::version::{is_version_installed, ParsedVersion, VersionType},
+    fs::get_downloads_directory,
+    helpers::version::{is_version_installed, ParsedVersion, VersionType},
 };
 
 use super::PostDownloadVersionType;
 
 #[derive(Debug, Clone)]
 pub struct CardanoNode {
-  pub url: String,
-  pub alias: String,
-  pub version: String,
+    pub url: String,
+    pub alias: String,
+    pub version: String,
 }
 
 #[derive(Debug, Clone)]
 pub enum Package {
-  CardanoNode(CardanoNode),
-  CardanoCli,
-  Mithril,
+    CardanoNode(CardanoNode),
+    CardanoCli,
+    Mithril,
 }
 
 impl Package {
-  pub fn url(&self) -> Option<Cow<str>> {
-    match self {
-      Package::CardanoNode(CardanoNode { url, version, .. }) => {
-        let package_url = url.replace("{version}", version);
+    pub fn url(&self) -> Option<Cow<str>> {
+        match self {
+            Package::CardanoNode(CardanoNode { url, version, .. }) => {
+                let package_url = url.replace("{version}", version);
 
-        Some(Cow::Owned(format!("https://github.com/{}", package_url)))
-      }
-      _ => None,
+                Some(Cow::Owned(format!("https://github.com/{}", package_url)))
+            }
+            _ => None,
+        }
     }
-  }
 }
 
 pub async fn install(
-  client: &Client,
-  package: Package,
-  version: ParsedVersion,
+    client: &Client,
+    package: Package,
+    version: ParsedVersion,
 ) -> Result<(), Error> {
-  let root = get_downloads_directory(package.clone()).await?;
+    let root = get_downloads_directory(package.clone()).await?;
 
-  env::set_current_dir(&root)?;
-  let root = root.as_path();
+    env::set_current_dir(&root)?;
+    let root = root.as_path();
 
-  let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await?;
+    let is_version_installed = is_version_installed(&version.tag_name, package.clone()).await?;
 
-  copy_cardano_node_proxy(package.clone()).await?;
+    copy_cardano_node_proxy(package.clone()).await?;
 
-  if is_version_installed {
-    println!("Version {} is already installed", version.tag_name);
-    return Ok(());
-  }
-
-  let downloaded_file = match version.version_type {
-    VersionType::Normal | VersionType::Latest => {
-      download_version(client, &version, root, package.clone()).await?
+    if is_version_installed {
+        println!("Version {} is already installed", version.tag_name);
+        return Ok(());
     }
-    VersionType::Hash => todo!(),
-  };
 
-  if let PostDownloadVersionType::Standard(local_version) = downloaded_file {
-    unarchive(package, local_version).await?;
-  }
+    let downloaded_file = match version.version_type {
+        VersionType::Normal | VersionType::Latest => {
+            download_version(client, &version, root, package.clone()).await?
+        }
+        VersionType::Hash => todo!(),
+    };
 
-  Ok(())
+    if let PostDownloadVersionType::Standard(local_version) = downloaded_file {
+        unarchive(package, local_version).await?;
+    }
+
+    Ok(())
 }
 
 /// This function sends a request to download the specified version based on the version type.
@@ -113,69 +113,70 @@ pub async fn install(
 /// let result = download_version(&client, &version, &root).await;
 /// ```
 async fn download_version(
-  client: &Client,
-  version: &ParsedVersion,
-  root: &Path,
-  package: Package,
+    client: &Client,
+    version: &ParsedVersion,
+    root: &Path,
+    package: Package,
 ) -> Result<PostDownloadVersionType> {
-  match version.version_type {
-    VersionType::Normal | VersionType::Latest => {
-      let response = send_request(client, package).await;
+    match version.version_type {
+        VersionType::Normal | VersionType::Latest => {
+            let response = send_request(client, package).await;
 
-      match response {
-        Ok(response) => {
-          if response.status() == 200 {
-            let total_size = response.content_length().unwrap();
-            let mut response_bytes = response.bytes_stream();
+            match response {
+                Ok(response) => {
+                    if response.status() == 200 {
+                        let total_size = response.content_length().unwrap();
+                        let mut response_bytes = response.bytes_stream();
 
-            // Progress Bar Setup
-            let pb = ProgressBar::new(total_size);
-            pb.set_style(ProgressStyle::default_bar()
+                        // Progress Bar Setup
+                        let pb = ProgressBar::new(total_size);
+                        pb.set_style(ProgressStyle::default_bar()
                     .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
                     .unwrap()
                     .progress_chars("█  "));
-            pb.set_message(format!("Downloading version: {}", version.tag_name));
+                        pb.set_message(format!("Downloading version: {}", version.tag_name));
 
-            let file_type = get_file_type();
-            let mut file =
-              tokio::fs::File::create(format!("{}.{file_type}", version.tag_name)).await?;
+                        let file_type = get_file_type();
+                        let mut file =
+                            tokio::fs::File::create(format!("{}.{file_type}", version.tag_name))
+                                .await?;
 
-            let mut downloaded: u64 = 0;
+                        let mut downloaded: u64 = 0;
 
-            while let Some(item) = response_bytes.next().await {
-              let chunk = item.map_err(|_| anyhow!("hello"))?;
-              file.write_all(&chunk).await?;
-              let new = min(downloaded + (chunk.len() as u64), total_size);
-              downloaded = new;
-              pb.set_position(new);
+                        while let Some(item) = response_bytes.next().await {
+                            let chunk = item.map_err(|_| anyhow!("hello"))?;
+                            file.write_all(&chunk).await?;
+                            let new = min(downloaded + (chunk.len() as u64), total_size);
+                            downloaded = new;
+                            pb.set_position(new);
+                        }
+
+                        pb.finish_with_message(format!(
+                            "Downloaded version {} to {}/{}.{file_type}",
+                            version.tag_name,
+                            root.display(),
+                            version.tag_name
+                        ));
+
+                        Ok(PostDownloadVersionType::Standard(LocalVersion {
+                            file_name: version.tag_name.to_owned(),
+                            file_format: file_type.to_string(),
+                            path: root.display().to_string(),
+                            semver: version.semver.clone(),
+                        }))
+                    } else {
+                        Err(anyhow!(
+                            "Please provide an existing version, {}",
+                            response.text().await?
+                        ))
+                    }
+                }
+                Err(error) => Err(anyhow!(error)),
             }
-
-            pb.finish_with_message(format!(
-              "Downloaded version {} to {}/{}.{file_type}",
-              version.tag_name,
-              root.display(),
-              version.tag_name
-            ));
-
-            Ok(PostDownloadVersionType::Standard(LocalVersion {
-              file_name: version.tag_name.to_owned(),
-              file_format: file_type.to_string(),
-              path: root.display().to_string(),
-              semver: version.semver.clone(),
-            }))
-          } else {
-            Err(anyhow!(
-              "Please provide an existing version, {}",
-              response.text().await?
-            ))
-          }
         }
-        Err(error) => Err(anyhow!(error)),
-      }
+        // VersionType::Hash => handle_building_from_source(version).await,
+        VersionType::Hash => todo!(),
     }
-    // VersionType::Hash => handle_building_from_source(version).await,
-    VersionType::Hash => todo!(),
-  }
 }
 
 /// Sends a GET request to the specified URL to download a specific version.
@@ -209,19 +210,19 @@ async fn download_version(
 /// * [`helpers::get_platform_name_download`](src/helpers/platform.rs)
 /// * [`helpers::get_file_type`](src/helpers/file.rs)
 async fn send_request(
-  client: &Client,
-  package: Package,
+    client: &Client,
+    package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
-  let platform = get_platform_name_download();
-  println!("platform: {:?}", platform);
-  let file_type = get_file_type();
+    let platform = get_platform_name_download();
+    println!("platform: {:?}", platform);
+    let file_type = get_file_type();
 
-  let package_url = package.url().unwrap();
-  println!("package_url: {:?}", package_url);
+    let package_url = package.url().unwrap();
+    println!("package_url: {:?}", package_url);
 
-  client
-    .get(package_url.to_string())
-    .header("user-agent", "hyper-jump")
-    .send()
-    .await
+    client
+        .get(package_url.to_string())
+        .header("user-agent", "hyper-jump")
+        .send()
+        .await
 }
