@@ -3,3 +3,4 @@ imports_granularity = "Item"
 fn_single_line = true
 merge_imports = true
 chain_width = 80
+wrap_comments = true

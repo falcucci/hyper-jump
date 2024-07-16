@@ -12,16 +12,20 @@ use tracing::info;
 
 /// Returns the home directory path for the current user.
 ///
-/// This function checks the target operating system using the `cfg!` macro and constructs the home directory path accordingly.
-/// For Windows, it uses the "USERPROFILE" environment variable.
-/// For macOS, it uses the "/Users/" directory and appends the "SUDO_USER" or "USER" environment variable if they exist and correspond to a valid directory.
-/// For other operating systems, it uses the "/home/" directory and appends the "SUDO_USER" or "USER" environment variable if they exist and correspond to a valid directory.
+/// This function checks the target operating system using the `cfg!` macro and
+/// constructs the home directory path accordingly. For Windows, it uses the
+/// "USERPROFILE" environment variable. For macOS, it uses the "/Users/"
+/// directory and appends the "SUDO_USER" or "USER" environment variable if they
+/// exist and correspond to a valid directory. For other operating systems, it
+/// uses the "/home/" directory and appends the "SUDO_USER" or "USER"
+/// environment variable if they exist and correspond to a valid directory.
 /// If none of the above methods work, it uses the "HOME" environment variable.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that contains a `PathBuf` representing the home directory path if the operation was successful.
-/// If the operation failed, the function returns `Err` with a description of the error.
+/// This function returns a `Result` that contains a `PathBuf` representing the
+/// home directory path if the operation was successful. If the operation
+/// failed, the function returns `Err` with a description of the error.
 ///
 /// # Example
 ///
@@ -64,15 +68,18 @@ pub fn get_home_dir() -> Result<PathBuf> {
 
 /// Returns the local data directory path for the current user.
 ///
-/// This function first gets the home directory path by calling the `get_home_dir` function.
-/// It then checks the target operating system using the `cfg!` macro and constructs the local data directory path accordingly.
+/// This function first gets the home directory path by calling the
+/// `get_home_dir` function. It then checks the target operating system using
+/// the `cfg!` macro and constructs the local data directory path accordingly.
 /// For Windows, it appends "AppData/Local" to the home directory path.
-/// For other operating systems, it appends ".local/share" to the home directory path.
+/// For other operating systems, it appends ".local/share" to the home directory
+/// path.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that contains a `PathBuf` representing the local data directory path if the operation was successful.
-/// If the operation failed, the function returns `Err` with a description of the error.
+/// This function returns a `Result` that contains a `PathBuf` representing the
+/// local data directory path if the operation was successful. If the operation
+/// failed, the function returns `Err` with a description of the error.
 ///
 /// # Example
 ///
@@ -86,12 +93,14 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
     Ok(home_dir)
 }
 
-/// Asynchronously returns the downloads directory path based on the application configuration.
+/// Asynchronously returns the downloads directory path based on the application
+/// configuration.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that contains a `PathBuf` representing the downloads directory path if the operation was successful.
-/// If the operation failed, the function returns `Err` with a description of the error.
+/// This function returns a `Result` that contains a `PathBuf` representing the
+/// downloads directory path if the operation was successful. If the operation
+/// failed, the function returns `Err` with a description of the error.
 ///
 /// # Example
 ///
@@ -119,14 +128,16 @@ pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
 
 /// Returns the file type binary download based on the target operating system.
 ///
-/// This function checks the target operating system using the `cfg!` macro and returns a string that corresponds to the appropriate file type binary download.
-/// For Windows, it returns "zip".
+/// This function checks the target operating system using the `cfg!` macro and
+/// returns a string that corresponds to the appropriate file type binary
+/// download. For Windows, it returns "zip".
 /// For macOS, it returns "tar.gz".
 /// For other operating systems, it returns "appimage".
 ///
 /// # Returns
 ///
-/// This function returns a `&'static str` that corresponds to the file type binary download.
+/// This function returns a `&'static str` that corresponds to the file type
+/// binary download.
 ///
 /// # Example
 ///
@@ -145,18 +156,23 @@ pub fn get_file_type() -> &'static str {
 
 /// Returns the platform-specific name.
 ///
-/// This function takes an `Option<Version>` as an argument, which represents the version to be downloaded.
-/// It checks the target operating system and architecture using the `cfg!` macro and returns a string that corresponds to the appropriate download for the platform.
-/// For Windows, it returns "win64".
-/// For macOS, it checks the version. If the version is less than or equal to 0.9.5, it returns "macos". If the target architecture is "aarch64", it returns "macos-arm64". Otherwise, it returns "macos-x86_64".
+/// This function takes an `Option<Version>` as an argument, which represents
+/// the version to be downloaded. It checks the target operating system and
+/// architecture using the `cfg!` macro and returns a string that corresponds to
+/// the appropriate download for the platform. For Windows, it returns "win64".
+/// For macOS, it checks the version. If the version is less than or equal to
+/// 0.9.5, it returns "macos". If the target architecture is "aarch64", it
+/// returns "macos-arm64". Otherwise, it returns "macos-x86_64".
 ///
 /// # Arguments
 ///
-/// * `version` - An `Option<Version>` representing the version to be downloaded.
+/// * `version` - An `Option<Version>` representing the version to be
+///   downloaded.
 ///
 /// # Returns
 ///
-/// This function returns a `&'static str` that corresponds to the platform-specific name for download.
+/// This function returns a `&'static str` that corresponds to the
+/// platform-specific name for download.
 ///
 /// # Example
 ///
@@ -167,11 +183,15 @@ pub fn get_platform_name_download() -> &'static str { std::env::consts::OS }
 
 /// Copies the proxy to the installation directory.
 ///
-/// This function gets the current executable's path, determines the installation directory, creates it if it doesn't exist, adds it to the system's PATH, and copies the current executable to the installation directory as "cardano-node".
+/// This function gets the current executable's path, determines the
+/// installation directory, creates it if it doesn't exist, adds it to the
+/// system's PATH, and copies the current executable to the installation
+/// directory as "cardano-node".
 ///
 /// # Returns
 ///
-/// * `Result<()>` - Returns a `Result` that indicates whether the operation was successful or not.
+/// * `Result<()>` - Returns a `Result` that indicates whether the operation was
+///   successful or not.
 ///
 /// # Errors
 ///
@@ -230,7 +250,8 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
 
 /// Adds the installation directory to the system's PATH.
 ///
-/// This function checks if the installation directory is already in the PATH. If not, it adds the directory to the PATH.
+/// This function checks if the installation directory is already in the PATH.
+/// If not, it adds the directory to the PATH.
 ///
 /// # Arguments
 ///
@@ -238,14 +259,16 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
 ///
 /// # Returns
 ///
-/// * `Result<()>` - Returns a `Result` that indicates whether the operation was successful or not.
+/// * `Result<()>` - Returns a `Result` that indicates whether the operation was
+///   successful or not.
 ///
 /// # Errors
 ///
 /// This function will return an error if:
 ///
 /// * The installation directory cannot be converted to a string.
-/// * The current user's environment variables cannot be accessed or modified (Windows only).
+/// * The current user's environment variables cannot be accessed or modified
+///   (Windows only).
 /// * The PATH environment variable cannot be read (non-Windows only).
 ///
 /// # Example
@@ -264,14 +287,19 @@ fn add_to_path(installation_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Asynchronously returns the installation directory path based on the application configuration.
+/// Asynchronously returns the installation directory path based on the
+/// application configuration.
 ///
-/// If the `installation_location` field in the `Config` is not set, it gets the downloads directory path by calling the `get_downloads_directory` function and appends "cardano-node-bin" to it.
+/// If the `installation_location` field in the `Config` is not set, it gets the
+/// downloads directory path by calling the `get_downloads_directory` function
+/// and appends "cardano-node-bin" to it.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that contains a `PathBuf` representing the installation directory path if the operation was successful.
-/// If the operation failed, the function returns `Err` with a description of the error.
+/// This function returns a `Result` that contains a `PathBuf` representing the
+/// installation directory path if the operation was successful.
+/// If the operation failed, the function returns `Err` with a description of
+/// the error.
 ///
 /// # Example
 ///
@@ -287,11 +315,13 @@ pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
 
 /// Starts the process of expanding a downloaded file.
 ///
-/// This function is asynchronous and uses `tokio::task::spawn_blocking` to run the `expand` function in a separate thread.
-/// It takes a `LocalVersion` struct which contains information about the downloaded file, such as its name, format, and path.
-/// The function first clones the `LocalVersion` struct and passes it to the `expand` function.
-/// If the `expand` function returns an error, the `start` function also returns an error.
-/// If the `expand` function is successful, the `start` function removes the original downloaded file.
+/// This function is asynchronous and uses `tokio::task::spawn_blocking` to run
+/// the `expand` function in a separate thread. It takes a `LocalVersion` struct
+/// which contains information about the downloaded file, such as its name,
+/// format, and path. The function first clones the `LocalVersion` struct and
+/// passes it to the `expand` function. If the `expand` function returns an
+/// error, the `start` function also returns an error. If the `expand` function
+/// is successful, the `start` function removes the original downloaded file.
 ///
 /// # Arguments
 ///
@@ -299,9 +329,10 @@ pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that indicates whether the operation was successful.
-/// If the operation was successful, the function returns `Ok(())`.
-/// If the operation failed, the function returns `Err` with a description of the error.
+/// This function returns a `Result` that indicates whether the operation was
+/// successful. If the operation was successful, the function returns `Ok(())`.
+/// If the operation failed, the function returns `Err` with a description of
+/// the error.
 ///
 /// # Errors
 ///
@@ -343,22 +374,27 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
 
 /// Expands a downloaded file on macOS.
 ///
-/// This function is specific to macOS due to the use of certain features like `os::unix::fs::PermissionsExt`.
-/// It takes a `LocalVersion` struct which contains information about the downloaded file, such as its name and format.
-/// The function then opens the file, decompresses it using `GzDecoder`, and extracts its contents using `tar::Archive`.
-/// During the extraction process, a progress bar is displayed to the user.
-/// After extraction, the function renames the `cardano-node-osx64` directory to `cardano-node-macos` if it exists.
-/// Finally, it sets the permissions of the `cardano-node` binary to `0o551`.
+/// This function is specific to macOS due to the use of certain features like
+/// `os::unix::fs::PermissionsExt`. It takes a `LocalVersion` struct which
+/// contains information about the downloaded file, such as its name and format.
+/// The function then opens the file, decompresses it using `GzDecoder`, and
+/// extracts its contents using `tar::Archive`. During the extraction process, a
+/// progress bar is displayed to the user. After extraction, the function
+/// renames the `cardano-node-osx64` directory to `cardano-node-macos` if it
+/// exists. Finally, it sets the permissions of the `cardano-node` binary to
+/// `0o551`.
 ///
 /// # Arguments
 ///
-/// * `downloaded_file` - A `LocalVersion` struct representing the downloaded file.
+/// * `downloaded_file` - A `LocalVersion` struct representing the downloaded
+///   file.
 ///
 /// # Returns
 ///
-/// This function returns a `Result` that indicates whether the operation was successful.
-/// If the operation was successful, the function returns `Ok(())`.
-/// If the operation failed, the function returns `Err` with a description of the error.
+/// This function returns a `Result` that indicates whether the operation was
+/// successful. If the operation was successful, the function returns `Ok(())`.
+/// If the operation failed, the function returns `Err` with a description of
+/// the error.
 ///
 /// # Errors
 ///
@@ -421,7 +457,9 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
             )
         })?;
 
-    let totalsize = 4692; // hard coding this is pretty unwise, but you cant get the length of an archive in tar-rs unlike zip-rs
+    // hard coding this is pretty unwise, but you cant get the length of an archive
+    // in tar-rs unlike zip-rs
+    let totalsize = 4692;
     let pb = ProgressBar::new(totalsize);
     let pb_style = ProgressStyle::default_bar()
         .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
