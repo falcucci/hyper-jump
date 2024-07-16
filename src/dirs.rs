@@ -1,5 +1,7 @@
-use miette::{bail, IntoDiagnostic};
-use std::path::{Path, PathBuf};
+use miette::bail;
+use miette::IntoDiagnostic;
+use std::path::Path;
+use std::path::PathBuf;
 
 const DEFAULT_PATH_NAME: &str = "hyper-jump";
 

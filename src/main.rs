@@ -1,20 +1,19 @@
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
-
-extern crate core;
-
-use clap::{Parser, Subcommand, ValueEnum};
-use packages::{
-    cardano_cli,
-    cardano_node::{self},
-    mithril,
-};
+use clap::Parser;
+use clap::Subcommand;
+use clap::ValueEnum;
+use packages::cardano_cli;
+use packages::cardano_node::{self};
+use packages::mithril;
 use proxy::handle_proxy;
+use std::env;
+use std::path::Path;
+use std::path::PathBuf;
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+
+extern crate core;
 
 mod commands;
 mod dirs;

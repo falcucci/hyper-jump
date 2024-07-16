@@ -1,10 +1,10 @@
 use tracing::info;
 
-use crate::{
-    commands::install::install,
-    fs::copy_cardano_node_proxy,
-    helpers::version::{is_version_used, switch_version, ParsedVersion},
-};
+use crate::commands::install::install;
+use crate::fs::copy_cardano_node_proxy;
+use crate::helpers::version::is_version_used;
+use crate::helpers::version::switch_version;
+use crate::helpers::version::ParsedVersion;
 
 use super::install::Package;
 

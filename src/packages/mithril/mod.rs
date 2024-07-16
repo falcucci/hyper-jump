@@ -1,4 +1,5 @@
-use clap::{command, Parser};
+use clap::command;
+use clap::Parser;
 use tracing::instrument;
 
 #[derive(Parser)]

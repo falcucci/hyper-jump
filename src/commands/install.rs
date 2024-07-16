@@ -3,22 +3,26 @@ use std::cmp::min;
 use std::env;
 use std::path::Path;
 
+use anyhow::anyhow;
 use anyhow::Error;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use futures_util::stream::StreamExt;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::ProgressBar;
+use indicatif::ProgressStyle;
 use reqwest::Client;
 
-use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
-use crate::fs::{copy_cardano_node_proxy, get_file_type, get_platform_name_download, unarchive};
+use crate::fs::copy_cardano_node_proxy;
+use crate::fs::get_downloads_directory;
+use crate::fs::get_file_type;
+use crate::fs::get_platform_name_download;
+use crate::fs::unarchive;
+use crate::helpers::version::is_version_installed;
 use crate::helpers::version::LocalVersion;
+use crate::helpers::version::ParsedVersion;
+use crate::helpers::version::VersionType;
 use crate::packages::CARDANO_NODE_PACKAGE_URL;
-use crate::{
-    fs::get_downloads_directory,
-    helpers::version::{is_version_installed, ParsedVersion, VersionType},
-};
 
 use super::PostDownloadVersionType;
 

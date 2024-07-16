@@ -1,10 +1,12 @@
-use crate::{
-    commands::install::{CardanoNode, Package},
-    helpers::version::get_current_version,
-};
-use anyhow::{anyhow, Result};
-use std::sync::{atomic::AtomicBool, Arc};
-use tokio::time::{sleep, Duration};
+use crate::commands::install::CardanoNode;
+use crate::commands::install::Package;
+use crate::helpers::version::get_current_version;
+use anyhow::anyhow;
+use anyhow::Result;
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
+use tokio::time::sleep;
+use tokio::time::Duration;
 
 /// Handles the proxy command with optional arguments.
 ///
@@ -257,10 +259,9 @@ fn handle_unix_signals(
     spawned_child: &mut tokio::process::Child,
     term_signal: &Arc<AtomicBool>,
 ) -> Result<()> {
-    use nix::{
-        sys::signal::{self, Signal},
-        unistd::Pid,
-    };
+    use nix::sys::signal::Signal;
+    use nix::sys::signal::{self};
+    use nix::unistd::Pid;
     use std::sync::atomic::Ordering;
 
     if term_signal.load(Ordering::Relaxed) {
