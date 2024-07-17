@@ -21,3 +21,7 @@ flate2 = "1.0.30"
 tar = "0.4.41"
 signal-hook = "0.3.17"
 nix = { version = "0.29.0", features = ["signal"] }
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.120"
+chrono = { version = "0.4.38", features = ["serde"] }
+yansi = "1.0.1"

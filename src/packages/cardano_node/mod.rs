@@ -3,6 +3,7 @@ use tracing::instrument;
 
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::client;
@@ -32,9 +33,10 @@ pub struct Update {
 pub enum Commands {
     Use { version: String },
     Install { version: String },
-    Uninstall,
+    Uninstall { version: String },
     Rollback,
     List,
+    ListRemote,
     Update(Update),
     Run(Run),
 }
@@ -59,8 +61,9 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
             let package = Package::new_cardano_node(version.non_parsed_string.clone());
             install(&client, package, version).await.expect("Failed to install")
         }
-        Commands::Uninstall => {
-            let package = Package::new_cardano_node("9.0.0".to_string());
+        Commands::Uninstall { version } => {
+            let version = parse_version_type(&version).await.unwrap();
+            let package = Package::new_cardano_node(version.non_parsed_string.clone());
             uninstall(package).await.expect("Failed to erase");
         }
         Commands::Rollback => {
@@ -68,6 +71,10 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
         }
         Commands::List => {
             println!("List");
+        }
+        Commands::ListRemote => {
+            let package = Package::new_cardano_node("9.0.0".to_string());
+            list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {
             println!("Update: {:?}", update.version);

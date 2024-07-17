@@ -1,7 +1,12 @@
 use anyhow::anyhow;
 use anyhow::Result;
+use chrono::DateTime;
+use chrono::Utc;
 use regex::Regex;
 use semver::Version;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
 use tokio::fs;
 
 use crate::commands::install::Package;
@@ -38,6 +43,69 @@ pub struct LocalVersion {
     pub file_format: String,
     pub path: String,
     pub semver: Option<Version>,
+}
+
+/// Represents a remote version.
+///
+/// This struct is used to deserialize the response from the GitHub API request
+/// that gets the tags of the repository. Each tag represents a version
+/// of package, and the `name` field of the `RemoteVersion` struct represents
+/// the name of the version.
+///
+/// # Fields
+///
+/// * `name` - A `String` that represents the name of the version.
+///
+/// # Example
+///
+/// ```rust
+/// let remote_version = RemoteVersion {
+///     name: "v0.5.0".to_string(),
+/// };
+/// ```
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct RemoteVersion {
+    pub name: String,
+    pub tag_name: String,
+    pub prerelease: bool,
+}
+
+/// Represents the version of the upstream software in the GitHub API.
+///
+/// This struct contains the tag name of the version, the target commitish of
+/// the version, and the date and time the version was published.
+///
+/// # Fields
+///
+/// * `tag_name: String` - The tag name of the version.
+/// * `target_commitish: Option<String>` - The target commitish of the version.
+///   This is optional and may be `None`.
+/// * `published_at: DateTime<Utc>` - The date and time the version was
+///   published, represented as a `DateTime<Utc>` object.
+///
+/// # Example
+///
+/// ```rust
+/// let upstream_version = UpstreamVersion {
+///     tag_name: "v1.0.0".to_string(),
+///     target_commitish: Some("abc123".to_string()),
+///     published_at: Utc::now(),
+/// };
+/// println!("The tag name is {}", upstream_version.tag_name);
+/// println!(
+///     "The target commitish is {}",
+///     upstream_version.target_commitish.unwrap_or_default()
+/// );
+/// println!(
+///     "The published date and time is {}",
+///     upstream_version.published_at
+/// );
+/// ```
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct UpstreamVersion {
+    pub tag_name: String,
+    pub target_commitish: Option<String>,
+    pub published_at: DateTime<Utc>,
 }
 
 /// Represents a parsed version of the software.
@@ -103,9 +171,12 @@ pub enum VersionType {
     Hash,
 }
 
+pub fn semver(version: &str) -> Result<bool> {
+    Ok(Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$")?.is_match(version))
+}
+
 pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
-    let version_regex = Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
-    if version_regex.is_match(version) {
+    if semver(version)? {
         let mut returned_version = version.to_string();
         if !version.contains('v') {
             returned_version.insert(0, 'v');
@@ -191,7 +262,6 @@ pub async fn is_version_installed(version: &str, package: Package) -> Result<boo
 pub async fn get_current_version(package: Package) -> Result<String> {
     let mut downloads_dir = crate::fs::get_downloads_directory(package).await?;
     downloads_dir.push("used");
-    println!("downloads_dir: {:?}", downloads_dir);
     tokio::fs::read_to_string(&downloads_dir)
         .await
         .map_err(|_| anyhow!("Could not read the current version"))

@@ -22,6 +22,7 @@ mod fs;
 mod helpers;
 mod packages;
 mod proxy;
+mod services;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

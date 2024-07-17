@@ -37,7 +37,7 @@ pub enum Package {
 }
 
 impl Package {
-    pub fn url(&self) -> Option<Cow<str>> {
+    pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
             Package::CardanoNode(CardanoNode { version, .. }) => {
                 let url = CARDANO_NODE_PACKAGE_URL;
@@ -45,6 +45,15 @@ impl Package {
 
                 Some(Cow::Owned(format!("https://github.com/{}", package_url)))
             }
+            _ => None,
+        }
+    }
+
+    pub fn releases_url(&self) -> Option<Cow<str>> {
+        match self {
+            Package::CardanoNode(CardanoNode { .. }) => Some(Cow::Owned(
+                "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
+            )),
             _ => None,
         }
     }
@@ -295,7 +304,7 @@ async fn send_request(
     let platform = get_platform_name_download();
     let file_type = get_file_type();
 
-    let package_url = package.url().unwrap();
+    let package_url = package.download_url().unwrap();
 
     client
         .get(package_url.to_string())
