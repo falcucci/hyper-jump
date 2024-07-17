@@ -1,3 +1,5 @@
+use std::env::var;
+
 use anyhow::Error;
 use reqwest::header::HeaderMap;
 use reqwest::header::HeaderValue;
@@ -26,19 +28,11 @@ use reqwest::Client;
 /// This function will return an error if the `reqwest::Client` could not be
 /// built.
 pub fn create_reqwest_client() -> Result<Client, Error> {
-    // fetch env variable
-    let github_token = std::env::var("GITHUB_TOKEN");
-
+    let token = format!("Bearer {}", var("GITHUB_TOKEN").unwrap_or_default());
     let mut headers = HeaderMap::new();
-
-    if let Ok(github_token) = github_token {
-        headers.insert(
-            AUTHORIZATION,
-            HeaderValue::from_str(&format!("Bearer {}", github_token)).unwrap(),
-        );
+    if let Some(token) = token.strip_prefix("Bearer ") {
+        headers.insert(AUTHORIZATION, HeaderValue::from_str(token)?);
     }
 
-    let client = Client::builder().default_headers(headers).build()?;
-
-    Ok(client)
+    Ok(Client::builder().default_headers(headers).build()?)
 }
