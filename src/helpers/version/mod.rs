@@ -1,9 +1,10 @@
-use crate::commands::install::Package;
 use anyhow::anyhow;
 use anyhow::Result;
 use regex::Regex;
 use semver::Version;
 use tokio::fs;
+
+use crate::commands::install::Package;
 
 /// Represents a local version of the software.
 ///

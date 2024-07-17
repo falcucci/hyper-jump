@@ -1,14 +1,16 @@
-use crate::commands::install::CardanoNode;
-use crate::commands::install::Package;
-use crate::helpers::version::LocalVersion;
-use anyhow::anyhow;
-use anyhow::Result;
 use std::env;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+
+use anyhow::anyhow;
+use anyhow::Result;
 use tracing::info;
+
+use crate::commands::install::CardanoNode;
+use crate::commands::install::Package;
+use crate::helpers::version::LocalVersion;
 
 /// Returns the home directory path for the current user.
 ///
@@ -418,12 +420,13 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
 /// ```
 #[cfg(target_os = "macos")]
 fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
+    use std::fs::File;
+    use std::os::unix::fs::PermissionsExt;
+
     use anyhow::Context;
     use flate2::read::GzDecoder;
     use indicatif::ProgressBar;
     use indicatif::ProgressStyle;
-    use std::fs::File;
-    use std::os::unix::fs::PermissionsExt;
     use tar::Archive;
 
     if fs::metadata(&downloaded_file.file_name).is_ok() {

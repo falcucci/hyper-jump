@@ -1,9 +1,10 @@
-use super::install::Package;
 use anyhow::anyhow;
 use anyhow::Error;
 use anyhow::Result;
 use tokio::fs;
 use tracing::info;
+
+use super::install::Package;
 
 pub async fn erase(package: Package) -> Result<(), Error> {
     let downloads = crate::fs::get_downloads_directory(package.clone()).await?;

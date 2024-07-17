@@ -1,3 +1,7 @@
+use std::env;
+use std::path::Path;
+use std::path::PathBuf;
+
 use clap::Parser;
 use clap::Subcommand;
 use clap::ValueEnum;
@@ -5,9 +9,6 @@ use packages::cardano_cli;
 use packages::cardano_node::{self};
 use packages::mithril;
 use proxy::handle_proxy;
-use std::env;
-use std::path::Path;
-use std::path::PathBuf;
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::layer::SubscriberExt;

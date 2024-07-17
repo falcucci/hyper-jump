@@ -1,12 +1,12 @@
-use crate::commands::erase::erase;
+use clap::Parser;
+use tracing::instrument;
+
 use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::client;
 use crate::helpers::version::parse_version_type;
-use clap::Parser;
-use tracing::instrument;
 
 #[derive(Parser)]
 pub struct Args {
