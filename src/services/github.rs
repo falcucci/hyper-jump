@@ -41,10 +41,11 @@ pub struct ErrorResponse {
 pub async fn api(client: &Client, url: Cow<'_, str>) -> Result<String> {
     let response = client
         .get(url.as_ref())
-        .header("user-agent", "hyper-jump")
-        .header("Accept", "application/vnd.github.v3+json")
+        .header(reqwest::header::USER_AGENT, "hyper-jump")
+        .header(reqwest::header::ACCEPT, "application/vnd.github.v3+json")
         .send()
         .await?
+        .error_for_status()?
         .text()
         .await?;
 
@@ -81,10 +82,8 @@ pub async fn api(client: &Client, url: Cow<'_, str>) -> Result<String> {
 /// ```
 pub fn deserialize_response<T: DeserializeOwned>(response: String) -> Result<T> {
     let value: serde_json::Value = serde_json::from_str(&response)?;
-
     if value.get("message").is_some() {
         let result: ErrorResponse = serde_json::from_value(value)?;
-
         if result.documentation_url.contains("rate-limiting") {
             return Err(anyhow!("Rate limited by GitHub API"));
         }
