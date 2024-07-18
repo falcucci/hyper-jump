@@ -13,12 +13,34 @@ use crate::helpers::version::RemoteVersion;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
 
+/// Lists the remote versions of a specified package.
+///
+/// This function fetches the list of releases from a remote repository, filters
+/// out pre-release versions, and then prints each version with a specific color
+/// coding:
+/// - Green if the version is currently used.
+/// - Yellow if the version is installed but not used.
+/// - Default color if the version is not installed.
+///
+/// # Arguments
+///
+/// * `client` - A reference to a `reqwest::Client` used to make HTTP requests.
+/// * `package` - The `Package` enum representing the package to list versions
+///   for.
+///
+/// # Returns
+///
+/// This function returns a `Result<(), Error>` indicating the operation's
+/// success or failure.
+///
+/// # Errors
+///
+/// This function will return an error if there is no releases URL for the
+/// package or if there is an issue with fetching or processing the list of
+/// versions.
 pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error> {
-    let response = api(
-        client,
-        package.clone().releases_url().ok_or(anyhow!("No releases URL"))?,
-    )
-    .await?;
+    let url = package.releases_url().ok_or(anyhow!("No releases URL"))?;
+    let response = api(client, url).await?;
 
     let mut local_versions: Vec<PathBuf> = filter_local_versions(package.clone()).await?;
     let versions: Vec<RemoteVersion> = deserialize_response(response)?;
@@ -56,10 +78,40 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
     Ok(())
 }
 
+/// Filters out pre-release versions from a list of `RemoteVersion`.
+///
+/// # Arguments
+///
+/// * `versions` - A vector of `RemoteVersion` instances to filter.
+///
+/// # Returns
+///
+/// This function returns a `Result<Vec<RemoteVersion>, Error>` containing only
+/// the versions that are not marked as pre-releases.
 fn filter_versions(versions: Vec<RemoteVersion>) -> Result<Vec<RemoteVersion>, Error> {
     Ok(versions.into_iter().filter(|v| !v.prerelease).collect())
 }
 
+/// Filters local versions of a package from the downloads directory.
+///
+/// This function reads the downloads directory for the specified package and
+/// filters out entries that do not contain a 'v' character, which is assumed to
+/// indicate a version.
+///
+/// # Arguments
+///
+/// * `package` - The `Package` enum representing the package to filter local
+///   versions for.
+///
+/// # Returns
+///
+/// This function returns a `Result<Vec<PathBuf>, Error>` containing paths to
+/// the local versions of the package.
+///
+/// # Errors
+///
+/// This function will return an error if there is an issue reading the
+/// downloads directory.
 async fn filter_local_versions(package: Package) -> Result<Vec<PathBuf>, Error> {
     let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
     let local_versions: Vec<PathBuf> = fs::read_dir(downloads_dir)?
