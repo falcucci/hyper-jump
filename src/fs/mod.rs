@@ -273,16 +273,10 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
         fs::create_dir_all(&installation_dir)?;
     }
 
-    let alias = match package {
-        Package::CardanoNode(CardanoNode { alias, .. }) => alias,
-        Package::CardanoCli(CardanoCli { alias, .. }) => alias,
-        Package::Mithril => todo!(),
-    };
-
     add_to_path(&installation_dir)?;
 
+    let alias = package.alias();
     installation_dir.push(&alias);
-
     if fs::metadata(&installation_dir).is_ok() {
         let output = Command::new(&alias).arg("--&hyper-jump").output()?.stdout;
         let version = String::from_utf8(output)?.trim().to_string();
