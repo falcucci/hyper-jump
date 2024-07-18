@@ -452,7 +452,7 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
 /// expand(downloaded_file);
 /// ```
 #[cfg(target_os = "macos")]
-fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
+fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
     use std::fs::File;
     use std::os::unix::fs::PermissionsExt;
 
@@ -462,34 +462,27 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
     use indicatif::ProgressStyle;
     use tar::Archive;
 
-    if fs::metadata(&downloaded_file.file_name).is_ok() {
-        fs::remove_dir_all(&downloaded_file.file_name)?;
+    if fs::metadata(&tmp.file_name).is_ok() {
+        fs::remove_dir_all(&tmp.file_name)?;
     }
 
-    let file_path = format!(
-        "{}/{}.{}",
-        downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
-    );
+    let file_path = format!("{}/{}.{}", tmp.path, tmp.file_name, tmp.file_format);
     let file = File::open(&file_path).map_err(|error| {
         anyhow!(
             "Failed to open file {}.{}, file doesn't exist. additional info: {error}",
-            downloaded_file.file_name,
-            downloaded_file.file_format,
+            tmp.file_name,
+            tmp.file_format,
         )
     })?;
 
     let decompress_stream = GzDecoder::new(file);
-    Archive::new(decompress_stream)
-        .unpack(format!(
-            "{}/{}",
-            downloaded_file.path, downloaded_file.file_name
-        ))
-        .with_context(|| {
-            format!(
-                "Failed to decompress or extract file {}.{}",
-                downloaded_file.file_name, downloaded_file.file_format
-            )
-        })?;
+    let output = format!("{}/{}", tmp.path, tmp.file_name);
+    Archive::new(decompress_stream).unpack(&output).with_context(|| {
+        format!(
+            "Failed to decompress or extract file {}.{}",
+            tmp.file_name, tmp.file_format
+        )
+    })?;
 
     // hard coding this is pretty unwise, but you cant get the length of an
     // archive in tar-rs unlike zip-rs
@@ -503,18 +496,18 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
 
     pb.finish_with_message(format!(
         "Finished expanding to {}/{}",
-        downloaded_file.path, downloaded_file.file_name
+        tmp.path, tmp.file_name
     ));
 
-    let file = &format!(
+    let binary = &format!(
         "{}/{}/{}",
-        downloaded_file.file_name,
+        tmp.file_name,
         package.binary_path(),
         package.binary_name()
     );
-    let mut perms = fs::metadata(file)?.permissions();
+    let mut perms = fs::metadata(binary)?.permissions();
     perms.set_mode(0o551);
-    fs::set_permissions(file, perms)?;
+    fs::set_permissions(binary, perms)?;
 
     Ok(())
 }
