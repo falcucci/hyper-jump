@@ -153,11 +153,18 @@ pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
 /// let file_type = get_file_type(); 
 /// ```
 pub fn get_file_type() -> &'static str {
-    if cfg!(target_family = "windows") {
+    #[cfg(target_family = "windows")]
+    {
         "zip"
-    } else if cfg!(target_os = "macos") {
+    }
+
+    #[cfg(target_os = "macos")]
+    {
         "tar.gz"
-    } else {
+    }
+
+    #[cfg(target_os = "linux")]
+    {
         "appimage"
     }
 }
