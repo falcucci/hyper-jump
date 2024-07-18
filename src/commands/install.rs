@@ -16,7 +16,6 @@ use crate::fs::copy_package_proxy;
 use crate::fs::get_downloads_directory;
 use crate::fs::get_file_type;
 use crate::fs::get_platform_name;
-use crate::fs::get_platform_name_download;
 use crate::fs::unarchive;
 use crate::helpers::version::is_version_installed;
 use crate::helpers::version::LocalVersion;
