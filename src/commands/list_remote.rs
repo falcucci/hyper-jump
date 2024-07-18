@@ -49,12 +49,7 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
 
     let padding = " ".repeat(12);
     for version in filtered_versions {
-        let version_installed = local_versions.iter().any(|v| {
-            v.file_name()
-                .and_then(|str| str.to_str())
-                .map_or(false, |str| str.contains(&version.tag_name))
-        });
-
+        let version_installed = check_version_installed(&local_versions, &version.tag_name);
         let tag = match package {
             Package::CardanoNode(_) => version.tag_name.clone(),
             Package::CardanoCli(_) => version.tag_name.clone(),
@@ -81,6 +76,14 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
     }
 
     Ok(())
+}
+
+fn check_version_installed(local_versions: &[PathBuf], tag: &str) -> bool {
+    local_versions.iter().any(|v| {
+        v.file_name()
+            .and_then(|str| str.to_str())
+            .map_or(false, |str| str.contains(tag))
+    })
 }
 
 fn retain_local_versions(local_versions: Vec<PathBuf>, tag: &str) {
