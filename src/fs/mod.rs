@@ -398,15 +398,10 @@ pub async fn get_installation_directory() -> Result<PathBuf> {
 /// ```
 pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
     let temp_file = file.clone();
-    match tokio::task::spawn_blocking(move || match expand(package, temp_file) {
-        Ok(_) => Ok(()),
-        Err(error) => Err(anyhow!(error)),
-    })
-    .await
-    {
-        Ok(_) => (),
-        Err(error) => return Err(anyhow!(error)),
-    }
+    tokio::task::spawn_blocking(move || expand(package, temp_file))
+        .await?
+        .map_err(|e| anyhow!(e))?;
+
     tokio::fs::remove_file(format!(
         "{}/{}.{}",
         file.path, file.file_name, file.file_format
