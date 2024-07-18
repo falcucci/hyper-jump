@@ -475,8 +475,8 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
         )
     })?;
 
-    let decompress_stream = GzDecoder::new(file);
     let output = format!("{}/{}", tmp.path, tmp.file_name);
+    let decompress_stream = GzDecoder::new(file);
     Archive::new(decompress_stream).unpack(&output).with_context(|| {
         format!(
             "Failed to decompress or extract file {}.{}",
