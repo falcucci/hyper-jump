@@ -4,7 +4,6 @@ use chrono::DateTime;
 use chrono::Utc;
 use regex::Regex;
 use semver::Version;
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
 use tokio::fs;
@@ -68,6 +67,13 @@ pub struct RemoteVersion {
     pub name: String,
     pub tag_name: String,
     pub prerelease: bool,
+}
+
+#[derive(Debug, Clone)]
+pub enum VersionStatus {
+    Installed,
+    Used,
+    NotInstalled,
 }
 
 /// Represents the version of the upstream software in the GitHub API.

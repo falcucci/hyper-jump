@@ -10,6 +10,7 @@ use yansi::Paint;
 use super::install::Package;
 use crate::helpers::version::is_version_used;
 use crate::helpers::version::RemoteVersion;
+use crate::helpers::version::VersionStatus;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
 
@@ -42,7 +43,7 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
     let url = package.releases_url().ok_or(anyhow!("No releases URL"))?;
     let response = api(client, url).await?;
 
-    let mut local_versions: Vec<PathBuf> = filter_local_versions(package.clone()).await?;
+    let local_versions: Vec<PathBuf> = filter_local_versions(package.clone()).await?;
     let versions: Vec<RemoteVersion> = deserialize_response(response)?;
     let filtered_versions: Vec<RemoteVersion> = filter_versions(versions)?;
 
@@ -60,22 +61,33 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
             Package::Mithril => todo!(),
         };
 
-        if is_version_used(format!("v{}", tag).as_str(), package.clone()).await {
-            println!("{padding}{}", Paint::green(&tag),);
-        } else if version_installed {
-            println!("{padding}{}", Paint::yellow(&tag),);
+        let version_status =
+            match is_version_used(format!("v{}", tag).as_str(), package.clone()).await {
+                true => VersionStatus::Used,
+                false if version_installed => VersionStatus::Installed,
+                false => VersionStatus::NotInstalled,
+            };
 
-            local_versions.retain(|v| {
-                v.file_name()
-                    .and_then(|str| str.to_str())
-                    .map_or(true, |str| !str.contains(&version.name))
-            });
-        } else {
-            println!("{padding}{}", tag);
+        match version_status {
+            VersionStatus::Used => println!("{padding}{}", Paint::green(&tag),),
+            VersionStatus::Installed => {
+                println!("{padding}{}", Paint::yellow(&tag),);
+                retain_local_versions(local_versions.clone(), &version.tag_name);
+            }
+            VersionStatus::NotInstalled => println!("{padding}{}", tag),
         }
     }
 
     Ok(())
+}
+
+fn retain_local_versions(local_versions: Vec<PathBuf>, tag: &str) {
+    let mut local_versions = local_versions;
+    local_versions.retain(|v| {
+        v.file_name()
+            .and_then(|str| str.to_str())
+            .map_or(true, |str| !str.contains(tag))
+    });
 }
 
 /// Filters out pre-release versions from a list of `RemoteVersion`.
