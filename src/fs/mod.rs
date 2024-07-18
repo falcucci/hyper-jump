@@ -8,6 +8,7 @@ use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
 
+use crate::commands::install::CardanoCli;
 use crate::commands::install::CardanoNode;
 use crate::commands::install::Package;
 use crate::helpers::version::LocalVersion;
@@ -90,8 +91,9 @@ pub fn get_home_dir() -> Result<PathBuf> {
 /// ```
 pub fn get_local_data_dir() -> Result<PathBuf> {
     let mut home_dir = get_home_dir()?;
-
     home_dir.push(".local/share");
+    home_dir.push("hyper-jump");
+
     Ok(home_dir)
 }
 
@@ -112,10 +114,10 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     let mut data_dir = get_local_data_dir()?;
 
-    data_dir.push("hyper-jump");
-
-    if let Package::CardanoNode(CardanoNode { alias, .. }) = package {
-        data_dir.push(alias);
+    match package {
+        Package::CardanoNode(CardanoNode { alias, .. }) => data_dir.push(alias),
+        Package::CardanoCli(CardanoCli { alias, .. }) => data_dir.push(alias),
+        Package::Mithril => todo!(),
     }
 
     let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();
@@ -218,7 +220,7 @@ pub fn get_platform_name_download() -> &'static str { std::env::consts::OS }
 /// ```
 pub async fn copy_package_proxy(package: Package) -> Result<()> {
     let exe_path = env::current_exe().unwrap();
-    let mut installation_dir = get_installation_directory(package.clone()).await?;
+    let mut installation_dir = get_installation_directory().await?;
     println!("exe_path: {:?}", exe_path);
     println!("installation_dir: {:?}", installation_dir);
 
@@ -228,7 +230,7 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
 
     let alias = match package {
         Package::CardanoNode(CardanoNode { alias, .. }) => alias,
-        Package::CardanoCli => todo!(),
+        Package::CardanoCli(CardanoCli { alias, .. }) => alias,
         Package::Mithril => todo!(),
     };
 
@@ -282,7 +284,7 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
 fn add_to_path(installation_dir: &Path) -> Result<()> {
     let installation_dir = installation_dir.to_str().unwrap();
 
-    if !std::env::var("PATH")?.contains("cardano-node-bin") {
+    if !std::env::var("PATH")?.contains("cardano-bin") {
         info!("Make sure to have {installation_dir} in PATH");
     }
 
@@ -308,9 +310,10 @@ fn add_to_path(installation_dir: &Path) -> Result<()> {
 /// ```rust
 /// let installation_directory = get_installation_directory().await?; 
 /// ```
-pub async fn get_installation_directory(package: Package) -> Result<PathBuf> {
-    let mut installation_location = get_downloads_directory(package).await?;
-    installation_location.push("cardano-node-bin");
+pub async fn get_installation_directory() -> Result<PathBuf> {
+    let mut installation_location = get_local_data_dir()?;
+
+    installation_location.push("cardano-bin");
 
     Ok(installation_location)
 }

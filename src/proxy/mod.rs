@@ -6,6 +6,7 @@ use anyhow::Result;
 use tokio::time::sleep;
 use tokio::time::Duration;
 
+use crate::commands::install::CardanoCli;
 use crate::commands::install::CardanoNode;
 use crate::commands::install::Package;
 use crate::helpers::version::get_current_version;
@@ -96,7 +97,7 @@ pub async fn handle_package_process(args: &[String], package: Package) -> Result
 
     let alias = match package {
         Package::CardanoNode(CardanoNode { alias, .. }) => alias,
-        Package::CardanoCli => todo!(),
+        Package::CardanoCli(CardanoCli { alias, .. }) => alias,
         Package::Mithril => todo!(),
     };
 

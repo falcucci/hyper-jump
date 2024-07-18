@@ -8,7 +8,7 @@ use super::install::Package;
 
 pub async fn uninstall(package: Package) -> Result<(), Error> {
     let downloads = crate::fs::get_downloads_directory(package.clone()).await?;
-    let installation_dir = crate::fs::get_installation_directory(package.clone()).await?;
+    let installation_dir = crate::fs::get_installation_directory().await?;
 
     if fs::remove_dir_all(&installation_dir).await.is_ok() {
         info!("Successfully removed hyper-jump installation folder");

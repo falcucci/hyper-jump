@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use clap::Parser;
 use clap::Subcommand;
 use clap::ValueEnum;
+use helpers::client;
 use packages::cardano_cli;
 use packages::cardano_node::{self};
 use packages::mithril;
@@ -103,10 +104,11 @@ async fn main() -> miette::Result<()> {
 
     let cli = Cli::parse();
     let ctx = Context::for_cli(&cli)?;
+    let client = client::create_reqwest_client().unwrap();
     match cli.command {
         Commands::Mithril(args) => mithril::run(args, &ctx).await,
-        Commands::CardanoNode(args) => cardano_node::run(args, &ctx).await,
-        Commands::CardanoCli(args) => cardano_cli::run(args, &ctx).await,
+        Commands::CardanoNode(args) => cardano_node::run(args, &ctx, &client).await,
+        Commands::CardanoCli(args) => cardano_cli::run(args, &ctx, &client).await,
         Commands::Erase => todo!(),
     }
 }

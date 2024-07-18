@@ -299,7 +299,9 @@ pub async fn switch_version(
     version: &ParsedVersion,
     package: Package,
 ) -> Result<()> {
+    println!("Switching to version: {}", version.tag_name);
     std::env::set_current_dir(crate::fs::get_downloads_directory(package).await?)?;
+    println!("Switching to version: {}", version.tag_name);
 
     let file_version: String = version.tag_name.to_string();
 

@@ -1,5 +1,11 @@
 use clap::Parser;
+use reqwest::Client;
 use tracing::instrument;
+
+use crate::commands::install::install;
+use crate::commands::install::Package;
+use crate::helpers::client;
+use crate::helpers::version::parse_version_type;
 
 #[derive(Parser)]
 pub struct Args {
@@ -40,13 +46,15 @@ pub enum Commands {
 }
 
 #[instrument("cardano-cli", skip_all)]
-pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
+pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
             println!("Use version: {}", version);
         }
         Commands::Install { version } => {
-            println!("Install version: {}", version);
+            let version = parse_version_type(&version).await.unwrap();
+            let package = Package::new_cardano_cli("9.0.0.1".to_string());
+            install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
             println!("Uninstall version: {}", version);

@@ -13,7 +13,7 @@ use crate::helpers::version::RemoteVersion;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
 
-pub async fn list_remote(client: Client, package: Package) -> Result<(), Error> {
+pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error> {
     let response = api(
         &client,
         package.clone().releases_url().ok_or(anyhow!("No releases URL"))?,

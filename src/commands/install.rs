@@ -21,30 +21,39 @@ use crate::helpers::version::is_version_installed;
 use crate::helpers::version::LocalVersion;
 use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
+use crate::packages::CARDANO_CLI_PACKAGE_URL;
 use crate::packages::CARDANO_NODE_PACKAGE_URL;
 
 #[derive(Debug, Clone)]
 pub struct CardanoNode {
     pub alias: String,
     pub version: String,
+    pub binary_path: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct CardanoCli {
+    pub alias: String,
+    pub version: String,
+    pub binary_path: String,
 }
 
 #[derive(Debug, Clone)]
 pub enum Package {
     CardanoNode(CardanoNode),
-    CardanoCli,
+    CardanoCli(CardanoCli),
     Mithril,
 }
 
 impl Package {
     pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
-            Package::CardanoNode(CardanoNode { version, .. }) => {
-                let url = CARDANO_NODE_PACKAGE_URL;
-                let package_url = url.replace("{version}", version);
-
-                Some(Cow::Owned(format!("https://github.com/{}", package_url)))
-            }
+            Package::CardanoNode(CardanoNode { version, .. }) => Some(Cow::Owned(
+                CARDANO_NODE_PACKAGE_URL.replace("{version}", version),
+            )),
+            Package::CardanoCli(CardanoCli { version, .. }) => Some(Cow::Owned(
+                CARDANO_CLI_PACKAGE_URL.replace("{version}", version),
+            )),
             _ => None,
         }
     }
@@ -62,6 +71,15 @@ impl Package {
         Package::CardanoNode(CardanoNode {
             alias: "cardano-node".to_string(),
             version,
+            binary_path: "cardano-bin".to_string(),
+        })
+    }
+
+    pub fn new_cardano_cli(version: String) -> Self {
+        Package::CardanoCli(CardanoCli {
+            alias: "cardano-cli".to_string(),
+            version,
+            binary_path: "cardano-bin".to_string(),
         })
     }
 }
@@ -305,6 +323,7 @@ async fn send_request(
     let file_type = get_file_type();
 
     let package_url = package.download_url().unwrap();
+    println!("Downloading: {}", package_url);
 
     client
         .get(package_url.to_string())

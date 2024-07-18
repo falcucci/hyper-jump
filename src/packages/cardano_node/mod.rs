@@ -48,18 +48,21 @@ pub struct Run {
 }
 
 #[instrument("cardano-node", skip_all)]
-pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
-    let client = client::create_reqwest_client().unwrap();
+pub async fn run(
+    args: Args,
+    _ctx: &crate::Context,
+    client: &reqwest::Client,
+) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
             let version = parse_version_type(&version).await.unwrap();
             let package = Package::new_cardano_node(version.non_parsed_string.clone());
-            use_cmd(&client, version, package).await.expect("Failed to set the version")
+            use_cmd(client, version, package).await.expect("Failed to set the version")
         }
         Commands::Install { version } => {
             let version = parse_version_type(&version).await.unwrap();
             let package = Package::new_cardano_node(version.non_parsed_string.clone());
-            install(&client, package, version).await.expect("Failed to install")
+            install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
             let version = parse_version_type(&version).await.unwrap();
