@@ -38,16 +38,21 @@ use crate::helpers::version::LocalVersion;
 pub fn get_home_dir() -> Result<PathBuf> {
     let mut home_str = PathBuf::new();
 
-    if cfg!(windows) {
+    #[cfg(target_family = "windows")]
+    {
         home_str.push(std::env::var("USERPROFILE")?);
         return Ok(home_str);
     }
 
-    if cfg!(target_os = "macos") {
+    #[cfg(target_os = "macos")]
+    {
         home_str.push("/Users/");
-    } else {
-        home_str.push("/home/")
-    };
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        home_str.push("/home/");
+    }
 
     if let Ok(value) = std::env::var("SUDO_USER") {
         home_str.push(&value);
