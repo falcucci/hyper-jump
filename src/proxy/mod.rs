@@ -6,8 +6,6 @@ use anyhow::Result;
 use tokio::time::sleep;
 use tokio::time::Duration;
 
-use crate::commands::install::CardanoCli;
-use crate::commands::install::CardanoNode;
 use crate::commands::install::Package;
 use crate::helpers::version::get_current_version;
 

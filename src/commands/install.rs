@@ -111,6 +111,32 @@ impl Package {
     }
 }
 
+/// Installs a specified version of a package asynchronously.
+///
+/// This function handles the installation process of a package by first
+/// checking if the version is already installed, and if not, it proceeds to
+/// download and unarchive the specified version.
+///
+/// # Arguments
+///
+/// * `client` - A reference to a `reqwest::Client` for making HTTP requests.
+/// * `package` - The `Package` to be installed.
+/// * `version` - The `ParsedVersion` specifying the version to install.
+///
+/// # Errors
+///
+/// Returns an error if the installation process fails at any step, including
+/// checking for an already installed version, downloading, or unarchiving the
+/// package.
+///
+/// # Examples
+///
+/// ```rust
+/// let client = Client::new();
+/// let package = Package::new_cardano_node("1.0.0".to_string());
+/// let version = ParsedVersion::parse("1.0.0").unwrap();
+/// install(&client, package, version).await?;
+/// ```
 pub async fn install(
     client: &Client,
     package: Package,

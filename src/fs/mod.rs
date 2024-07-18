@@ -189,6 +189,15 @@ pub fn get_file_type() -> &'static str {
 /// ```
 pub fn get_platform_name() -> &'static str { std::env::consts::OS }
 
+/// Retrieves the platform-specific name for downloads based on the target
+/// operating system.
+///
+/// # Examples
+///
+/// ```
+/// let platform_name_download = get_platform_name_download();
+/// println!("Platform name for downloads: {}", platform_name_download);
+/// ```
 pub fn get_platform_name_download() -> &'static str {
     #[cfg(target_family = "windows")]
     {
