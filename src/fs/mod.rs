@@ -113,7 +113,6 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 /// ```
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     let mut data_dir = get_local_data_dir()?;
-
     match package {
         Package::CardanoNode(CardanoNode { alias, .. }) => data_dir.push(alias),
         Package::CardanoCli(CardanoCli { alias, .. }) => data_dir.push(alias),
@@ -183,7 +182,32 @@ pub fn get_file_type() -> &'static str {
 /// ```rust
 /// let platform_name = get_platform_name_download(); 
 /// ```
-pub fn get_platform_name_download() -> &'static str { std::env::consts::OS }
+pub fn get_platform_name() -> &'static str { std::env::consts::OS }
+
+pub fn get_platform_name_download() -> &'static str {
+    #[cfg(target_family = "windows")]
+    {
+        "win64"
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        #[cfg(target_arch = "aarch64")]
+        {
+            "aarch64-darwin"
+        }
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            "x86_64-darwin"
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        "linux"
+    }
+}
 
 /// Copies the proxy to the installation directory.
 ///
@@ -478,9 +502,12 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
         downloaded_file.path, downloaded_file.file_name
     ));
 
-    let platform = get_platform_name_download();
-
-    let file = &format!("{}/bin/cardano-node", downloaded_file.file_name);
+    let file = &format!(
+        "{}/{}/{}",
+        downloaded_file.file_name,
+        package.binary_path(),
+        package.binary_name()
+    );
     let mut perms = fs::metadata(file)?.permissions();
     perms.set_mode(0o551);
     fs::set_permissions(file, perms)?;

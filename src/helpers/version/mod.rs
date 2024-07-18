@@ -37,7 +37,7 @@ use crate::commands::install::Package;
 /// };
 /// println!("The local version is {:?}", local_version);
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct LocalVersion {
     pub file_name: String,
     pub file_format: String,
@@ -222,10 +222,13 @@ pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
 /// ```
 pub async fn is_version_installed(version: &str, package: Package) -> Result<bool> {
     let downloads_dir = crate::fs::get_downloads_directory(package).await?;
+    println!("2.Checking if version {} is installed", version);
+    println!("2.Downloads directory: {:?}", downloads_dir);
     let mut dir = tokio::fs::read_dir(&downloads_dir).await?;
 
     while let Some(directory) = dir.next_entry().await? {
         let name = directory.file_name().to_str().unwrap().to_owned();
+        println!("2.Checking directory: {:?}", name);
         if !version.eq(&name) {
             continue;
         } else {
@@ -262,6 +265,7 @@ pub async fn is_version_installed(version: &str, package: Package) -> Result<boo
 pub async fn get_current_version(package: Package) -> Result<String> {
     let mut downloads_dir = crate::fs::get_downloads_directory(package).await?;
     downloads_dir.push("used");
+    println!("Reading current version from: {:?}", downloads_dir);
     tokio::fs::read_to_string(&downloads_dir)
         .await
         .map_err(|_| anyhow!("Could not read the current version"))

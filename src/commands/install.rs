@@ -15,6 +15,7 @@ use super::PostDownloadVersionType;
 use crate::fs::copy_package_proxy;
 use crate::fs::get_downloads_directory;
 use crate::fs::get_file_type;
+use crate::fs::get_platform_name;
 use crate::fs::get_platform_name_download;
 use crate::fs::unarchive;
 use crate::helpers::version::is_version_installed;
@@ -64,9 +65,33 @@ impl Package {
                 "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
             )),
             Package::CardanoCli(CardanoCli { .. }) => Some(Cow::Owned(
-                "https://api.github.com/repos/IntersectMBO/cardano-cli/releases".to_string(),
+                "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
             )),
             _ => None,
+        }
+    }
+
+    pub fn alias(&self) -> String {
+        match self {
+            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
+            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
+            Package::Mithril => todo!(),
+        }
+    }
+
+    pub fn binary_path(&self) -> String {
+        match self {
+            Package::CardanoNode(CardanoNode { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoCli(CardanoCli { binary_path, .. }) => binary_path.clone(),
+            Package::Mithril => todo!(),
+        }
+    }
+
+    pub fn binary_name(&self) -> String {
+        match self {
+            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
+            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
+            Package::Mithril => todo!(),
         }
     }
 
@@ -74,7 +99,7 @@ impl Package {
         Package::CardanoNode(CardanoNode {
             alias: "cardano-node".to_string(),
             version,
-            binary_path: "cardano-bin".to_string(),
+            binary_path: "bin".to_string(),
         })
     }
 
@@ -82,7 +107,7 @@ impl Package {
         Package::CardanoCli(CardanoCli {
             alias: "cardano-cli".to_string(),
             version,
-            binary_path: "cardano-bin".to_string(),
+            binary_path: "bin".to_string(),
         })
     }
 }
@@ -94,6 +119,7 @@ pub async fn install(
 ) -> Result<(), Error> {
     let root = get_downloads_directory(package.clone()).await?;
 
+    println!("Root: {}", root.display());
     env::set_current_dir(&root)?;
     let root = root.as_path();
 
@@ -191,6 +217,7 @@ async fn download_version(
         path: root.display().to_string(),
         semver: version.semver.clone(),
     };
+    println!("5.local_version: {:?}", local_version);
 
     Ok(PostDownloadVersionType::Standard(local_version))
 }
@@ -322,7 +349,7 @@ async fn send_request(
     client: &Client,
     package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
-    let platform = get_platform_name_download();
+    let platform = get_platform_name();
     let file_type = get_file_type();
 
     let package_url = package.download_url().unwrap();

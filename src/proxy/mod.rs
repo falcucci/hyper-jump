@@ -41,13 +41,19 @@ use crate::helpers::version::get_current_version;
 ///
 /// This function will return an error if the `handle_package_process` function
 /// fails.
-pub async fn handle_proxy(rest_args: &[String]) -> miette::Result<()> {
+pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Result<()> {
     if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
         print!("hyper-jump v{}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
 
-    let package = Package::new_cardano_node("9.0.0".to_string());
+    let package = match exec_name {
+        "cardano-node" => Package::new_cardano_node("9.0.0".to_string()),
+        "cardano-cli" => Package::new_cardano_cli("9.0.1".to_string()),
+        "mithril" => todo!(),
+        _ => return Err(miette::miette!("Unknown package")),
+    };
+
     handle_package_process(rest_args, package).await.unwrap();
 
     Ok(())
@@ -94,14 +100,13 @@ pub async fn handle_proxy(rest_args: &[String]) -> miette::Result<()> {
 pub async fn handle_package_process(args: &[String], package: Package) -> Result<()> {
     let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
     let used_version = get_current_version(package.clone()).await?;
+    println!("Used version: {}", used_version);
 
-    let alias = match package {
-        Package::CardanoNode(CardanoNode { alias, .. }) => alias,
-        Package::CardanoCli(CardanoCli { alias, .. }) => alias,
-        Package::Mithril => todo!(),
-    };
+    let location = downloads_dir
+        .join(used_version)
+        .join(package.binary_path())
+        .join(package.binary_name());
 
-    let location = downloads_dir.join(used_version).join("bin").join(alias);
     println!("Running: {:?}", location);
 
     let _term = Arc::new(AtomicBool::new(false));

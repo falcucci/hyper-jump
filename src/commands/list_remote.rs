@@ -34,7 +34,7 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
 
         let tag = match package {
             Package::CardanoNode(_) => version.tag_name.clone(),
-            Package::CardanoCli(_) => version.name.clone(),
+            Package::CardanoCli(_) => version.tag_name.clone(),
             Package::Mithril => todo!(),
         };
 

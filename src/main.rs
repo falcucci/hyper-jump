@@ -99,7 +99,7 @@ async fn main() -> miette::Result<()> {
     let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
 
     if !exe_name.eq(env!("CARGO_PKG_NAME")) {
-        return handle_proxy(rest_args).await;
+        return handle_proxy(exe_name, rest_args).await;
     }
 
     let cli = Cli::parse();

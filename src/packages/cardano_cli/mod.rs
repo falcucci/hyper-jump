@@ -5,6 +5,7 @@ use tracing::instrument;
 use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::list_remote::list_remote;
+use crate::commands::use_cmd::use_cmd;
 use crate::helpers::client;
 use crate::helpers::version::parse_version_type;
 
@@ -51,11 +52,13 @@ pub enum Commands {
 pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
-            println!("Use version: {}", version);
+            let version = parse_version_type(&version).await.unwrap();
+            let package = Package::new_cardano_cli("9.0.0".to_string());
+            use_cmd(client, version, package).await.expect("Failed to use")
         }
         Commands::Install { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_cli("9.0.0.1".to_string());
+            let package = Package::new_cardano_cli("9.0.0".to_string());
             install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
