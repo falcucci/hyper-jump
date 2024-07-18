@@ -53,7 +53,7 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
     match args.command {
         Commands::Use { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_cli("9.0.0".to_string());
+            let package = Package::new_cardano_cli(version.non_parsed_string.clone());
             use_cmd(client, version, package).await.expect("Failed to use")
         }
         Commands::Install { version } => {
