@@ -28,10 +28,10 @@ use reqwest::Client;
 /// This function will return an error if the `reqwest::Client` could not be
 /// built.
 pub fn create_reqwest_client() -> Result<Client, Error> {
-    let token = format!("Bearer {}", var("GITHUB_TOKEN").unwrap_or_default());
     let mut headers = HeaderMap::new();
-    if let Some(token) = token.strip_prefix("Bearer ") {
-        headers.insert(AUTHORIZATION, HeaderValue::from_str(token)?);
+    if let Ok(token) = var("GITHUB_TOKEN") {
+        let token = HeaderValue::from_str(&format!("token {}", token))?;
+        headers.insert(AUTHORIZATION, token);
     }
 
     Ok(Client::builder().default_headers(headers).build()?)
