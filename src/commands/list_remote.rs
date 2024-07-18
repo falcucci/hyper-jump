@@ -15,7 +15,7 @@ use crate::services::github::deserialize_response;
 
 pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error> {
     let response = api(
-        &client,
+        client,
         package.clone().releases_url().ok_or(anyhow!("No releases URL"))?,
     )
     .await?;
@@ -32,10 +32,16 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
                 .map_or(false, |str| str.contains(&version.tag_name))
         });
 
-        if is_version_used(format!("v{}", &version.tag_name).as_str(), package.clone()).await {
-            println!("{padding}{}", Paint::green(&version.tag_name),);
+        let tag = match package {
+            Package::CardanoNode(_) => version.tag_name.clone(),
+            Package::CardanoCli(_) => version.name.clone(),
+            Package::Mithril => todo!(),
+        };
+
+        if is_version_used(format!("v{}", tag).as_str(), package.clone()).await {
+            println!("{padding}{}", Paint::green(&tag),);
         } else if version_installed {
-            println!("{padding}{}", Paint::yellow(&version.tag_name),);
+            println!("{padding}{}", Paint::yellow(&tag),);
 
             local_versions.retain(|v| {
                 v.file_name()
@@ -43,7 +49,7 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
                     .map_or(true, |str| !str.contains(&version.name))
             });
         } else {
-            println!("{padding}{}", version.tag_name);
+            println!("{padding}{}", tag);
         }
     }
 

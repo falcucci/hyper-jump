@@ -63,6 +63,9 @@ impl Package {
             Package::CardanoNode(CardanoNode { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
             )),
+            Package::CardanoCli(CardanoCli { .. }) => Some(Cow::Owned(
+                "https://api.github.com/repos/IntersectMBO/cardano-cli/releases".to_string(),
+            )),
             _ => None,
         }
     }

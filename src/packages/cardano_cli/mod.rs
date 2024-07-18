@@ -4,6 +4,7 @@ use tracing::instrument;
 
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::list_remote::list_remote;
 use crate::helpers::client;
 use crate::helpers::version::parse_version_type;
 
@@ -41,6 +42,7 @@ pub enum Commands {
     Rollback,
     Erase,
     List,
+    ListRemote,
     Update(Update),
     Run(Run),
 }
@@ -67,6 +69,10 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
         }
         Commands::List => {
             println!("List");
+        }
+        Commands::ListRemote => {
+            let package = Package::new_cardano_cli("9.0.0.1".to_string());
+            list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {
             println!("Update: {:?}", update.version);
