@@ -68,14 +68,16 @@ pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error>
                 false => VersionStatus::NotInstalled,
             };
 
-        match version_status {
-            VersionStatus::Used => println!("{padding}{}", Paint::green(&tag),),
+        let color = match version_status {
+            VersionStatus::Used => Paint::green(&tag),
             VersionStatus::Installed => {
-                println!("{padding}{}", Paint::yellow(&tag),);
                 retain_local_versions(local_versions.clone(), &version.tag_name);
+                Paint::yellow(&tag)
             }
-            VersionStatus::NotInstalled => println!("{padding}{}", tag),
-        }
+            VersionStatus::NotInstalled => Paint::italic(&tag),
+        };
+
+        println!("{padding}{}", color);
     }
 
     Ok(())
