@@ -466,19 +466,17 @@ fn expand(package: Package, downloaded_file: LocalVersion) -> Result<()> {
         fs::remove_dir_all(&downloaded_file.file_name)?;
     }
 
-    let file = match File::open(format!(
+    let file_path = format!(
         "{}/{}.{}",
         downloaded_file.path, downloaded_file.file_name, downloaded_file.file_format
-    )) {
-        Ok(value) => value,
-        Err(error) => {
-            return Err(anyhow!(
-                "Failed to open file {}.{}, file doesn't exist. additional info: {error}",
-                downloaded_file.file_name,
-                downloaded_file.file_format
-            ))
-        }
-    };
+    );
+    let file = File::open(&file_path).map_err(|error| {
+        anyhow!(
+            "Failed to open file {}.{}, file doesn't exist. additional info: {error}",
+            downloaded_file.file_name,
+            downloaded_file.file_format,
+        )
+    })?;
 
     let decompress_stream = GzDecoder::new(file);
     Archive::new(decompress_stream)
