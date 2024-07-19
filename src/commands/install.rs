@@ -262,7 +262,6 @@ async fn download_version(
         path: root.display().to_string(),
         semver: version.semver.clone(),
     };
-    println!("5.local_version: {:?}", local_version);
 
     Ok(PostDownloadVersionType::Standard(local_version))
 }
