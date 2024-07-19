@@ -23,6 +23,7 @@ use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
 use crate::packages::CARDANO_CLI_PACKAGE_URL;
 use crate::packages::CARDANO_NODE_PACKAGE_URL;
+use crate::packages::MITHRIL_PACKAGE_URL;
 
 #[derive(Debug, Clone)]
 pub struct CardanoNode {
@@ -39,10 +40,17 @@ pub struct CardanoCli {
 }
 
 #[derive(Debug, Clone)]
+pub struct Mithril {
+    pub alias: String,
+    pub version: String,
+    pub binary_path: String,
+}
+
+#[derive(Debug, Clone)]
 pub enum Package {
     CardanoNode(CardanoNode),
     CardanoCli(CardanoCli),
-    Mithril,
+    Mithril(Mithril),
 }
 
 impl Package {
@@ -54,7 +62,9 @@ impl Package {
             Package::CardanoCli(CardanoCli { version, .. }) => Some(Cow::Owned(
                 CARDANO_CLI_PACKAGE_URL.replace("{version}", version),
             )),
-            _ => None,
+            Package::Mithril(Mithril { version, .. }) => Some(Cow::Owned(
+                MITHRIL_PACKAGE_URL.replace("{version}", version),
+            )),
         }
     }
 
@@ -66,7 +76,9 @@ impl Package {
             Package::CardanoCli(CardanoCli { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
             )),
-            _ => None,
+            Package::Mithril(Mithril { .. }) => Some(Cow::Owned(
+                "https://api.github.com/repos/input-output-hk/mithril/releases".to_string(),
+            )),
         }
     }
 
@@ -74,7 +86,7 @@ impl Package {
         match self {
             Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
             Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
-            Package::Mithril => todo!(),
+            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
         }
     }
 
@@ -82,7 +94,7 @@ impl Package {
         match self {
             Package::CardanoNode(CardanoNode { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(CardanoCli { binary_path, .. }) => binary_path.clone(),
-            Package::Mithril => todo!(),
+            Package::Mithril(Mithril { binary_path, .. }) => binary_path.clone(),
         }
     }
 
@@ -90,7 +102,7 @@ impl Package {
         match self {
             Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
             Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
-            Package::Mithril => todo!(),
+            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
         }
     }
 
@@ -107,6 +119,14 @@ impl Package {
             alias: "cardano-cli".to_string(),
             version,
             binary_path: "bin".to_string(),
+        })
+    }
+
+    pub fn new_mithril(version: String) -> Self {
+        Package::Mithril(Mithril {
+            alias: "mithril-client".to_string(),
+            version,
+            binary_path: "".to_string(),
         })
     }
 }

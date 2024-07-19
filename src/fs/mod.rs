@@ -10,6 +10,7 @@ use tracing::info;
 
 use crate::commands::install::CardanoCli;
 use crate::commands::install::CardanoNode;
+use crate::commands::install::Mithril;
 use crate::commands::install::Package;
 use crate::helpers::version::LocalVersion;
 
@@ -121,7 +122,7 @@ pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     match package {
         Package::CardanoNode(CardanoNode { alias, .. }) => data_dir.push(alias),
         Package::CardanoCli(CardanoCli { alias, .. }) => data_dir.push(alias),
-        Package::Mithril => todo!(),
+        Package::Mithril(Mithril { alias, .. }) => data_dir.push(alias),
     }
 
     let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();

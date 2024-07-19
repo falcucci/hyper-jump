@@ -48,7 +48,7 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
     let package = match exec_name {
         "cardano-node" => Package::new_cardano_node("9.0.0".to_string()),
         "cardano-cli" => Package::new_cardano_cli("9.0.1".to_string()),
-        "mithril" => todo!(),
+        "mithril-client" => Package::new_mithril("9.0.0".to_string()),
         _ => return Err(miette::miette!("Unknown package")),
     };
 

@@ -2,6 +2,10 @@ use clap::command;
 use clap::Parser;
 use tracing::instrument;
 
+use crate::commands::install::Package;
+use crate::commands::use_cmd::use_cmd;
+use crate::helpers::version::parse_version_type;
+
 #[derive(Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -35,16 +39,23 @@ pub enum Commands {
     Uninstall { version: String },
     Rollback,
     List,
+    ListRemote,
     Erase,
     Update(Update),
     Run(Run),
 }
 
 #[instrument("mithril", skip_all)]
-pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
+pub async fn run(
+    args: Args,
+    _ctx: &crate::Context,
+    client: &reqwest::Client,
+) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
-            println!("Running use with version: {}", version);
+            let version = parse_version_type(version.as_str()).await.unwrap();
+            let package = Package::new_mithril(version.non_parsed_string.clone());
+            use_cmd(client, version, package).await.expect("Failed to use")
         }
         Commands::Install { version } => {
             println!("Running install with version: {}", version);
@@ -60,6 +71,9 @@ pub async fn run(args: Args, _ctx: &crate::Context) -> miette::Result<()> {
         }
         Commands::List => {
             println!("Running list");
+        }
+        Commands::ListRemote => {
+            println!("Running list remote");
         }
         Commands::Update(update) => {
             println!("Running update with version: {:?}", update.version);
