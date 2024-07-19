@@ -2,6 +2,7 @@ use clap::command;
 use clap::Parser;
 use tracing::instrument;
 
+use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::version::parse_version_type;
@@ -58,7 +59,9 @@ pub async fn run(
             use_cmd(client, version, package).await.expect("Failed to use")
         }
         Commands::Install { version } => {
-            println!("Running install with version: {}", version);
+            let version = parse_version_type(version.as_str()).await.unwrap();
+            let package = Package::new_mithril(version.non_parsed_string.clone());
+            install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
             println!("Running uninstall with version: {}", version);
