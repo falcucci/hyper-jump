@@ -4,6 +4,7 @@ use tracing::instrument;
 
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::list_remote::list_remote;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::version::parse_version_type;
 
@@ -76,7 +77,8 @@ pub async fn run(
             println!("Running list");
         }
         Commands::ListRemote => {
-            println!("Running list remote");
+            let package = Package::new_mithril("9.0.0".to_string());
+            list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {
             println!("Running update with version: {:?}", update.version);
