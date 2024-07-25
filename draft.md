@@ -2,9 +2,9 @@
 
 # hyper-jump
 
-</div>
-
 _The console lights up, keys clack rapidly and then..._ 🛸
+
+</div>
 
 Pff, the Cardano aircraft, where the only thing faster than the transactions is the hyper-jump between versions! It's the Swiss Army knife of version managers, the Batman utility belt for developers and the TARDIS for your codebase – it's bigger on the inside with all the versions it can handle!
 
