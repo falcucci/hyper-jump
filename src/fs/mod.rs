@@ -97,6 +97,10 @@ pub fn get_home_dir() -> Result<PathBuf> {
 /// ```
 pub fn get_local_data_dir() -> Result<PathBuf> {
     let mut home_dir = get_home_dir()?;
+
+    #[cfg(target_family = "windows")]
+    home_dir.push("AppData/Local");
+
     home_dir.push(".local/share");
     home_dir.push("hyper-jump");
 

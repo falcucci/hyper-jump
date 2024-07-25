@@ -6,7 +6,6 @@ use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::list_remote::list_remote;
 use crate::commands::use_cmd::use_cmd;
-use crate::helpers::client;
 use crate::helpers::version::parse_version_type;
 
 #[derive(Parser)]

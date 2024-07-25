@@ -39,11 +39,28 @@ Now, let's talk about the all-in-one aspect. This isn't just a version manager; 
 | Cardano Node | `cardano-node`   | Manage versions of the Cardano Node software.   |
 | Cardano CLI  | `cardano-cli`    | Manage versions of the Cardano CLI tool.        |
 | Mithril      | `mithril-client` | Manage versions of the Mithril client software. |
+| Aiken        | `aiken-client`   | Manage versions of the Aiken client software.   |
 
 ## Installation
 
 ```bash
 cargo install hyper-jump
+```
+
+## Configuration
+
+#### On Linux and macOS:
+
+Add the following line to your shell configuration file (e.g., `~/.bashrc`, `~/.zshrc`, etc.):
+
+```bash
+export PATH="$HOME/.local/share/hyper-jump/cardano-bin:$PATH"
+```
+
+Or add the binary to your PATH by running:
+
+```bash
+sudo launchctl config user path "$HOME/.local/share/hyper-jump/cardano-bin:${PATH}"
 ```
 
 ## Usage
