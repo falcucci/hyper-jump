@@ -12,6 +12,14 @@ Imagine you're in the cockpit of the Cardano aircraft, your fingers dance across
 
 Now, let's talk about the all-in-one aspect. This isn't just a version manager; it's a version festival, a version buffet where you can sample all the flavors of Cardano without the indigestion. Cross-platform? You bet! Whether you're a Windows wizard, a macOS maestro or a Linux luminary, the Cardano aircraft has got you covered. It's like having a universal adapter for your development needs.
 
+## Supported Packages
+
+| Package Name | Alias            | Description                                     |
+| ------------ | ---------------- | ----------------------------------------------- |
+| Cardano Node | `cardano-node`   | Manage versions of the Cardano Node software.   |
+| Cardano CLI  | `cardano-cli`    | Manage versions of the Cardano CLI tool.        |
+| Mithril      | `mithril-client` | Manage versions of the Mithril client software. |
+
 ## Core Features
 
 - **Version Management**: Install and switch between different versions of Cardano ecosystem tools.
