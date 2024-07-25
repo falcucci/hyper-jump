@@ -1,4 +1,8 @@
+<div align="center">
+
 # hyper-jump
+
+</div>
 
 _The console lights up, keys clack rapidly and then..._ 🛸
 
@@ -30,9 +34,17 @@ Now, let's talk about the all-in-one aspect. This isn't just a version manager; 
 
 ## Installation
 
+```bash
+cargo install hyper-jump
+```
+
 ## Usage
 
 The Hyper-Jump tool provides several subcommands to manage packages:
+
+```bash
+hyper-jump --help
+```
 
 ### Use
 
