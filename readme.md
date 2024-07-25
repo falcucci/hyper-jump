@@ -57,7 +57,7 @@ Add the following line to your shell configuration file (e.g., `~/.bashrc`, `~/.
 export PATH="$HOME/.local/share/hyper-jump/cardano-bin:$PATH"
 ```
 
-Or add the binary to your PATH by running:
+Or add the hyper-jump binary path to your PATH by running:
 
 ```bash
 sudo launchctl config user path "$HOME/.local/share/hyper-jump/cardano-bin:${PATH}"
