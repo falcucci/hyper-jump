@@ -42,7 +42,6 @@ pub enum Commands {
     Use { version: String },
     Install { version: String },
     Uninstall { version: String },
-    Rollback,
     List,
     ListRemote,
     Update(Update),
@@ -69,9 +68,6 @@ pub async fn run(
             let version = parse_version_type(version.as_str()).await.unwrap();
             let package = Package::new(PackageType::Mithril, version.non_parsed_string.clone());
             uninstall(package).await.expect("Failed to uninstall")
-        }
-        Commands::Rollback => {
-            println!("Running rollback");
         }
         Commands::List => {
             let package = Package::new(PackageType::Mithril, "".to_string());
