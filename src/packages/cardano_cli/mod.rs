@@ -6,6 +6,7 @@ use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
 use crate::commands::list_remote::list_remote;
+use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::version::parse_version_type;
 
@@ -41,11 +42,9 @@ pub enum Commands {
     Install { version: String },
     Uninstall { version: String },
     Rollback,
-    Erase,
     List,
     ListRemote,
     Update(Update),
-    Run(Run),
 }
 
 #[instrument("cardano-cli", skip_all)]
@@ -62,13 +61,12 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
             install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
-            println!("Uninstall version: {}", version);
+            let version = parse_version_type(&version).await.unwrap();
+            let package = Package::new(PackageType::CardanoCli, version.non_parsed_string.clone());
+            uninstall(package).await.expect("Failed to uninstall")
         }
         Commands::Rollback => {
             println!("Rollback");
-        }
-        Commands::Erase => {
-            println!("Erase");
         }
         Commands::List => {
             println!("List");
@@ -79,9 +77,6 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
         }
         Commands::Update(update) => {
             println!("Update: {:?}", update.version);
-        }
-        Commands::Run(run) => {
-            println!("Run: {:?}", run.free);
         }
     }
 
