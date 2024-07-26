@@ -5,6 +5,7 @@ use tracing::instrument;
 use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
+use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
@@ -65,7 +66,8 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
             uninstall(package).await.expect("Failed to uninstall")
         }
         Commands::List => {
-            println!("List");
+            let package = Package::new(PackageType::CardanoCli, "".to_string());
+            list(package).await.expect("Failed to list");
         }
         Commands::ListRemote => {
             let package = Package::new(PackageType::CardanoCli, "".to_string());

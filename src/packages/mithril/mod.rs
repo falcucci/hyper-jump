@@ -5,6 +5,7 @@ use tracing::instrument;
 use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
+use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
@@ -73,7 +74,8 @@ pub async fn run(
             println!("Running rollback");
         }
         Commands::List => {
-            println!("Running list");
+            let package = Package::new(PackageType::Mithril, "".to_string());
+            list(package).await.expect("Failed to list");
         }
         Commands::ListRemote => {
             let package = Package::new(PackageType::Mithril, "".to_string());
