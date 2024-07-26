@@ -44,9 +44,7 @@ pub enum Commands {
     Rollback,
     List,
     ListRemote,
-    Erase,
     Update(Update),
-    Run(Run),
 }
 
 #[instrument("mithril", skip_all)]
@@ -74,9 +72,6 @@ pub async fn run(
         Commands::Rollback => {
             println!("Running rollback");
         }
-        Commands::Erase => {
-            println!("Running erase");
-        }
         Commands::List => {
             println!("Running list");
         }
@@ -86,9 +81,6 @@ pub async fn run(
         }
         Commands::Update(update) => {
             println!("Running update with version: {:?}", update.version);
-        }
-        Commands::Run(run) => {
-            println!("Running run with free: {:?}", run.free);
         }
     }
 
