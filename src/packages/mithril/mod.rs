@@ -76,7 +76,7 @@ pub async fn run(
             println!("Running list");
         }
         Commands::ListRemote => {
-            let package = Package::new(PackageType::Mithril, "9.0.0".to_string());
+            let package = Package::new(PackageType::Mithril, "".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {
