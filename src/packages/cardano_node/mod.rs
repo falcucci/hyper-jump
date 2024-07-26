@@ -4,6 +4,7 @@ use tracing::instrument;
 use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
+use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
@@ -35,11 +36,9 @@ pub enum Commands {
     Use { version: String },
     Install { version: String },
     Uninstall { version: String },
-    Rollback,
     List,
     ListRemote,
     Update(Update),
-    Run(Run),
 }
 
 #[derive(Parser)]
@@ -70,11 +69,9 @@ pub async fn run(
             let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
             uninstall(package).await.expect("Failed to erase");
         }
-        Commands::Rollback => {
-            println!("Rollback");
-        }
         Commands::List => {
-            println!("List");
+            let package = Package::new(PackageType::CardanoNode, "".to_string());
+            list(package).await.expect("Failed to list");
         }
         Commands::ListRemote => {
             let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string());
@@ -82,9 +79,6 @@ pub async fn run(
         }
         Commands::Update(update) => {
             println!("Update: {:?}", update.version);
-        }
-        Commands::Run(run) => {
-            println!("Run: {:?}", run.free);
         }
     }
 

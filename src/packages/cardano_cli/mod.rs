@@ -41,7 +41,6 @@ pub enum Commands {
     Use { version: String },
     Install { version: String },
     Uninstall { version: String },
-    Rollback,
     List,
     ListRemote,
     Update(Update),
@@ -65,14 +64,11 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
             let package = Package::new(PackageType::CardanoCli, version.non_parsed_string.clone());
             uninstall(package).await.expect("Failed to uninstall")
         }
-        Commands::Rollback => {
-            println!("Rollback");
-        }
         Commands::List => {
             println!("List");
         }
         Commands::ListRemote => {
-            let package = Package::new(PackageType::CardanoCli, "9.0.0.1".to_string());
+            let package = Package::new(PackageType::CardanoCli, "".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {
