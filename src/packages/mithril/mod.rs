@@ -4,6 +4,7 @@ use tracing::instrument;
 
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::install::PackageType;
 use crate::commands::list_remote::list_remote;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::version::parse_version_type;
@@ -56,12 +57,12 @@ pub async fn run(
     match args.command {
         Commands::Use { version } => {
             let version = parse_version_type(version.as_str()).await.unwrap();
-            let package = Package::new_mithril(version.non_parsed_string.clone());
+            let package = Package::new(PackageType::Mithril, version.non_parsed_string.clone());
             use_cmd(client, version, package).await.expect("Failed to use")
         }
         Commands::Install { version } => {
             let version = parse_version_type(version.as_str()).await.unwrap();
-            let package = Package::new_mithril(version.non_parsed_string.clone());
+            let package = Package::new(PackageType::Mithril, version.non_parsed_string.clone());
             install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
@@ -77,7 +78,7 @@ pub async fn run(
             println!("Running list");
         }
         Commands::ListRemote => {
-            let package = Package::new_mithril("9.0.0".to_string());
+            let package = Package::new(PackageType::Mithril, "9.0.0".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {

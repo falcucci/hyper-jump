@@ -3,6 +3,7 @@ use tracing::instrument;
 
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::install::PackageType;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
@@ -56,17 +57,17 @@ pub async fn run(
     match args.command {
         Commands::Use { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_node(version.non_parsed_string.clone());
+            let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
             use_cmd(client, version, package).await.expect("Failed to set the version")
         }
         Commands::Install { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_node(version.non_parsed_string.clone());
+            let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
             install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_node(version.non_parsed_string.clone());
+            let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
             uninstall(package).await.expect("Failed to erase");
         }
         Commands::Rollback => {
@@ -76,7 +77,7 @@ pub async fn run(
             println!("List");
         }
         Commands::ListRemote => {
-            let package = Package::new_cardano_node("9.0.0".to_string());
+            let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {

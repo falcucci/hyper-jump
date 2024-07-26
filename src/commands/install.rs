@@ -39,6 +39,13 @@ pub enum Package {
     Mithril(Spec),
 }
 
+#[derive(Debug, Clone)]
+pub enum PackageType {
+    CardanoNode,
+    CardanoCli,
+    Mithril,
+}
+
 impl Package {
     pub fn alias(&self) -> String {
         match self {
@@ -92,28 +99,24 @@ impl Package {
         }
     }
 
-    pub fn new_cardano_node(version: String) -> Self {
-        Package::CardanoNode(Spec {
-            alias: "cardano-node".to_string(),
-            version,
-            binary_path: "bin".to_string(),
-        })
-    }
-
-    pub fn new_cardano_cli(version: String) -> Self {
-        Package::CardanoCli(Spec {
-            alias: "cardano-cli".to_string(),
-            version,
-            binary_path: "bin".to_string(),
-        })
-    }
-
-    pub fn new_mithril(version: String) -> Self {
-        Package::Mithril(Spec {
-            alias: "mithril-client".to_string(),
-            version,
-            binary_path: "".to_string(),
-        })
+    pub fn new(package_type: PackageType, version: String) -> Package {
+        match package_type {
+            PackageType::CardanoNode => Package::CardanoNode(Spec {
+                alias: "cardano-node".to_string(),
+                version,
+                binary_path: "bin".to_string(),
+            }),
+            PackageType::CardanoCli => Package::CardanoCli(Spec {
+                alias: "cardano-cli".to_string(),
+                version,
+                binary_path: "bin".to_string(),
+            }),
+            PackageType::Mithril => Package::Mithril(Spec {
+                alias: "mithril-client".to_string(),
+                version,
+                binary_path: "".to_string(),
+            }),
+        }
     }
 }
 

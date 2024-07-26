@@ -4,6 +4,7 @@ use tracing::instrument;
 
 use crate::commands::install::install;
 use crate::commands::install::Package;
+use crate::commands::install::PackageType;
 use crate::commands::list_remote::list_remote;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::version::parse_version_type;
@@ -52,12 +53,12 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
     match args.command {
         Commands::Use { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_cli(version.non_parsed_string.clone());
+            let package = Package::new(PackageType::CardanoCli, version.non_parsed_string.clone());
             use_cmd(client, version, package).await.expect("Failed to use")
         }
         Commands::Install { version } => {
             let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new_cardano_cli("9.0.0".to_string());
+            let package = Package::new(PackageType::CardanoCli, version.non_parsed_string.clone());
             install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
@@ -73,7 +74,7 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
             println!("List");
         }
         Commands::ListRemote => {
-            let package = Package::new_cardano_cli("9.0.0.1".to_string());
+            let package = Package::new(PackageType::CardanoCli, "9.0.0.1".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
         }
         Commands::Update(update) => {

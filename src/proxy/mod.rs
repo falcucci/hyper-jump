@@ -7,6 +7,7 @@ use tokio::time::sleep;
 use tokio::time::Duration;
 
 use crate::commands::install::Package;
+use crate::commands::install::PackageType;
 use crate::helpers::version::get_current_version;
 
 /// Handles the proxy command with optional arguments.
@@ -46,9 +47,9 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
     }
 
     let package = match exec_name {
-        "cardano-node" => Package::new_cardano_node("9.0.0".to_string()),
-        "cardano-cli" => Package::new_cardano_cli("9.0.1".to_string()),
-        "mithril-client" => Package::new_mithril("9.0.0".to_string()),
+        "cardano-node" => Package::new(PackageType::CardanoNode, "9.0.0".to_string()),
+        "cardano-cli" => Package::new(PackageType::CardanoCli, "9.0.1".to_string()),
+        "mithril-client" => Package::new(PackageType::Mithril, "9.0.0".to_string()),
         _ => return Err(miette::miette!("Unknown package")),
     };
 
