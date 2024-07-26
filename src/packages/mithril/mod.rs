@@ -6,6 +6,7 @@ use crate::commands::install::install;
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
 use crate::commands::list_remote::list_remote;
+use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
 use crate::helpers::version::parse_version_type;
 
@@ -66,7 +67,9 @@ pub async fn run(
             install(client, package, version).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
-            println!("Running uninstall with version: {}", version);
+            let version = parse_version_type(version.as_str()).await.unwrap();
+            let package = Package::new(PackageType::Mithril, version.non_parsed_string.clone());
+            uninstall(package).await.expect("Failed to uninstall")
         }
         Commands::Rollback => {
             println!("Running rollback");
