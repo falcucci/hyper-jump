@@ -65,7 +65,11 @@ sudo launchctl config user path "$HOME/.local/share/hyper-jump/cardano-bin:${PAT
 
 ## Usage
 
-The Hyper-Jump tool provides several subcommands to manage packages:
+To manage packages, use the following subcommands:
+
+### Help
+
+Display help information:
 
 ```bash
 hyper-jump --help
@@ -93,6 +97,14 @@ Uninstall a specific version of a package.
 
 ```sh
 hyper-jump cardano-node uninstall --version <version>
+```
+
+### List
+
+List installed versions of a package:
+
+```sh
+hyper-jump cardano-node list
 ```
 
 ### List Remote
