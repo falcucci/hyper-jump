@@ -181,22 +181,30 @@ pub fn semver(version: &str) -> Result<bool> {
     Ok(Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$")?.is_match(version))
 }
 
-pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
-    if semver(version)? {
-        let mut returned_version = version.to_string();
-        if !version.contains('v') {
-            returned_version.insert(0, 'v');
-        }
+fn parse_semver(version: &str) -> Result<ParsedVersion> {
+    let version = version.to_string();
+    let semver = Version::parse(&version)?;
+    Ok(ParsedVersion {
+        tag_name: version.clone(),
+        version_type: VersionType::Normal,
+        non_parsed_string: version.clone(),
+        semver: Some(semver),
+    })
+}
 
-        return Ok(ParsedVersion {
-            tag_name: returned_version,
+pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
+    let semver = semver(version)?;
+    let returned_version = match (semver, version.starts_with('v')) {
+        (true, false) => parse_semver(version)?,
+        _ => ParsedVersion {
+            tag_name: version.to_string(),
             version_type: VersionType::Normal,
             non_parsed_string: version.to_string(),
             semver: None,
-        });
-    }
+        },
+    };
 
-    Err(anyhow!("Please provide a proper version string"))
+    Ok(returned_version)
 }
 
 /// This function reads the downloads directory and checks if there is a
