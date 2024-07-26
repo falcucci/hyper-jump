@@ -18,33 +18,12 @@ pub struct Args {
 }
 
 #[derive(Parser)]
-pub struct Run {
-    #[arg(short, long)]
-    free: Vec<String>,
-}
-
-#[derive(Parser)]
-pub struct Update {
-    /// Update specified version |nightly|stable|
-    #[arg(conflicts_with = "all")]
-    pub version: Option<String>,
-
-    /// Apply the update to all versions
-    #[arg(short, long)]
-    pub all: bool,
-
-    #[arg(short, long)]
-    force: bool,
-}
-
-#[derive(Parser)]
 pub enum Commands {
     Use { version: String },
     Install { version: String },
     Uninstall { version: String },
     List,
     ListRemote,
-    Update(Update),
 }
 
 #[instrument("cardano-cli", skip_all)]
@@ -72,9 +51,6 @@ pub async fn run(args: Args, _ctx: &crate::Context, client: &Client) -> miette::
         Commands::ListRemote => {
             let package = Package::new(PackageType::CardanoCli, "".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
-        }
-        Commands::Update(update) => {
-            println!("Update: {:?}", update.version);
         }
     }
 

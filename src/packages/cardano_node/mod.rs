@@ -18,27 +18,12 @@ pub struct Args {
 }
 
 #[derive(Parser)]
-pub struct Update {
-    /// Update specified version |nightly|stable|
-    #[arg(conflicts_with = "all")]
-    pub version: Option<String>,
-
-    /// Apply the update to all versions
-    #[arg(short, long)]
-    pub all: bool,
-
-    #[arg(short, long)]
-    force: bool,
-}
-
-#[derive(Parser)]
 pub enum Commands {
     Use { version: String },
     Install { version: String },
     Uninstall { version: String },
     List,
     ListRemote,
-    Update(Update),
 }
 
 #[derive(Parser)]
@@ -76,9 +61,6 @@ pub async fn run(
         Commands::ListRemote => {
             let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string());
             list_remote(client, package).await.expect("Failed to list remote");
-        }
-        Commands::Update(update) => {
-            println!("Update: {:?}", update.version);
         }
     }
 
