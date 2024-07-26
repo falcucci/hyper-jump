@@ -26,21 +26,7 @@ use crate::packages::CARDANO_NODE_PACKAGE_URL;
 use crate::packages::MITHRIL_PACKAGE_URL;
 
 #[derive(Debug, Clone)]
-pub struct CardanoNode {
-    pub alias: String,
-    pub version: String,
-    pub binary_path: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct CardanoCli {
-    pub alias: String,
-    pub version: String,
-    pub binary_path: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct Mithril {
+pub struct Spec {
     pub alias: String,
     pub version: String,
     pub binary_path: String,
@@ -48,45 +34,45 @@ pub struct Mithril {
 
 #[derive(Debug, Clone)]
 pub enum Package {
-    CardanoNode(CardanoNode),
-    CardanoCli(CardanoCli),
-    Mithril(Mithril),
+    CardanoNode(Spec),
+    CardanoCli(Spec),
+    Mithril(Spec),
 }
 
 impl Package {
     pub fn alias(&self) -> String {
         match self {
-            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
-            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
-            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
+            Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
+            Package::Mithril(Spec { alias, .. }) => alias.clone(),
         }
     }
 
     pub fn binary_path(&self) -> String {
         match self {
-            Package::CardanoNode(CardanoNode { binary_path, .. }) => binary_path.clone(),
-            Package::CardanoCli(CardanoCli { binary_path, .. }) => binary_path.clone(),
-            Package::Mithril(Mithril { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
 
     pub fn binary_name(&self) -> String {
         match self {
-            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
-            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
-            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
+            Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
+            Package::Mithril(Spec { alias, .. }) => alias.clone(),
         }
     }
 
     pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
-            Package::CardanoNode(CardanoNode { version, .. }) => Some(Cow::Owned(
+            Package::CardanoNode(Spec { version, .. }) => Some(Cow::Owned(
                 CARDANO_NODE_PACKAGE_URL.replace("{version}", version),
             )),
-            Package::CardanoCli(CardanoCli { version, .. }) => Some(Cow::Owned(
+            Package::CardanoCli(Spec { version, .. }) => Some(Cow::Owned(
                 CARDANO_CLI_PACKAGE_URL.replace("{version}", version),
             )),
-            Package::Mithril(Mithril { version, .. }) => Some(Cow::Owned(
+            Package::Mithril(Spec { version, .. }) => Some(Cow::Owned(
                 MITHRIL_PACKAGE_URL.replace("{version}", version),
             )),
         }
@@ -94,20 +80,20 @@ impl Package {
 
     pub fn releases_url(&self) -> Option<Cow<str>> {
         match self {
-            Package::CardanoNode(CardanoNode { .. }) => Some(Cow::Owned(
+            Package::CardanoNode(Spec { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
             )),
-            Package::CardanoCli(CardanoCli { .. }) => Some(Cow::Owned(
+            Package::CardanoCli(Spec { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/IntersectMBO/cardano-node/releases".to_string(),
             )),
-            Package::Mithril(Mithril { .. }) => Some(Cow::Owned(
+            Package::Mithril(Spec { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/input-output-hk/mithril/releases".to_string(),
             )),
         }
     }
 
     pub fn new_cardano_node(version: String) -> Self {
-        Package::CardanoNode(CardanoNode {
+        Package::CardanoNode(Spec {
             alias: "cardano-node".to_string(),
             version,
             binary_path: "bin".to_string(),
@@ -115,7 +101,7 @@ impl Package {
     }
 
     pub fn new_cardano_cli(version: String) -> Self {
-        Package::CardanoCli(CardanoCli {
+        Package::CardanoCli(Spec {
             alias: "cardano-cli".to_string(),
             version,
             binary_path: "bin".to_string(),
@@ -123,7 +109,7 @@ impl Package {
     }
 
     pub fn new_mithril(version: String) -> Self {
-        Package::Mithril(Mithril {
+        Package::Mithril(Spec {
             alias: "mithril-client".to_string(),
             version,
             binary_path: "".to_string(),

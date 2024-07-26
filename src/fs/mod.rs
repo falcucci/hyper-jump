@@ -8,10 +8,8 @@ use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
 
-use crate::commands::install::CardanoCli;
-use crate::commands::install::CardanoNode;
-use crate::commands::install::Mithril;
 use crate::commands::install::Package;
+use crate::commands::install::Spec;
 use crate::helpers::version::LocalVersion;
 
 /// Returns the home directory path for the current user.
@@ -124,9 +122,9 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     let mut data_dir = get_local_data_dir()?;
     match package {
-        Package::CardanoNode(CardanoNode { alias, .. }) => data_dir.push(alias),
-        Package::CardanoCli(CardanoCli { alias, .. }) => data_dir.push(alias),
-        Package::Mithril(Mithril { alias, .. }) => data_dir.push(alias),
+        Package::CardanoNode(Spec { alias, .. }) => data_dir.push(alias),
+        Package::CardanoCli(Spec { alias, .. }) => data_dir.push(alias),
+        Package::Mithril(Spec { alias, .. }) => data_dir.push(alias),
     }
 
     let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();

@@ -1,10 +1,5 @@
-use anyhow::anyhow;
-use anyhow::Error;
-use anyhow::Result;
 use tokio::fs;
 use tracing::info;
-
-use super::install::Package;
 
 /// Asynchronously erases the hyper-jump installation and downloads folders.
 ///
