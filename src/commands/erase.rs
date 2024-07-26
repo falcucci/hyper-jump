@@ -32,11 +32,10 @@ use super::install::Package;
 /// erase(package).await?;
 /// # };
 /// ```
-pub async fn erase(package: Package) -> Result<(), Error> {
-    let downloads = crate::fs::get_downloads_directory(package.clone()).await?;
-    let installation_dir = crate::fs::get_installation_directory().await?;
+pub async fn erase() -> miette::Result<()> {
+    let downloads = crate::fs::get_local_data_dir().unwrap();
 
-    if fs::remove_dir_all(&installation_dir).await.is_ok() {
+    if fs::remove_dir_all(&downloads).await.is_ok() {
         info!("Successfully removed hyper-jump installation folder");
     }
 
@@ -46,7 +45,7 @@ pub async fn erase(package: Package) -> Result<(), Error> {
         // the folder doesn't exist damn...
         info!("Successfully removed hyper-jump downloads folder");
     } else {
-        return Err(anyhow!("There's nothing to erase"));
+        info!("No hyper-jump installation or downloads folder to remove");
     }
 
     Ok(())

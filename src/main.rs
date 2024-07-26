@@ -91,15 +91,20 @@ pub fn with_tracing() {
         .init();
 }
 
+fn parse_args(args: Vec<String>) -> (String, Vec<String>) {
+    let exe_name_path = Path::new(&args[0]);
+    let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
+    let rest_args = &args[1..];
+    (exe_name.to_string(), rest_args.to_vec())
+}
+
 #[tokio::main]
 async fn main() -> miette::Result<()> {
     let args: Vec<String> = env::args().collect();
-    let rest_args = &args[1..];
-    let exe_name_path = Path::new(&args[0]);
-    let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
+    let (exe_name, rest_args) = parse_args(args);
 
     if !exe_name.eq(env!("CARGO_PKG_NAME")) {
-        return handle_proxy(exe_name, rest_args).await;
+        return handle_proxy(&exe_name, &rest_args).await;
     }
 
     let cli = Cli::parse();
@@ -109,6 +114,6 @@ async fn main() -> miette::Result<()> {
         Commands::Mithril(args) => mithril::run(args, &ctx, &client).await,
         Commands::CardanoNode(args) => cardano_node::run(args, &ctx, &client).await,
         Commands::CardanoCli(args) => cardano_cli::run(args, &ctx, &client).await,
-        Commands::Erase => todo!(),
+        Commands::Erase => commands::erase::erase().await,
     }
 }

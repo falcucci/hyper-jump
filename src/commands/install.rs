@@ -54,6 +54,30 @@ pub enum Package {
 }
 
 impl Package {
+    pub fn alias(&self) -> String {
+        match self {
+            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
+            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
+            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
+        }
+    }
+
+    pub fn binary_path(&self) -> String {
+        match self {
+            Package::CardanoNode(CardanoNode { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoCli(CardanoCli { binary_path, .. }) => binary_path.clone(),
+            Package::Mithril(Mithril { binary_path, .. }) => binary_path.clone(),
+        }
+    }
+
+    pub fn binary_name(&self) -> String {
+        match self {
+            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
+            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
+            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
+        }
+    }
+
     pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
             Package::CardanoNode(CardanoNode { version, .. }) => Some(Cow::Owned(
@@ -79,30 +103,6 @@ impl Package {
             Package::Mithril(Mithril { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/input-output-hk/mithril/releases".to_string(),
             )),
-        }
-    }
-
-    pub fn alias(&self) -> String {
-        match self {
-            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
-            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
-            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
-        }
-    }
-
-    pub fn binary_path(&self) -> String {
-        match self {
-            Package::CardanoNode(CardanoNode { binary_path, .. }) => binary_path.clone(),
-            Package::CardanoCli(CardanoCli { binary_path, .. }) => binary_path.clone(),
-            Package::Mithril(Mithril { binary_path, .. }) => binary_path.clone(),
-        }
-    }
-
-    pub fn binary_name(&self) -> String {
-        match self {
-            Package::CardanoNode(CardanoNode { alias, .. }) => alias.clone(),
-            Package::CardanoCli(CardanoCli { alias, .. }) => alias.clone(),
-            Package::Mithril(Mithril { alias, .. }) => alias.clone(),
         }
     }
 
