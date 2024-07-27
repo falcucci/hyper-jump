@@ -26,13 +26,6 @@ pub async fn erase() -> miette::Result<()> {
 
     if fs::remove_dir_all(&downloads).await.is_ok() {
         info!("Successfully removed hyper-jump installation folder");
-    }
-
-    if fs::remove_dir_all(downloads).await.is_ok() {
-        // For some weird reason this check doesn't really work for downloads folder
-        // as it keeps thinking the folder exists and it runs with no issues even tho
-        // the folder doesn't exist damn...
-        info!("Successfully removed hyper-jump downloads folder");
     } else {
         info!("No hyper-jump installation or downloads folder to remove");
     }
