@@ -7,8 +7,10 @@ use semver::Version;
 use serde::Deserialize;
 use serde::Serialize;
 use tokio::fs;
+use tracing::info;
 
 use crate::commands::install::Package;
+use crate::commands::install::PackageType;
 
 /// Represents a local version of the software.
 ///
@@ -158,7 +160,6 @@ pub struct ParsedVersion {
 ///
 /// * `Normal` - Represents a normal version.
 /// * `Latest` - Represents the latest version.
-/// * `Hash` - Represents a version identified by a hash.
 ///
 /// # Example
 ///
@@ -167,14 +168,49 @@ pub struct ParsedVersion {
 /// match version_type {
 ///     VersionType::Normal => println!("This is a normal version."),
 ///     VersionType::Latest => println!("This is the latest version."),
-///     VersionType::Hash => println!("This is a version identified by a hash."),
 /// }
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum VersionType {
     Normal,
     Latest,
-    Hash,
+}
+
+impl VersionType {
+    pub fn from_string(version: &str) -> VersionType {
+        match version {
+            "latest" => VersionType::Latest,
+            _ => VersionType::Normal,
+        }
+    }
+
+    pub fn parse(
+        version: &str,
+        client: Option<&reqwest::Client>,
+        package_type: PackageType,
+    ) -> Result<ParsedVersion> {
+        let version_type = VersionType::from_string(version);
+        match version_type {
+            VersionType::Normal => {
+                let semver = semver(version)?;
+                let returned_version = match (semver, version.starts_with('v')) {
+                    (true, false) => parse_semver(version)?,
+                    _ => ParsedVersion {
+                        tag_name: version.to_string(),
+                        version_type: VersionType::Normal,
+                        non_parsed_string: version.to_string(),
+                        semver: None,
+                    },
+                };
+
+                Ok(returned_version)
+            }
+            VersionType::Latest => {
+                info!("Fetching latest version");
+                todo!()
+            }
+        }
+    }
 }
 
 pub fn semver(version: &str) -> Result<bool> {
@@ -190,21 +226,6 @@ fn parse_semver(version: &str) -> Result<ParsedVersion> {
         non_parsed_string: version.clone(),
         semver: Some(semver),
     })
-}
-
-pub async fn parse_version_type(version: &str) -> Result<ParsedVersion> {
-    let semver = semver(version)?;
-    let returned_version = match (semver, version.starts_with('v')) {
-        (true, false) => parse_semver(version)?,
-        _ => ParsedVersion {
-            tag_name: version.to_string(),
-            version_type: VersionType::Normal,
-            non_parsed_string: version.to_string(),
-            semver: None,
-        },
-    };
-
-    Ok(returned_version)
 }
 
 /// This function reads the downloads directory and checks if there is a
@@ -309,11 +330,7 @@ pub async fn is_version_used(version: &str, package: Package) -> bool {
 /// * The downloads directory cannot be determined.
 /// * The current directory cannot be changed to the downloads directory.
 /// * The version cannot be written to the "used" file.
-pub async fn switch_version(
-    client: &reqwest::Client,
-    version: &ParsedVersion,
-    package: Package,
-) -> Result<()> {
+pub async fn switch_version(version: &ParsedVersion, package: Package) -> Result<()> {
     std::env::set_current_dir(crate::fs::get_downloads_directory(package).await?)?;
 
     let file_version: String = version.tag_name.to_string();

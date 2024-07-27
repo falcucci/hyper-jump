@@ -40,10 +40,6 @@ pub async fn list(package: Package) -> Result<(), Error> {
 
         let path_name = path.file_name().unwrap().to_str().unwrap();
 
-        if !is_version(path_name) {
-            continue;
-        }
-
         let status = if is_version_used(path_name, package.clone()).await {
             Cell::new("Used").fg(Color::Green)
         } else {
@@ -59,21 +55,4 @@ pub async fn list(package: Package) -> Result<(), Error> {
     println!("{table}");
 
     Ok(())
-}
-
-fn is_version(name: &str) -> bool {
-    match name {
-        "stable" => true,
-        nightly_name if nightly_name.contains("nightly") => true,
-        name => {
-            let version_regex = Regex::new(r"^v?[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
-            let hash_regex = Regex::new(r"\b[0-9a-f]{5,40}\b").unwrap();
-
-            if version_regex.is_match(name) {
-                return true;
-            }
-
-            hash_regex.is_match(name)
-        }
-    }
 }

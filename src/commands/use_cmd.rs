@@ -8,10 +8,10 @@ use crate::helpers::version::switch_version;
 use crate::helpers::version::ParsedVersion;
 
 pub async fn use_cmd(
-    client: &reqwest::Client,
-    version: ParsedVersion,
+    client: Option<&reqwest::Client>,
     package: Package,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let version = package.version().unwrap();
     let is_version_used = is_version_used(&version.tag_name, package.clone()).await;
 
     println!("Copying package proxy...");
@@ -22,10 +22,10 @@ pub async fn use_cmd(
     }
 
     println!("Installing version: {}", version.tag_name);
-    install(client, package.clone(), version.clone()).await?;
+    install(client, package.clone()).await?;
 
     println!("Switching to version: {}", version.tag_name);
-    switch_version(client, &version, package.clone()).await?;
+    switch_version(&version, package.clone()).await?;
 
     info!("You can now use {}!", version.tag_name);
 

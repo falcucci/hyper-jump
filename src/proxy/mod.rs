@@ -46,12 +46,8 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
         return Ok(());
     }
 
-    let package = match exec_name {
-        "cardano-node" => Package::new(PackageType::CardanoNode, "9.0.0".to_string()),
-        "cardano-cli" => Package::new(PackageType::CardanoCli, "9.0.1".to_string()),
-        "mithril-client" => Package::new(PackageType::Mithril, "9.0.0".to_string()),
-        _ => return Err(miette::miette!("Unknown package")),
-    };
+    let package_type = PackageType::from_str(exec_name);
+    let package = Package::new(package_type, String::new(), None);
 
     handle_package_process(rest_args, package).await.unwrap();
 

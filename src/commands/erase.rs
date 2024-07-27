@@ -4,13 +4,8 @@ use tracing::info;
 /// Asynchronously erases the hyper-jump installation and downloads folders.
 ///
 /// This function attempts to remove the hyper-jump installation directory and
-/// the downloads directory associated with the provided package. It logs
-/// successful removals and returns an error if there is nothing to erase.
-///
-/// # Arguments
-///
-/// * `package` - A `Package` instance representing the package whose associated
-///   directories are to be erased.
+/// the downloads directory. It logs successful removals and returns an error if
+/// there is nothing to erase or if an error occurs during the removal process.
 ///
 /// # Errors
 ///
@@ -20,12 +15,11 @@ use tracing::info;
 /// # Examples
 ///
 /// ```no_run
-/// # use hyper_jump::commands::erase::erase;
-/// # use hyper_jump::commands::install::Package;
-/// # async {
-/// let package = Package::new(/* ... */);
-/// erase(package).await?;
-/// # };
+/// #[tokio::main]
+/// async fn main() -> miette::Result<()> {
+///     erase().await?;
+///     Ok(())
+/// }
 /// ```
 pub async fn erase() -> miette::Result<()> {
     let downloads = crate::fs::get_local_data_dir().unwrap();

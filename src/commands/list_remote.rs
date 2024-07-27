@@ -39,7 +39,7 @@ use crate::services::github::deserialize_response;
 /// This function will return an error if there is no releases URL for the
 /// package or if there is an issue with fetching or processing the list of
 /// versions.
-pub async fn list_remote(client: &Client, package: Package) -> Result<(), Error> {
+pub async fn list_remote(client: Option<&Client>, package: Package) -> Result<(), Error> {
     let url = package.releases_url().ok_or(anyhow!("No releases URL"))?;
     let response = api(client, url).await?;
 

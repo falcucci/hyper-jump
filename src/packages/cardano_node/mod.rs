@@ -8,8 +8,7 @@ use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
-use crate::helpers::client;
-use crate::helpers::version::parse_version_type;
+use crate::helpers::version::VersionType;
 
 #[derive(Parser)]
 pub struct Args {
@@ -36,30 +35,27 @@ pub struct Run {
 pub async fn run(
     args: Args,
     _ctx: &crate::Context,
-    client: &reqwest::Client,
+    client: Option<&reqwest::Client>,
 ) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
-            let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
-            use_cmd(client, version, package).await.expect("Failed to set the version")
+            let package = Package::new(PackageType::CardanoNode, version, client);
+            use_cmd(client, package).await.expect("Failed to set the version")
         }
         Commands::Install { version } => {
-            let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
-            install(client, package, version).await.expect("Failed to install")
+            let package = Package::new(PackageType::CardanoNode, version, client);
+            install(client, package).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
-            let version = parse_version_type(&version).await.unwrap();
-            let package = Package::new(PackageType::CardanoNode, version.non_parsed_string.clone());
+            let package = Package::new(PackageType::CardanoNode, version, client);
             uninstall(package).await.expect("Failed to erase");
         }
         Commands::List => {
-            let package = Package::new(PackageType::CardanoNode, "".to_string());
+            let package = Package::new(PackageType::CardanoNode, "".to_string(), client);
             list(package).await.expect("Failed to list");
         }
         Commands::ListRemote => {
-            let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string());
+            let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string(), client);
             list_remote(client, package).await.expect("Failed to list remote");
         }
     }

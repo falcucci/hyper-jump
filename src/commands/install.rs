@@ -28,7 +28,7 @@ use crate::packages::MITHRIL_PACKAGE_URL;
 #[derive(Debug, Clone)]
 pub struct Spec {
     pub alias: String,
-    pub version: String,
+    pub version: Option<ParsedVersion>,
     pub binary_path: String,
 }
 
@@ -46,12 +46,31 @@ pub enum PackageType {
     Mithril,
 }
 
+impl PackageType {
+    pub fn from_str(package: &str) -> Self {
+        match package {
+            "cardano-node" => PackageType::CardanoNode,
+            "cardano-cli" => PackageType::CardanoCli,
+            "mithril-client" => PackageType::Mithril,
+            _ => panic!("Unknown package"),
+        }
+    }
+}
+
 impl Package {
     pub fn alias(&self) -> String {
         match self {
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
+        }
+    }
+
+    pub fn version(&self) -> Option<ParsedVersion> {
+        match self {
+            Package::CardanoNode(Spec { version, .. }) => version.clone(),
+            Package::CardanoCli(Spec { version, .. }) => version.clone(),
+            Package::Mithril(Spec { version, .. }) => version.clone(),
         }
     }
 
@@ -73,15 +92,24 @@ impl Package {
 
     pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
-            Package::CardanoNode(Spec { version, .. }) => Some(Cow::Owned(
-                CARDANO_NODE_PACKAGE_URL.replace("{version}", version),
-            )),
-            Package::CardanoCli(Spec { version, .. }) => Some(Cow::Owned(
-                CARDANO_CLI_PACKAGE_URL.replace("{version}", version),
-            )),
-            Package::Mithril(Spec { version, .. }) => Some(Cow::Owned(
-                MITHRIL_PACKAGE_URL.replace("{version}", version),
-            )),
+            Package::CardanoNode(Spec { version, .. }) => {
+                Some(Cow::Owned(CARDANO_NODE_PACKAGE_URL.replace(
+                    "{version}",
+                    version.clone().unwrap().non_parsed_string.as_str(),
+                )))
+            }
+            Package::CardanoCli(Spec { version, .. }) => {
+                Some(Cow::Owned(CARDANO_CLI_PACKAGE_URL.replace(
+                    "{version}",
+                    version.clone().unwrap().non_parsed_string.as_str(),
+                )))
+            }
+            Package::Mithril(Spec { version, .. }) => {
+                Some(Cow::Owned(MITHRIL_PACKAGE_URL.replace(
+                    "{version}",
+                    version.clone().unwrap().non_parsed_string.as_str(),
+                )))
+            }
         }
     }
 
@@ -99,21 +127,22 @@ impl Package {
         }
     }
 
-    pub fn new(package_type: PackageType, version: String) -> Package {
+    pub fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
+        let version = VersionType::parse(&version, client, package_type.clone()).unwrap();
         match package_type {
             PackageType::CardanoNode => Package::CardanoNode(Spec {
                 alias: "cardano-node".to_string(),
-                version,
+                version: Some(version),
                 binary_path: "bin".to_string(),
             }),
             PackageType::CardanoCli => Package::CardanoCli(Spec {
                 alias: "cardano-cli".to_string(),
-                version,
+                version: Some(version),
                 binary_path: "bin".to_string(),
             }),
             PackageType::Mithril => Package::Mithril(Spec {
                 alias: "mithril-client".to_string(),
-                version,
+                version: Some(version),
                 binary_path: "".to_string(),
             }),
         }
@@ -146,11 +175,8 @@ impl Package {
 /// let version = ParsedVersion::parse("1.0.0").unwrap();
 /// install(&client, package, version).await?;
 /// ```
-pub async fn install(
-    client: &Client,
-    package: Package,
-    version: ParsedVersion,
-) -> Result<(), Error> {
+pub async fn install(client: Option<&Client>, package: Package) -> Result<(), Error> {
+    let version = package.version().map_or_else(|| Err(anyhow!("No version specified")), Ok)?;
     let root = get_downloads_directory(package.clone()).await?;
 
     println!("Root: {}", root.display());
@@ -169,8 +195,6 @@ pub async fn install(
         VersionType::Normal | VersionType::Latest => {
             download_version(client, &version, root, package.clone()).await?
         }
-        // VersionType::Hash => handle_building_from_source(version).await,
-        VersionType::Hash => todo!(),
     };
 
     if let PostDownloadVersionType::Standard(local_version) = downloaded_file {
@@ -215,7 +239,7 @@ pub async fn install(
 /// let result = download_version(&client, &version, &root).await;
 /// ```
 async fn download_version(
-    client: &Client,
+    client: Option<&Client>,
     version: &ParsedVersion,
     root: &Path,
     package: Package,
@@ -379,7 +403,7 @@ fn create_file_path(version: &ParsedVersion, root: &Path, file_type: &str) -> St
 /// * [`helpers::get_platform_name_download`](src/helpers/platform.rs)
 /// * [`helpers::get_file_type`](src/helpers/file.rs)
 async fn send_request(
-    client: &Client,
+    client: Option<&Client>,
     package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
     let platform = get_platform_name();
@@ -389,6 +413,7 @@ async fn send_request(
     println!("Downloading: {}", package_url);
 
     client
+        .expect("Client is not set")
         .get(package_url.to_string())
         .header("user-agent", "hyper-jump")
         .send()

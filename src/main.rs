@@ -109,11 +109,12 @@ async fn main() -> miette::Result<()> {
 
     let cli = Cli::parse();
     let ctx = Context::for_cli(&cli)?;
-    let client = client::create_reqwest_client().unwrap();
+    let client = Some(client::create_reqwest_client().map_err(|e| miette::miette!(e))?);
+
     match cli.command {
-        Commands::Mithril(args) => mithril::run(args, &ctx, &client).await,
-        Commands::CardanoNode(args) => cardano_node::run(args, &ctx, &client).await,
-        Commands::CardanoCli(args) => cardano_cli::run(args, &ctx, &client).await,
+        Commands::Mithril(args) => mithril::run(args, &ctx, client.as_ref()).await,
+        Commands::CardanoNode(args) => cardano_node::run(args, &ctx, client.as_ref()).await,
+        Commands::CardanoCli(args) => cardano_cli::run(args, &ctx, client.as_ref()).await,
         Commands::Erase => commands::erase::erase().await,
     }
 }
