@@ -9,4 +9,5 @@ pub const CARDANO_CLI_PACKAGE_URL: &str = "https://github.com/IntersectMBO/carda
 
 pub const MITHRIL_PACKAGE_URL: &str = "https://github.com//input-output-hk/mithril/releases/download/{version}/mithril-{version}-{OS}-arm64.tar.gz";
 
-pub const AIKEN_PACKAGE_URL: &str = "https://github.com/aiken-lang/aiken/releases/download/{version}/aiken-aarch64-apple-darwin.tar.gz";
+pub const AIKEN_PACKAGE_URL: &str =
+    "https://github.com/aiken-lang/aiken/releases/download/{version}/aiken-{platform}.tar.gz";
