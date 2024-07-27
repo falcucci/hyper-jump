@@ -8,7 +8,7 @@ authors = ["Alexsander Falcucci <alex.falcucci@gmail.com>"]
 description = "A generalist all-in-one command-line version manager toolset for Cardano-based projects."
 categories = ["command-line-utilities"]
 repository = "https://github.com/falcucci/hyper-jump"
-keywords = ["cardano", "version-manager", "blockchain", "node-management", "cli-tool", "mithril", "aiken", "package-management", "cross-platform", "installation", "switch-versions", "crypto", "cryptocurrency", "development-tools"]
+keywords = ["cardano", "version-manager", "blockchain", "node-management", "cli-tool"]
 
 [dependencies]
 clap = { version = "4.5.4",  features = ["derive", "env"] }
