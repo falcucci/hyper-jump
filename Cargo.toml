@@ -2,6 +2,28 @@
 name = "hyper-jump"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+readme = "README.md"
+authors = ["Alexsander Falcucci <alex.falcucci@gmail.com>"]
+description = "The console lights up, keys clack rapidly and then... hyper-jump!"
+categories = ["command-line-utilities"]
+repository = "https://github.com/falcucci/hyper-jump"
+keywords = [
+  "cardano",
+  "version-manager",
+  "blockchain",
+  "node-management",
+  "cli-tool",
+  "mithril",
+  "aiken",
+  "package-management",
+  "cross-platform",
+  "installation",
+  "switch-versions",
+  "crypto",
+  "cryptocurrency",
+  "development-tools",
+]
 
 [dependencies]
 clap = { version = "4.5.4",  features = ["derive", "env"] }
@@ -26,3 +48,10 @@ serde_json = "1.0.120"
 chrono = { version = "0.4.38", features = ["serde"] }
 yansi = "1.0.1"
 comfy-table = "7.1.1"
+
+[[bin]]
+path = "src/main.rs"
+name = "hyper-jump"
+plugin = false
+proc-macro = false
+required-features = []
