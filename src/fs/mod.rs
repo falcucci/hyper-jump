@@ -122,14 +122,8 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 /// ```
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     let mut data_dir = get_local_data_dir()?;
-    // let alias = package.alias();
-    // data_dir.push(alias);
-    match package {
-        Package::CardanoNode(Spec { alias, .. }) => data_dir.push(alias),
-        Package::CardanoCli(Spec { alias, .. }) => data_dir.push(alias),
-        Package::Mithril(Spec { alias, .. }) => data_dir.push(alias),
-        Package::Aiken(Spec { alias, .. }) => data_dir.push(alias),
-    }
+    let alias = package.alias();
+    data_dir.push(alias);
 
     let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();
     let is_folder_created = tokio::fs::create_dir_all(&data_dir).await.is_ok();
