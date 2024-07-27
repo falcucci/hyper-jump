@@ -16,11 +16,13 @@ use crate::fs::copy_package_proxy;
 use crate::fs::get_downloads_directory;
 use crate::fs::get_file_type;
 use crate::fs::get_platform_name;
+use crate::fs::get_platform_name_download;
 use crate::fs::unarchive;
 use crate::helpers::version::is_version_installed;
 use crate::helpers::version::LocalVersion;
 use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
+use crate::packages::AIKEN_PACKAGE_URL;
 use crate::packages::CARDANO_CLI_PACKAGE_URL;
 use crate::packages::CARDANO_NODE_PACKAGE_URL;
 use crate::packages::MITHRIL_PACKAGE_URL;
@@ -37,6 +39,7 @@ pub enum Package {
     CardanoNode(Spec),
     CardanoCli(Spec),
     Mithril(Spec),
+    Aiken(Spec),
 }
 
 #[derive(Debug, Clone)]
@@ -44,6 +47,7 @@ pub enum PackageType {
     CardanoNode,
     CardanoCli,
     Mithril,
+    Aiken,
 }
 
 impl PackageType {
@@ -52,6 +56,7 @@ impl PackageType {
             "cardano-node" => PackageType::CardanoNode,
             "cardano-cli" => PackageType::CardanoCli,
             "mithril-client" => PackageType::Mithril,
+            "aiken" => PackageType::Aiken,
             _ => panic!("Unknown package"),
         }
     }
@@ -63,6 +68,7 @@ impl Package {
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
+            Package::Aiken(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -71,6 +77,7 @@ impl Package {
             Package::CardanoNode(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
+            Package::Aiken(Spec { version, .. }) => version.clone(),
         }
     }
 
@@ -79,6 +86,7 @@ impl Package {
             Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
 
@@ -87,6 +95,7 @@ impl Package {
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
+            Package::Aiken(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -98,7 +107,11 @@ impl Package {
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
                     )
-                    .replace("{OS}", get_platform_name()),
+                    .replace("{OS}", get_platform_name())
+                    .replace(
+                        "{platform}",
+                        get_platform_name_download(PackageType::CardanoNode),
+                    ),
             )),
             Package::CardanoCli(Spec { version, .. }) => Some(Cow::Owned(
                 CARDANO_CLI_PACKAGE_URL
@@ -106,7 +119,11 @@ impl Package {
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
                     )
-                    .replace("{OS}", get_platform_name()),
+                    .replace("{OS}", get_platform_name())
+                    .replace(
+                        "{platform}",
+                        get_platform_name_download(PackageType::CardanoCli),
+                    ),
             )),
             Package::Mithril(Spec { version, .. }) => Some(Cow::Owned(
                 MITHRIL_PACKAGE_URL
@@ -114,7 +131,20 @@ impl Package {
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
                     )
-                    .replace("{OS}", get_platform_name()),
+                    .replace("{OS}", get_platform_name())
+                    .replace(
+                        "{platform}",
+                        get_platform_name_download(PackageType::Mithril),
+                    ),
+            )),
+            Package::Aiken(Spec { version, .. }) => Some(Cow::Owned(
+                AIKEN_PACKAGE_URL
+                    .replace(
+                        "{version}",
+                        version.clone().unwrap().non_parsed_string.as_str(),
+                    )
+                    .replace("{OS}", get_platform_name())
+                    .replace("{platform}", get_platform_name_download(PackageType::Aiken)),
             )),
         }
     }
@@ -129,6 +159,9 @@ impl Package {
             )),
             Package::Mithril(Spec { .. }) => Some(Cow::Owned(
                 "https://api.github.com/repos/input-output-hk/mithril/releases".to_string(),
+            )),
+            Package::Aiken(Spec { .. }) => Some(Cow::Owned(
+                "https://api.github.com/repos/aiken-lang/aiken/releases".to_string(),
             )),
         }
     }
@@ -150,6 +183,14 @@ impl Package {
                 alias: "mithril-client".to_string(),
                 version: Some(version),
                 binary_path: "".to_string(),
+            }),
+            PackageType::Aiken => Package::Aiken(Spec {
+                alias: "aiken".to_string(),
+                version: Some(version),
+                binary_path: "aiken-{platform}".replace(
+                    "{platform}",
+                    get_platform_name_download(package_type.clone()),
+                ),
             }),
         }
     }

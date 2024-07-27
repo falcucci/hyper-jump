@@ -1,3 +1,11 @@
+mod commands;
+mod dirs;
+mod fs;
+mod helpers;
+mod packages;
+mod proxy;
+mod services;
+
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -6,8 +14,9 @@ use clap::Parser;
 use clap::Subcommand;
 use clap::ValueEnum;
 use helpers::client;
+use packages::aiken;
 use packages::cardano_cli;
-use packages::cardano_node::{self};
+use packages::cardano_node;
 use packages::mithril;
 use proxy::handle_proxy;
 use tracing::Level;
@@ -16,14 +25,6 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 extern crate core;
-
-mod commands;
-mod dirs;
-mod fs;
-mod helpers;
-mod packages;
-mod proxy;
-mod services;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -61,6 +62,7 @@ enum Commands {
     Mithril(mithril::Args),
     CardanoNode(cardano_node::Args),
     CardanoCli(cardano_cli::Args),
+    Aiken(aiken::Args),
     Erase,
 }
 
@@ -115,6 +117,7 @@ async fn main() -> miette::Result<()> {
         Commands::Mithril(args) => mithril::run(args, &ctx, client.as_ref()).await,
         Commands::CardanoNode(args) => cardano_node::run(args, &ctx, client.as_ref()).await,
         Commands::CardanoCli(args) => cardano_cli::run(args, &ctx, client.as_ref()).await,
+        Commands::Aiken(args) => aiken::run(args, &ctx, client.as_ref()).await,
         Commands::Erase => commands::erase::erase().await,
     }
 }

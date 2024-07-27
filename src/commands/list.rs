@@ -10,7 +10,6 @@ use comfy_table::Cell;
 use comfy_table::CellAlignment;
 use comfy_table::Color;
 use comfy_table::Table;
-use regex::Regex;
 
 use super::install::Package;
 use crate::fs::get_downloads_directory;

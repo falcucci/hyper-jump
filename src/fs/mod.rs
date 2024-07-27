@@ -9,6 +9,7 @@ use anyhow::Result;
 use tracing::info;
 
 use crate::commands::install::Package;
+use crate::commands::install::PackageType;
 use crate::commands::install::Spec;
 use crate::helpers::version::LocalVersion;
 
@@ -121,10 +122,13 @@ pub fn get_local_data_dir() -> Result<PathBuf> {
 /// ```
 pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
     let mut data_dir = get_local_data_dir()?;
+    // let alias = package.alias();
+    // data_dir.push(alias);
     match package {
         Package::CardanoNode(Spec { alias, .. }) => data_dir.push(alias),
         Package::CardanoCli(Spec { alias, .. }) => data_dir.push(alias),
         Package::Mithril(Spec { alias, .. }) => data_dir.push(alias),
+        Package::Aiken(Spec { alias, .. }) => data_dir.push(alias),
     }
 
     let does_folder_exist = tokio::fs::metadata(&data_dir).await.is_ok();
@@ -208,7 +212,7 @@ pub fn get_platform_name() -> &'static str { std::env::consts::OS }
 /// let platform_name_download = get_platform_name_download();
 /// println!("Platform name for downloads: {}", platform_name_download);
 /// ```
-pub fn get_platform_name_download() -> &'static str {
+pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
     #[cfg(target_family = "windows")]
     {
         "win64"
@@ -218,12 +222,22 @@ pub fn get_platform_name_download() -> &'static str {
     {
         #[cfg(target_arch = "aarch64")]
         {
-            "aarch64-darwin"
+            match package_type {
+                PackageType::CardanoNode => "",
+                PackageType::CardanoCli => "",
+                PackageType::Mithril => "arm64",
+                PackageType::Aiken => "aarch64-apple-darwin",
+            }
         }
 
         #[cfg(target_arch = "x86_64")]
         {
-            "x86_64-darwin"
+            match package_type {
+                PackageType::CardanoNode => "",
+                PackageType::CardanoCli => "",
+                PackageType::Mithril => "x86_64",
+                PackageType::Aiken => "x86_64-apple-darwin",
+            }
         }
     }
 

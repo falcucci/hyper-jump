@@ -3,6 +3,5 @@ group_imports = "StdExternalCrate"
 imports_granularity = "Item"
 format_strings = true
 fn_single_line = true
-merge_imports = true
 wrap_comments = true
 chain_width = 80
