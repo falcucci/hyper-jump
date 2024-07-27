@@ -166,7 +166,7 @@ pub fn get_file_type() -> &'static str {
 
     #[cfg(target_os = "linux")]
     {
-        "appimage"
+        "tar.gz"
     }
 }
 
@@ -237,7 +237,12 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
 
     #[cfg(target_os = "linux")]
     {
-        "linux"
+        match package_type {
+            PackageType::CardanoNode => "",
+            PackageType::CardanoCli => "",
+            PackageType::Mithril => "x64",
+            PackageType::Aiken => "x86_64-unknown-linux-gnu",
+        }
     }
 }
 
@@ -462,7 +467,6 @@ pub async fn unarchive(package: Package, file: LocalVersion) -> Result<()> {
 /// };
 /// expand(downloaded_file);
 /// ```
-#[cfg(target_os = "macos")]
 fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
     use std::fs::File;
     use std::os::unix::fs::PermissionsExt;
