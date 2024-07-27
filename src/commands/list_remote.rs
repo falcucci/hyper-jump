@@ -5,6 +5,7 @@ use anyhow::anyhow;
 use anyhow::Error;
 use anyhow::Result;
 use reqwest::Client;
+use tracing::info;
 use yansi::Paint;
 
 use super::install::Package;

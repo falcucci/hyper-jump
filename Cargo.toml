@@ -40,3 +40,10 @@ name = "hyper-jump"
 plugin = false
 proc-macro = false
 required-features = []
+
+[profile.optimized]
+inherits = "release"
+opt-level = "z"
+strip = true
+lto = true
+codegen-units = 1

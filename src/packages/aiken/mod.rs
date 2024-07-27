@@ -9,6 +9,7 @@ use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
+use crate::with_tracing;
 
 #[derive(Parser)]
 pub struct Args {

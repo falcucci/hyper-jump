@@ -31,7 +31,5 @@ pub enum InstallResult {
 /// * `Hash` - The version is identified by a hash.
 #[derive(PartialEq)]
 pub enum PostDownloadVersionType {
-    None,
     Standard(LocalVersion),
-    Hash,
 }

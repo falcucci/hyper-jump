@@ -10,6 +10,7 @@ use futures_util::stream::StreamExt;
 use indicatif::ProgressBar;
 use reqwest::Client;
 use tokio::io::AsyncWriteExt;
+use tracing::info;
 
 use super::PostDownloadVersionType;
 use crate::fs::copy_package_proxy;
@@ -242,7 +243,6 @@ pub async fn install(client: Option<&Client>, package: Package) -> Result<(), Er
     let version = package.version().map_or_else(|| Err(anyhow!("No version specified")), Ok)?;
     let root = get_downloads_directory(package.clone()).await?;
 
-    println!("Root: {}", root.display());
     env::set_current_dir(&root)?;
     let root = root.as_path();
 
@@ -473,7 +473,7 @@ async fn send_request(
     let file_type = get_file_type();
 
     let package_url = package.download_url().unwrap();
-    println!("Downloading: {}", package_url);
+    info!("Downloading: {}", package_url);
 
     client
         .expect("Client is not set")

@@ -95,14 +95,11 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
 pub async fn handle_package_process(args: &[String], package: Package) -> Result<()> {
     let downloads_dir = crate::fs::get_downloads_directory(package.clone()).await?;
     let used_version = get_current_version(package.clone()).await?;
-    println!("Used version: {}", used_version);
 
     let location = downloads_dir
         .join(used_version)
         .join(package.binary_path())
         .join(package.binary_name());
-
-    println!("Running: {:?}", location);
 
     let _term = Arc::new(AtomicBool::new(false));
 

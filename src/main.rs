@@ -102,6 +102,7 @@ fn parse_args(args: Vec<String>) -> (String, Vec<String>) {
 
 #[tokio::main]
 async fn main() -> miette::Result<()> {
+    tracing_subscriber::fmt::init();
     let args: Vec<String> = env::args().collect();
     let (exe_name, rest_args) = parse_args(args);
 

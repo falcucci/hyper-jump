@@ -14,17 +14,14 @@ pub async fn use_cmd(
     let version = package.version().unwrap();
     let is_version_used = is_version_used(&version.tag_name, package.clone()).await;
 
-    println!("Copying package proxy...");
     copy_package_proxy(package.clone()).await?;
 
     if is_version_used {
         return Ok(());
     }
 
-    println!("Installing version: {}", version.tag_name);
     install(client, package.clone()).await?;
 
-    println!("Switching to version: {}", version.tag_name);
     switch_version(&version, package.clone()).await?;
 
     info!("You can now use {}!", version.tag_name);

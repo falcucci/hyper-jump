@@ -281,8 +281,6 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
 pub async fn copy_package_proxy(package: Package) -> Result<()> {
     let exe_path = env::current_exe().unwrap();
     let mut installation_dir = get_installation_directory().await?;
-    println!("exe_path: {:?}", exe_path);
-    println!("installation_dir: {:?}", installation_dir);
 
     if fs::metadata(&installation_dir).is_err() {
         fs::create_dir_all(&installation_dir)?;

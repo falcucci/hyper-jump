@@ -10,6 +10,7 @@ use comfy_table::Cell;
 use comfy_table::CellAlignment;
 use comfy_table::Color;
 use comfy_table::Table;
+use tracing::info;
 
 use super::install::Package;
 use crate::fs::get_downloads_directory;
@@ -24,7 +25,8 @@ pub async fn list(package: Package) -> Result<(), Error> {
         .collect();
 
     if paths.is_empty() {
-        return Err(anyhow!("There are no versions installed"));
+        info!("There are no versions installed");
+        return Ok(());
     }
 
     let mut table = Table::new();
