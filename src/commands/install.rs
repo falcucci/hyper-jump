@@ -62,6 +62,18 @@ impl PackageType {
     }
 }
 
+/// Constructs a new `Package` with the specified type and version.
+///
+/// # Arguments
+///
+/// * `package_type` - The type of the package to construct.
+/// * `version` - The version string of the package.
+/// * `client` - An optional reference to a `reqwest::Client` for making HTTP
+///   requests.
+///
+/// # Returns
+///
+/// Returns a new instance of `Package`.
 impl Package {
     pub fn alias(&self) -> String {
         match self {
@@ -111,7 +123,8 @@ impl Package {
                     .replace(
                         "{platform}",
                         get_platform_name_download(PackageType::CardanoNode),
-                    ),
+                    )
+                    .replace("{file_type}", get_file_type()),
             )),
             Package::CardanoCli(Spec { version, .. }) => Some(Cow::Owned(
                 CARDANO_CLI_PACKAGE_URL
@@ -123,7 +136,8 @@ impl Package {
                     .replace(
                         "{platform}",
                         get_platform_name_download(PackageType::CardanoCli),
-                    ),
+                    )
+                    .replace("{file_type}", get_file_type()),
             )),
             Package::Mithril(Spec { version, .. }) => Some(Cow::Owned(
                 MITHRIL_PACKAGE_URL
@@ -135,7 +149,8 @@ impl Package {
                     .replace(
                         "{platform}",
                         get_platform_name_download(PackageType::Mithril),
-                    ),
+                    )
+                    .replace("{file_type}", get_file_type()),
             )),
             Package::Aiken(Spec { version, .. }) => Some(Cow::Owned(
                 AIKEN_PACKAGE_URL
@@ -144,7 +159,8 @@ impl Package {
                         version.clone().unwrap().non_parsed_string.as_str(),
                     )
                     .replace("{OS}", get_platform_name())
-                    .replace("{platform}", get_platform_name_download(PackageType::Aiken)),
+                    .replace("{platform}", get_platform_name_download(PackageType::Aiken))
+                    .replace("{file_type}", get_file_type()),
             )),
         }
     }
