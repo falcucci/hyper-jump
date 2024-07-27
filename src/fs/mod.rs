@@ -10,7 +10,6 @@ use tracing::info;
 
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
-use crate::commands::install::Spec;
 use crate::helpers::version::LocalVersion;
 
 /// Returns the home directory path for the current user.
