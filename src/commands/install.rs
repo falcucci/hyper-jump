@@ -92,24 +92,30 @@ impl Package {
 
     pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
-            Package::CardanoNode(Spec { version, .. }) => {
-                Some(Cow::Owned(CARDANO_NODE_PACKAGE_URL.replace(
-                    "{version}",
-                    version.clone().unwrap().non_parsed_string.as_str(),
-                )))
-            }
-            Package::CardanoCli(Spec { version, .. }) => {
-                Some(Cow::Owned(CARDANO_CLI_PACKAGE_URL.replace(
-                    "{version}",
-                    version.clone().unwrap().non_parsed_string.as_str(),
-                )))
-            }
-            Package::Mithril(Spec { version, .. }) => {
-                Some(Cow::Owned(MITHRIL_PACKAGE_URL.replace(
-                    "{version}",
-                    version.clone().unwrap().non_parsed_string.as_str(),
-                )))
-            }
+            Package::CardanoNode(Spec { version, .. }) => Some(Cow::Owned(
+                CARDANO_NODE_PACKAGE_URL
+                    .replace(
+                        "{version}",
+                        version.clone().unwrap().non_parsed_string.as_str(),
+                    )
+                    .replace("{OS}", get_platform_name()),
+            )),
+            Package::CardanoCli(Spec { version, .. }) => Some(Cow::Owned(
+                CARDANO_CLI_PACKAGE_URL
+                    .replace(
+                        "{version}",
+                        version.clone().unwrap().non_parsed_string.as_str(),
+                    )
+                    .replace("{OS}", get_platform_name()),
+            )),
+            Package::Mithril(Spec { version, .. }) => Some(Cow::Owned(
+                MITHRIL_PACKAGE_URL
+                    .replace(
+                        "{version}",
+                        version.clone().unwrap().non_parsed_string.as_str(),
+                    )
+                    .replace("{OS}", get_platform_name()),
+            )),
         }
     }
 
