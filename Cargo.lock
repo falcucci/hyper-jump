@@ -606,7 +606,7 @@ dependencies = [
 
 [[package]]
 name = "hyper-jump"
-version = "0.2.1"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "chrono",
