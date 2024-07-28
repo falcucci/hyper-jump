@@ -17,6 +17,7 @@ use commands::erase;
 use commands::install;
 use commands::list;
 use commands::list_remote;
+use commands::prefix;
 use commands::uninstall;
 use commands::use_cmd;
 use helpers::client;
@@ -125,6 +126,6 @@ async fn main() -> miette::Result<()> {
         Commands::Uninstall(args) => uninstall::run(args, &ctx, client.as_ref()).await,
         Commands::List(args) => list::run(args, &ctx, client.as_ref()).await,
         Commands::ListRemote(args) => list_remote::run(args, &ctx, client.as_ref()).await,
-        Commands::Prefix => todo!(),
+        Commands::Prefix => prefix::run().await,
     }
 }
