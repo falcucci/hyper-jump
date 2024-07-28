@@ -23,10 +23,15 @@ use crate::helpers::version::is_version_installed;
 use crate::helpers::version::LocalVersion;
 use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
-use crate::packages::AIKEN_PACKAGE_URL;
-use crate::packages::CARDANO_CLI_PACKAGE_URL;
-use crate::packages::CARDANO_NODE_PACKAGE_URL;
-use crate::packages::MITHRIL_PACKAGE_URL;
+use crate::packages::AIKEN_PACKAGE_DOWNLOAD_URL;
+use crate::packages::AIKEN_PACKAGE_LATEST_RELEASE_URL;
+use crate::packages::AIKEN_PACKAGE_RELEASES_URL;
+use crate::packages::CARDANO_CLI_PACKAGE_DOWNLOAD_URL;
+use crate::packages::CARDANO_CLI_PACKAGE_LATEST_RELEASE_URL;
+use crate::packages::CARDANO_NODE_PACKAGE_DOWNLOAD_URL;
+use crate::packages::CARDANO_NODE_PACKAGE_LATEST_RELEASE_URL;
+use crate::packages::MITHRIL_PACKAGE_DOWNLOAD_URL;
+use crate::packages::MITHRIL_PACKAGE_LATEST_RELEASE_URL;
 
 #[derive(Debug, Clone)]
 pub struct Spec {
@@ -59,6 +64,15 @@ impl PackageType {
             "mithril-client" => PackageType::Mithril,
             "aiken" => PackageType::Aiken,
             _ => panic!("Unknown package"),
+        }
+    }
+
+    pub fn get_latest_url(&self) -> String {
+        match self {
+            PackageType::CardanoNode => CARDANO_NODE_PACKAGE_LATEST_RELEASE_URL.to_string(),
+            PackageType::CardanoCli => CARDANO_CLI_PACKAGE_LATEST_RELEASE_URL.to_string(),
+            PackageType::Mithril => MITHRIL_PACKAGE_LATEST_RELEASE_URL.to_string(),
+            PackageType::Aiken => AIKEN_PACKAGE_LATEST_RELEASE_URL.to_string(),
         }
     }
 }
@@ -115,7 +129,7 @@ impl Package {
     pub fn download_url(&self) -> Option<Cow<str>> {
         match self {
             Package::CardanoNode(Spec { version, .. }) => Some(Cow::Owned(
-                CARDANO_NODE_PACKAGE_URL
+                CARDANO_NODE_PACKAGE_DOWNLOAD_URL
                     .replace(
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
@@ -128,7 +142,7 @@ impl Package {
                     .replace("{file_type}", get_file_type()),
             )),
             Package::CardanoCli(Spec { version, .. }) => Some(Cow::Owned(
-                CARDANO_CLI_PACKAGE_URL
+                CARDANO_CLI_PACKAGE_DOWNLOAD_URL
                     .replace(
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
@@ -141,7 +155,7 @@ impl Package {
                     .replace("{file_type}", get_file_type()),
             )),
             Package::Mithril(Spec { version, .. }) => Some(Cow::Owned(
-                MITHRIL_PACKAGE_URL
+                MITHRIL_PACKAGE_DOWNLOAD_URL
                     .replace(
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
@@ -154,7 +168,7 @@ impl Package {
                     .replace("{file_type}", get_file_type()),
             )),
             Package::Aiken(Spec { version, .. }) => Some(Cow::Owned(
-                AIKEN_PACKAGE_URL
+                AIKEN_PACKAGE_DOWNLOAD_URL
                     .replace(
                         "{version}",
                         version.clone().unwrap().non_parsed_string.as_str(),
@@ -183,8 +197,8 @@ impl Package {
         }
     }
 
-    pub fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
-        let version = VersionType::parse(&version, client, package_type.clone()).unwrap();
+    pub async fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
+        let version = VersionType::parse(&version, client, package_type.clone()).await.unwrap();
         match package_type {
             PackageType::CardanoNode => Package::CardanoNode(Spec {
                 alias: "cardano-node".to_string(),

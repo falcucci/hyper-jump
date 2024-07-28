@@ -11,6 +11,7 @@ use tracing::info;
 
 use crate::commands::install::Package;
 use crate::commands::install::PackageType;
+use crate::services::github::api;
 
 /// Represents a local version of the software.
 ///
@@ -184,33 +185,47 @@ impl VersionType {
         }
     }
 
-    pub fn parse(
+    pub async fn parse(
         version: &str,
         client: Option<&reqwest::Client>,
         package_type: PackageType,
     ) -> Result<ParsedVersion> {
         let version_type = VersionType::from_string(version);
         match version_type {
-            VersionType::Normal => {
-                let semver = semver(version)?;
-                let returned_version = match (semver, version.starts_with('v')) {
-                    (true, false) => parse_semver(version)?,
-                    _ => ParsedVersion {
-                        tag_name: version.to_string(),
-                        version_type: VersionType::Normal,
-                        non_parsed_string: version.to_string(),
-                        semver: None,
-                    },
-                };
-
-                Ok(returned_version)
-            }
-            VersionType::Latest => {
-                info!("Fetching latest version");
-                todo!()
-            }
+            VersionType::Normal => Ok(parse_normal_version(version, version_type).await?),
+            VersionType::Latest => Ok(fetch_latest_version(client, package_type).await?),
         }
     }
+}
+
+pub async fn parse_normal_version(
+    version: &str,
+    version_type: VersionType,
+) -> Result<ParsedVersion> {
+    let semver = semver(version)?;
+    let returned_version = match (semver, version.starts_with('v')) {
+        (true, false) => parse_semver(version)?,
+        _ => ParsedVersion {
+            tag_name: version.to_string(),
+            version_type,
+            non_parsed_string: version.to_string(),
+            semver: None,
+        },
+    };
+
+    Ok(returned_version)
+}
+
+pub async fn fetch_latest_version(
+    client: Option<&reqwest::Client>,
+    package_type: PackageType,
+) -> Result<ParsedVersion> {
+    let url = package_type.get_latest_url();
+    let response = api(client, url.into()).await.unwrap();
+    let latest_version: UpstreamVersion = serde_json::from_str(&response)?;
+    let tag_name = latest_version.tag_name.clone();
+
+    parse_normal_version(&tag_name, VersionType::Latest).await
 }
 
 pub fn semver(version: &str) -> Result<bool> {

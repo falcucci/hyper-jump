@@ -47,7 +47,7 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
     }
 
     let package_type = PackageType::from_str(exec_name);
-    let package = Package::new(package_type, String::new(), None);
+    let package = Package::new(package_type, String::new(), None).await;
 
     handle_package_process(rest_args, package).await.unwrap();
 

@@ -8,7 +8,6 @@ use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
 use crate::commands::use_cmd::use_cmd;
-use crate::helpers::version::VersionType;
 
 #[derive(Parser)]
 pub struct Args {
@@ -39,23 +38,23 @@ pub async fn run(
 ) -> miette::Result<()> {
     match args.command {
         Commands::Use { version } => {
-            let package = Package::new(PackageType::CardanoNode, version, client);
+            let package = Package::new(PackageType::CardanoNode, version, client).await;
             use_cmd(client, package).await.expect("Failed to set the version")
         }
         Commands::Install { version } => {
-            let package = Package::new(PackageType::CardanoNode, version, client);
+            let package = Package::new(PackageType::CardanoNode, version, client).await;
             install(client, package).await.expect("Failed to install")
         }
         Commands::Uninstall { version } => {
-            let package = Package::new(PackageType::CardanoNode, version, client);
+            let package = Package::new(PackageType::CardanoNode, version, client).await;
             uninstall(package).await.expect("Failed to erase");
         }
         Commands::List => {
-            let package = Package::new(PackageType::CardanoNode, "".to_string(), client);
+            let package = Package::new(PackageType::CardanoNode, "".to_string(), client).await;
             list(package).await.expect("Failed to list");
         }
         Commands::ListRemote => {
-            let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string(), client);
+            let package = Package::new(PackageType::CardanoNode, "9.0.0".to_string(), client).await;
             list_remote(client, package).await.expect("Failed to list remote");
         }
     }
