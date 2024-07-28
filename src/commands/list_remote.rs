@@ -26,6 +26,7 @@ pub enum Commands {
     CardanoCli,
     Mithril,
     Aiken,
+    Oura,
 }
 
 pub async fn run(
@@ -48,6 +49,10 @@ pub async fn run(
         }
         Commands::CardanoCli => {
             let package = Package::new(PackageType::CardanoCli, String::new(), client).await;
+            list_remote(client, package).await.expect("Failed to use")
+        }
+        Commands::Oura => {
+            let package = Package::new(PackageType::Oura, String::new(), client).await;
             list_remote(client, package).await.expect("Failed to use")
         }
     }
@@ -96,6 +101,7 @@ pub async fn list_remote(client: Option<&Client>, package: Package) -> Result<()
             Package::CardanoCli(_) => version.tag_name.clone(),
             Package::Mithril(_) => version.tag_name.clone(),
             Package::Aiken(_) => version.tag_name.clone(),
+            Package::Oura(_) => version.tag_name.clone(),
         };
 
         let version_status =

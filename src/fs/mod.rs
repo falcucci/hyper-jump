@@ -220,6 +220,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
                 PackageType::Aiken => "aarch64-apple-darwin",
+                PackageType::Oura => "aarch64-apple-darwin",
             }
         }
 
@@ -470,8 +471,6 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
 
     use anyhow::Context;
     use flate2::read::GzDecoder;
-    use indicatif::ProgressBar;
-    use indicatif::ProgressStyle;
     use tar::Archive;
 
     if fs::metadata(&tmp.file_name).is_ok() {

@@ -37,6 +37,7 @@ Now, let's talk about the all-in-one aspect. This isn't just a version manager; 
 | Cardano CLI  | `cardano-cli`    | Manage versions of the Cardano CLI tool.        |
 | Mithril      | `mithril-client` | Manage versions of the Mithril client software. |
 | Aiken        | `aiken`          | Manage versions of the Aiken client software.   |
+| Oura         | `oura`           | Manage versions of the Oura client software.    |
 
 ## Installation
 

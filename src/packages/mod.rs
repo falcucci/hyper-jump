@@ -12,6 +12,7 @@ const CARDANO_NODE_REPO: &str = "IntersectMBO/cardano-node";
 const CARDANO_CLI_REPO: &str = "IntersectMBO/cardano-node";
 const MITHRIL_REPO: &str = "input-output-hk/mithril";
 const AIKEN_REPO: &str = "aiken-lang/aiken";
+const OURA_REPO: &str = "txpipe/oura";
 
 /// Represents the specification of a package.
 ///
@@ -39,6 +40,7 @@ pub enum Package {
     CardanoCli(Spec),
     Mithril(Spec),
     Aiken(Spec),
+    Oura(Spec),
 }
 
 /// Enum representing different types of package types.
@@ -53,6 +55,7 @@ pub enum PackageType {
     CardanoCli,
     Mithril,
     Aiken,
+    Oura,
 }
 
 impl PackageType {
@@ -79,6 +82,7 @@ impl PackageType {
             "cardano-cli" => PackageType::CardanoCli,
             "mithril-client" => PackageType::Mithril,
             "aiken" => PackageType::Aiken,
+            "oura" => PackageType::Oura,
             _ => panic!("Unknown package"),
         }
     }
@@ -100,6 +104,7 @@ impl PackageType {
             PackageType::CardanoCli => CARDANO_CLI_REPO,
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::Aiken => AIKEN_REPO,
+            PackageType::Oura => OURA_REPO,
         }
     }
 
@@ -150,6 +155,7 @@ impl PackageType {
 /// # Arguments
 ///
 /// * `package_type` - The type of the package to construct.
+///
 /// * `version` - The version string of the package.
 /// * `client` - An optional reference to a `reqwest::Client` for making HTTP
 ///   requests.
@@ -179,6 +185,7 @@ impl Package {
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
+            Package::Oura(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -203,6 +210,7 @@ impl Package {
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
             Package::Aiken(Spec { version, .. }) => version.clone(),
+            Package::Oura(Spec { version, .. }) => version.clone(),
         }
     }
 
@@ -227,6 +235,7 @@ impl Package {
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
     // Returns the binary name of the package.
@@ -250,6 +259,7 @@ impl Package {
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
+            Package::Oura(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -274,6 +284,7 @@ impl Package {
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
+            Package::Oura(Spec { package_type, .. }) => package_type.clone(),
         }
     }
 
@@ -312,6 +323,10 @@ impl Package {
             ),
             PackageType::Aiken => format!(
                 "{}/{}/releases/download/{{version}}/aiken-{{platform}}.{{file_type}}",
+                base, repo,
+            ),
+            PackageType::Oura => format!(
+                "{}/{}/releases/download/{{version}}/oura-{{platform}}.{{file_type}}",
                 base, repo,
             ),
         }
@@ -414,6 +429,12 @@ impl Package {
                     "{platform}",
                     get_platform_name_download(package_type.clone()),
                 ),
+                package_type,
+            }),
+            PackageType::Oura => Package::Oura(Spec {
+                alias: "oura".to_string(),
+                version: Some(version),
+                binary_path: "".to_string(),
                 package_type,
             }),
         }
