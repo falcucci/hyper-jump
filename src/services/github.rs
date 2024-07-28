@@ -38,10 +38,10 @@ pub struct ErrorResponse {
     pub documentation_url: String,
 }
 
-pub async fn api(client: Option<&Client>, url: Cow<'_, str>) -> Result<String> {
+pub async fn api(client: Option<&Client>, url: String) -> Result<String> {
     let response = client
         .expect("Client not found")
-        .get(url.as_ref())
+        .get(url)
         .header(reqwest::header::USER_AGENT, "hyper-jump")
         .header(reqwest::header::ACCEPT, "application/vnd.github.v3+json")
         .send()

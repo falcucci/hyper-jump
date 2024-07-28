@@ -6,9 +6,9 @@ use anyhow::Result;
 use tokio::time::sleep;
 use tokio::time::Duration;
 
-use crate::commands::install::Package;
-use crate::commands::install::PackageType;
 use crate::helpers::version::get_current_version;
+use crate::packages::Package;
+use crate::packages::PackageType;
 
 /// Handles the proxy command with optional arguments.
 ///
@@ -143,7 +143,6 @@ pub async fn handle_package_process(args: &[String], package: Package) -> Result
 /// # Examples
 ///
 /// ```rust
-/// # async fn example() -> Result<()> {
 /// let term_signal = Arc::new(AtomicBool::new(false));
 /// let mut child = tokio::process::Command::new("some_command").spawn()?;
 /// watch_process(&mut child, &term_signal).await?.

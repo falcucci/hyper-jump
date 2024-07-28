@@ -4,7 +4,7 @@ use anyhow::Result;
 use tokio::fs;
 use tracing::info;
 
-use super::install::Package;
+use crate::packages::Package;
 
 pub async fn uninstall(package: Package) -> Result<(), Error> {
     let downloads = crate::fs::get_downloads_directory(package.clone()).await?;

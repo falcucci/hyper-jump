@@ -1,7 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
 
-use anyhow::anyhow;
 use anyhow::Error;
 use anyhow::Result;
 use comfy_table::modifiers::UTF8_ROUND_CORNERS;
@@ -12,9 +11,9 @@ use comfy_table::Color;
 use comfy_table::Table;
 use tracing::info;
 
-use super::install::Package;
 use crate::fs::get_downloads_directory;
 use crate::helpers::version::is_version_used;
+use crate::packages::Package;
 
 pub async fn list(package: Package) -> Result<(), Error> {
     let downloads_dir = get_downloads_directory(package.clone()).await?;

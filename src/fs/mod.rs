@@ -8,9 +8,9 @@ use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
 
-use crate::commands::install::Package;
-use crate::commands::install::PackageType;
 use crate::helpers::version::LocalVersion;
+use crate::packages::Package;
+use crate::packages::PackageType;
 
 /// Returns the home directory path for the current user.
 ///

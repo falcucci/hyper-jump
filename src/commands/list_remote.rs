@@ -5,13 +5,12 @@ use anyhow::anyhow;
 use anyhow::Error;
 use anyhow::Result;
 use reqwest::Client;
-use tracing::info;
 use yansi::Paint;
 
-use super::install::Package;
 use crate::helpers::version::is_version_used;
 use crate::helpers::version::RemoteVersion;
 use crate::helpers::version::VersionStatus;
+use crate::packages::Package;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
 
@@ -41,7 +40,7 @@ use crate::services::github::deserialize_response;
 /// package or if there is an issue with fetching or processing the list of
 /// versions.
 pub async fn list_remote(client: Option<&Client>, package: Package) -> Result<(), Error> {
-    let url = package.releases_url().ok_or(anyhow!("No releases URL"))?;
+    let url = package.releases_url();
     let response = api(client, url).await?;
 
     let local_versions: Vec<PathBuf> = filter_local_versions(package.clone()).await?;

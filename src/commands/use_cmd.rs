@@ -1,11 +1,10 @@
 use tracing::info;
 
-use super::install::Package;
 use crate::commands::install::install;
 use crate::fs::copy_package_proxy;
 use crate::helpers::version::is_version_used;
 use crate::helpers::version::switch_version;
-use crate::helpers::version::ParsedVersion;
+use crate::packages::Package;
 
 pub async fn use_cmd(
     client: Option<&reqwest::Client>,

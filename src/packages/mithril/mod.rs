@@ -2,9 +2,9 @@ use clap::command;
 use clap::Parser;
 use tracing::instrument;
 
+use super::Package;
+use super::PackageType;
 use crate::commands::install::install;
-use crate::commands::install::Package;
-use crate::commands::install::PackageType;
 use crate::commands::list::list;
 use crate::commands::list_remote::list_remote;
 use crate::commands::uninstall::uninstall;
