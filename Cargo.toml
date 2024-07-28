@@ -2,7 +2,7 @@
 name = "hyper-jump"
 version = "0.2.1"
 edition = "2021"
-license = "MIT"
+license = "Apache-2.0"
 readme = "README.md"
 authors = ["Alexsander Falcucci <alex.falcucci@gmail.com>"]
 description = "A generalist all-in-one command-line version manager toolset for Cardano-based projects."
