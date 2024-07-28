@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::cmp::min;
 use std::env;
 use std::path::Path;
@@ -6,6 +5,7 @@ use std::path::Path;
 use anyhow::anyhow;
 use anyhow::Error;
 use anyhow::Result;
+use clap::Parser;
 use futures_util::stream::StreamExt;
 use indicatif::ProgressBar;
 use reqwest::Client;
@@ -23,6 +23,48 @@ use crate::helpers::version::LocalVersion;
 use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
 use crate::packages::Package;
+use crate::packages::PackageType;
+
+#[derive(Parser)]
+pub struct Args {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Parser)]
+pub enum Commands {
+    CardanoNode { version: String },
+    CardanoCli { version: String },
+    Mithril { version: String },
+    Aiken { version: String },
+}
+
+pub async fn run(
+    args: Args,
+    _ctx: &crate::Context,
+    client: Option<&reqwest::Client>,
+) -> miette::Result<()> {
+    match args.command {
+        Commands::Mithril { version } => {
+            let package = Package::new(PackageType::Mithril, version, client).await;
+            install(client, package).await.expect("Failed to install")
+        }
+        Commands::Aiken { version } => {
+            let package = Package::new(PackageType::Aiken, version, client).await;
+            install(client, package).await.expect("Failed to install")
+        }
+        Commands::CardanoNode { version } => {
+            let package = Package::new(PackageType::CardanoNode, version, client).await;
+            install(client, package).await.expect("Failed to install")
+        }
+        Commands::CardanoCli { version } => {
+            let package = Package::new(PackageType::CardanoCli, version, client).await;
+            install(client, package).await.expect("Failed to install")
+        }
+    }
+
+    Ok(())
+}
 
 /// Installs a specified version of a package asynchronously.
 ///
@@ -71,8 +113,10 @@ pub async fn install(client: Option<&Client>, package: Package) -> Result<(), Er
         }
     };
 
-    if let PostDownloadVersionType::Standard(local_version) = downloaded_file {
-        unarchive(package, local_version).await?;
+    match downloaded_file {
+        PostDownloadVersionType::Standard(local_version) => {
+            unarchive(package, local_version).await?;
+        }
     }
 
     Ok(())

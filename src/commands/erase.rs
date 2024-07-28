@@ -17,11 +17,11 @@ use tracing::info;
 /// ```no_run
 /// #[tokio::main]
 /// async fn main() -> miette::Result<()> {
-///     erase().await?;
+///     run().await?;
 ///     Ok(())
 /// }
 /// ```
-pub async fn erase() -> miette::Result<()> {
+pub async fn run() -> miette::Result<()> {
     let downloads = crate::fs::get_local_data_dir().unwrap();
 
     if fs::remove_dir_all(&downloads).await.is_ok() {

@@ -14,6 +14,48 @@ use tracing::info;
 use crate::fs::get_downloads_directory;
 use crate::helpers::version::is_version_used;
 use crate::packages::Package;
+use crate::packages::PackageType;
+
+#[derive(clap::Parser)]
+pub struct Args {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(clap::Parser)]
+pub enum Commands {
+    CardanoNode,
+    CardanoCli,
+    Mithril,
+    Aiken,
+}
+
+pub async fn run(
+    args: Args,
+    _ctx: &crate::Context,
+    client: Option<&reqwest::Client>,
+) -> miette::Result<()> {
+    match args.command {
+        Commands::Mithril => {
+            let package = Package::new(PackageType::Mithril, String::new(), client).await;
+            list(package).await.expect("Failed to use")
+        }
+        Commands::Aiken => {
+            let package = Package::new(PackageType::Aiken, String::new(), client).await;
+            list(package).await.expect("Failed to use")
+        }
+        Commands::CardanoNode => {
+            let package = Package::new(PackageType::CardanoNode, String::new(), client).await;
+            list(package).await.expect("Failed to use")
+        }
+        Commands::CardanoCli => {
+            let package = Package::new(PackageType::CardanoCli, String::new(), client).await;
+            list(package).await.expect("Failed to use")
+        }
+    }
+
+    Ok(())
+}
 
 pub async fn list(package: Package) -> Result<(), Error> {
     let downloads_dir = get_downloads_directory(package.clone()).await?;

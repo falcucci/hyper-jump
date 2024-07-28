@@ -13,11 +13,13 @@ use std::path::PathBuf;
 use clap::Parser;
 use clap::Subcommand;
 use clap::ValueEnum;
+use commands::erase;
+use commands::install;
+use commands::list;
+use commands::list_remote;
+use commands::uninstall;
+use commands::use_cmd;
 use helpers::client;
-use packages::aiken;
-use packages::cardano_cli;
-use packages::cardano_node;
-use packages::mithril;
 use proxy::handle_proxy;
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
@@ -59,11 +61,13 @@ pub enum OutputFormat {
 
 #[derive(Subcommand)]
 enum Commands {
-    Mithril(mithril::Args),
-    CardanoNode(cardano_node::Args),
-    CardanoCli(cardano_cli::Args),
-    Aiken(aiken::Args),
+    Install(install::Args),
+    Uninstall(uninstall::Args),
+    Use(use_cmd::Args),
+    List(list::Args),
+    ListRemote(list_remote::Args),
     Erase,
+    Prefix,
 }
 
 pub struct Context {
@@ -115,10 +119,12 @@ async fn main() -> miette::Result<()> {
     let client = Some(client::create_reqwest_client().map_err(|e| miette::miette!(e))?);
 
     match cli.command {
-        Commands::Mithril(args) => mithril::run(args, &ctx, client.as_ref()).await,
-        Commands::CardanoNode(args) => cardano_node::run(args, &ctx, client.as_ref()).await,
-        Commands::CardanoCli(args) => cardano_cli::run(args, &ctx, client.as_ref()).await,
-        Commands::Aiken(args) => aiken::run(args, &ctx, client.as_ref()).await,
-        Commands::Erase => commands::erase::erase().await,
+        Commands::Erase => erase::run().await,
+        Commands::Install(args) => install::run(args, &ctx, client.as_ref()).await,
+        Commands::Use(args) => use_cmd::run(args, &ctx, client.as_ref()).await,
+        Commands::Uninstall(args) => uninstall::run(args, &ctx, client.as_ref()).await,
+        Commands::List(args) => list::run(args, &ctx, client.as_ref()).await,
+        Commands::ListRemote(args) => list_remote::run(args, &ctx, client.as_ref()).await,
+        Commands::Prefix => todo!(),
     }
 }

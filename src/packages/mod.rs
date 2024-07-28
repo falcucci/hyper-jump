@@ -6,11 +6,6 @@ use crate::fs::get_platform_name_download;
 use crate::helpers::version::ParsedVersion;
 use crate::helpers::version::VersionType;
 
-pub mod aiken;
-pub mod cardano_cli;
-pub mod cardano_node;
-pub mod mithril;
-
 const GITHUB_BASE_URL: &str = "https://github.com";
 const GITHUB_API_BASE_URL: &str = "https://api.github.com/repos";
 const CARDANO_NODE_REPO: &str = "IntersectMBO/cardano-node";

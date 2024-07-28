@@ -496,21 +496,6 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
         )
     })?;
 
-    // hard coding this is pretty unwise, but you cant get the length of an
-    // archive in tar-rs unlike zip-rs
-    let totalsize = 4692;
-    let pb = ProgressBar::new(totalsize);
-    let pb_style = ProgressStyle::default_bar()
-        .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
-        .unwrap()
-        .progress_chars("=> ");
-    pb.set_style(pb_style);
-
-    pb.finish_with_message(format!(
-        "Finished expanding to {}/{}",
-        tmp.path, tmp.file_name
-    ));
-
     let binary = &format!(
         "{}/{}/{}",
         tmp.file_name,

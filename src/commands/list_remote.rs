@@ -1,7 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
 
-use anyhow::anyhow;
 use anyhow::Error;
 use anyhow::Result;
 use reqwest::Client;
@@ -11,8 +10,50 @@ use crate::helpers::version::is_version_used;
 use crate::helpers::version::RemoteVersion;
 use crate::helpers::version::VersionStatus;
 use crate::packages::Package;
+use crate::packages::PackageType;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
+
+#[derive(clap::Parser)]
+pub struct Args {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(clap::Parser)]
+pub enum Commands {
+    CardanoNode,
+    CardanoCli,
+    Mithril,
+    Aiken,
+}
+
+pub async fn run(
+    args: Args,
+    _ctx: &crate::Context,
+    client: Option<&reqwest::Client>,
+) -> miette::Result<()> {
+    match args.command {
+        Commands::Mithril => {
+            let package = Package::new(PackageType::Mithril, String::new(), client).await;
+            list_remote(client, package).await.expect("Failed to use")
+        }
+        Commands::Aiken => {
+            let package = Package::new(PackageType::Aiken, String::new(), client).await;
+            list_remote(client, package).await.expect("Failed to use")
+        }
+        Commands::CardanoNode => {
+            let package = Package::new(PackageType::CardanoNode, String::new(), client).await;
+            list_remote(client, package).await.expect("Failed to use")
+        }
+        Commands::CardanoCli => {
+            let package = Package::new(PackageType::CardanoCli, String::new(), client).await;
+            list_remote(client, package).await.expect("Failed to use")
+        }
+    }
+
+    Ok(())
+}
 
 /// Lists the remote versions of a specified package.
 ///
