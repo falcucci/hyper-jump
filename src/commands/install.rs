@@ -37,6 +37,7 @@ pub enum Commands {
     CardanoCli { version: String },
     Mithril { version: String },
     Aiken { version: String },
+    Dolos { version: String },
     Oura { version: String },
 }
 
@@ -56,6 +57,10 @@ pub async fn run(
         }
         Commands::Oura { version } => {
             let package = Package::new(PackageType::Oura, version, client).await;
+            install(client, package).await.expect("Failed to install")
+        }
+        Commands::Dolos { version } => {
+            let package = Package::new(PackageType::Dolos, version, client).await;
             install(client, package).await.expect("Failed to install")
         }
         Commands::CardanoNode { version } => {
@@ -170,7 +175,7 @@ async fn download_version(
     root: &Path,
     package: Package,
 ) -> Result<PostDownloadVersionType> {
-    let response = send_request(client, package).await?;
+    let response = send_request(client, package.clone()).await?;
     if response.status() != reqwest::StatusCode::OK {
         return Err(anyhow!("Failed to send request to download version"));
     }
@@ -179,7 +184,8 @@ async fn download_version(
     let content_length = get_content_length(&response).await?;
     let pb = ProgressBar::new(content_length);
     let mut response_bytes = response.bytes_stream();
-    let file_type = get_file_type();
+    let package_type = package.package_type();
+    let file_type = get_file_type(package_type);
     let file_path = create_file_path(version, root, file_type);
     let mut file = create_file(&file_path).await?;
     while let Some(item) = response_bytes.next().await {
@@ -333,7 +339,8 @@ async fn send_request(
     package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
     let platform = get_platform_name();
-    let file_type = get_file_type();
+    let package_type = package.package_type();
+    let file_type = get_file_type(package_type);
 
     let package_url = package.download_url();
     info!("Downloading: {}", package_url);

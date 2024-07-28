@@ -20,6 +20,7 @@ pub enum Commands {
     Mithril { version: String },
     Aiken { version: String },
     Oura { version: String },
+    Dolos { version: String },
 }
 
 pub async fn run(
@@ -38,6 +39,10 @@ pub async fn run(
         }
         Commands::Oura { version } => {
             let package = Package::new(PackageType::Oura, version, client).await;
+            use_cmd(client, package).await.expect("Failed to use")
+        }
+        Commands::Dolos { version } => {
+            let package = Package::new(PackageType::Dolos, version, client).await;
             use_cmd(client, package).await.expect("Failed to use")
         }
         Commands::CardanoNode { version } => {

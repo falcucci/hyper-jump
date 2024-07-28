@@ -13,6 +13,7 @@ const CARDANO_CLI_REPO: &str = "IntersectMBO/cardano-node";
 const MITHRIL_REPO: &str = "input-output-hk/mithril";
 const AIKEN_REPO: &str = "aiken-lang/aiken";
 const OURA_REPO: &str = "txpipe/oura";
+const DOLOS_REPO: &str = "txpipe/dolos";
 
 /// Represents the specification of a package.
 ///
@@ -41,6 +42,7 @@ pub enum Package {
     Mithril(Spec),
     Aiken(Spec),
     Oura(Spec),
+    Dolos(Spec),
 }
 
 /// Enum representing different types of package types.
@@ -56,6 +58,7 @@ pub enum PackageType {
     Mithril,
     Aiken,
     Oura,
+    Dolos,
 }
 
 impl PackageType {
@@ -81,6 +84,7 @@ impl PackageType {
             "cardano-node" => PackageType::CardanoNode,
             "cardano-cli" => PackageType::CardanoCli,
             "mithril-client" => PackageType::Mithril,
+            "dolos" => PackageType::Dolos,
             "aiken" => PackageType::Aiken,
             "oura" => PackageType::Oura,
             _ => panic!("Unknown package"),
@@ -105,6 +109,7 @@ impl PackageType {
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::Aiken => AIKEN_REPO,
             PackageType::Oura => OURA_REPO,
+            PackageType::Dolos => DOLOS_REPO,
         }
     }
 
@@ -185,6 +190,7 @@ impl Package {
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
+            Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Oura(Spec { alias, .. }) => alias.clone(),
         }
     }
@@ -210,6 +216,7 @@ impl Package {
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
             Package::Aiken(Spec { version, .. }) => version.clone(),
+            Package::Dolos(Spec { version, .. }) => version.clone(),
             Package::Oura(Spec { version, .. }) => version.clone(),
         }
     }
@@ -235,6 +242,7 @@ impl Package {
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Dolos(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
@@ -259,6 +267,7 @@ impl Package {
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
+            Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Oura(Spec { alias, .. }) => alias.clone(),
         }
     }
@@ -284,6 +293,7 @@ impl Package {
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
+            Package::Dolos(Spec { package_type, .. }) => package_type.clone(),
             Package::Oura(Spec { package_type, .. }) => package_type.clone(),
         }
     }
@@ -325,6 +335,10 @@ impl Package {
                 "{}/{}/releases/download/{{version}}/aiken-{{platform}}.{{file_type}}",
                 base, repo,
             ),
+            PackageType::Dolos => format!(
+                "{}/{}/releases/download/{{version}}/dolos-{{platform}}.{{file_type}}",
+                base, repo,
+            ),
             PackageType::Oura => format!(
                 "{}/{}/releases/download/{{version}}/oura-{{platform}}.{{file_type}}",
                 base, repo,
@@ -359,7 +373,7 @@ impl Package {
             .replace("{version}", v.non_parsed_string.as_str())
             .replace("{OS}", get_platform_name())
             .replace("{platform}", get_platform_name_download(p))
-            .replace("{file_type}", get_file_type())
+            .replace("{file_type}", get_file_type(self.package_type()))
     }
 
     /// Constructs the releases URL for the package.
@@ -426,6 +440,15 @@ impl Package {
                 alias: "aiken".to_string(),
                 version: Some(version),
                 binary_path: "aiken-{platform}".replace(
+                    "{platform}",
+                    get_platform_name_download(package_type.clone()),
+                ),
+                package_type,
+            }),
+            PackageType::Dolos => Package::Dolos(Spec {
+                alias: "dolos".to_string(),
+                version: Some(version),
+                binary_path: "dolos-{platform}".replace(
                     "{platform}",
                     get_platform_name_download(package_type.clone()),
                 ),

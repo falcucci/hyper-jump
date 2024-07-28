@@ -7,6 +7,7 @@ use std::process::Command;
 use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
+use xz2::read::XzDecoder;
 
 use crate::helpers::version::LocalVersion;
 use crate::packages::Package;
@@ -152,7 +153,7 @@ pub async fn get_downloads_directory(package: Package) -> Result<PathBuf> {
 /// ```rust
 /// let file_type = get_file_type(); 
 /// ```
-pub fn get_file_type() -> &'static str {
+pub fn get_file_type(package_type: PackageType) -> &'static str {
     #[cfg(target_family = "windows")]
     {
         "zip"
@@ -160,12 +161,26 @@ pub fn get_file_type() -> &'static str {
 
     #[cfg(target_os = "macos")]
     {
-        "tar.gz"
+        match package_type {
+            PackageType::CardanoNode => "tar.gz",
+            PackageType::CardanoCli => "tar.gz",
+            PackageType::Mithril => "tar.gz",
+            PackageType::Aiken => "tar.gz",
+            PackageType::Dolos => "tar.xz",
+            PackageType::Oura => "tar.gz",
+        }
     }
 
     #[cfg(target_os = "linux")]
     {
-        "tar.gz"
+        match package_type {
+            PackageType::CardanoNode => "tar.gz",
+            PackageType::CardanoCli => "tar.gz",
+            PackageType::Mithril => "tar.gz",
+            PackageType::Aiken => "tar.gz",
+            PackageType::Dolos => "tar.xz",
+            PackageType::Oura => "tar.gz",
+        }
     }
 }
 
@@ -220,6 +235,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
                 PackageType::Aiken => "aarch64-apple-darwin",
+                PackageType::Dolos => "aarch64-apple-darwin",
                 PackageType::Oura => "aarch64-apple-darwin",
             }
         }
@@ -487,7 +503,12 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
     })?;
 
     let output = format!("{}/{}", tmp.path, tmp.file_name);
-    let decompress_stream = GzDecoder::new(file);
+    let decompress_stream: Box<dyn std::io::Read> = match tmp.file_format.as_str() {
+        "tar.gz" => Box::new(GzDecoder::new(file)),
+        "tar.xz" => Box::new(XzDecoder::new(file)),
+        _ => return Err(anyhow!("Unsupported file format")),
+    };
+
     Archive::new(decompress_stream).unpack(&output).with_context(|| {
         format!(
             "Failed to decompress or extract file {}.{}",

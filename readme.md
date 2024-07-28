@@ -89,14 +89,6 @@ Install a specific version of a package.
 hyper-jump install cardano-node <version>
 ```
 
-### Uninstall
-
-Uninstall a specific version of a package.
-
-```sh
-hyper-jump uninstall cardano-node <version>
-```
-
 ### List
 
 List installed versions of a package:
@@ -111,6 +103,14 @@ List remote versions available for a package.
 
 ```sh
 hyper-jump list-remote cardano-node
+```
+
+### Uninstall
+
+Uninstall a specific version of a package.
+
+```sh
+hyper-jump uninstall cardano-node <version>
 ```
 
 ### Erase
