@@ -27,6 +27,7 @@ pub enum Commands {
     CardanoNode,
     CardanoCli,
     Mithril,
+    Scrolls,
     Aiken,
     Dolos,
     Oura,
@@ -41,6 +42,10 @@ pub async fn run(
         Commands::Mithril => {
             let package = Package::new(PackageType::Mithril, String::new(), client).await;
             list(package).await.expect("Faile to list versions")
+        }
+        Commands::Scrolls => {
+            let package = Package::new(PackageType::Scrolls, String::new(), client).await;
+            list(package).await.expect("Failed to list versions")
         }
         Commands::Aiken => {
             let package = Package::new(PackageType::Aiken, String::new(), client).await;

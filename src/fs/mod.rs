@@ -165,6 +165,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
+            PackageType::Scrolls => "tar.gz",
             PackageType::Aiken => "tar.gz",
             PackageType::Dolos => "tar.xz",
             PackageType::Oura => "tar.gz",
@@ -234,6 +235,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
+                PackageType::Scrolls => "aarch64-apple-darwin",
                 PackageType::Aiken => "aarch64-apple-darwin",
                 PackageType::Dolos => "aarch64-apple-darwin",
                 PackageType::Oura => "aarch64-apple-darwin",
@@ -246,7 +248,10 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "x86_64",
+                PackageType::Scrolls => "x86_64",
                 PackageType::Aiken => "x86_64-apple-darwin",
+                PackageType::Dolos => "x86_64-apple-darwin",
+                PackageType::Oura => "x86_64-apple-darwin",
             }
         }
     }
@@ -257,7 +262,10 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
             PackageType::CardanoNode => "",
             PackageType::CardanoCli => "",
             PackageType::Mithril => "x64",
+            PackageType::Scrolls => "x64",
             PackageType::Aiken => "x86_64-unknown-linux-gnu",
+            PackageType::Dolos => "x86_64-unknown-linux-gnu",
+            PackageType::Oura => "x86_64-unknown-linux-gnu",
         }
     }
 }

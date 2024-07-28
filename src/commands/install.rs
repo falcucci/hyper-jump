@@ -36,6 +36,7 @@ pub enum Commands {
     CardanoNode { version: String },
     CardanoCli { version: String },
     Mithril { version: String },
+    Scrolls { version: String },
     Aiken { version: String },
     Dolos { version: String },
     Oura { version: String },
@@ -61,6 +62,10 @@ pub async fn run(
         }
         Commands::Dolos { version } => {
             let package = Package::new(PackageType::Dolos, version, client).await;
+            install(client, package).await.expect("Failed to install")
+        }
+        Commands::Scrolls { version } => {
+            let package = Package::new(PackageType::Scrolls, version, client).await;
             install(client, package).await.expect("Failed to install")
         }
         Commands::CardanoNode { version } => {

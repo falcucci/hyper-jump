@@ -14,6 +14,7 @@ const MITHRIL_REPO: &str = "input-output-hk/mithril";
 const AIKEN_REPO: &str = "aiken-lang/aiken";
 const OURA_REPO: &str = "txpipe/oura";
 const DOLOS_REPO: &str = "txpipe/dolos";
+const SCROLLS_REPO: &str = "txpipe/scrolls";
 
 /// Represents the specification of a package.
 ///
@@ -40,6 +41,7 @@ pub enum Package {
     CardanoNode(Spec),
     CardanoCli(Spec),
     Mithril(Spec),
+    Scrolls(Spec),
     Aiken(Spec),
     Oura(Spec),
     Dolos(Spec),
@@ -56,6 +58,7 @@ pub enum PackageType {
     CardanoNode,
     CardanoCli,
     Mithril,
+    Scrolls,
     Aiken,
     Oura,
     Dolos,
@@ -87,6 +90,7 @@ impl PackageType {
             "dolos" => PackageType::Dolos,
             "aiken" => PackageType::Aiken,
             "oura" => PackageType::Oura,
+            "scrolls" => PackageType::Scrolls,
             _ => panic!("Unknown package"),
         }
     }
@@ -107,6 +111,7 @@ impl PackageType {
             PackageType::CardanoNode => CARDANO_NODE_REPO,
             PackageType::CardanoCli => CARDANO_CLI_REPO,
             PackageType::Mithril => MITHRIL_REPO,
+            PackageType::Scrolls => SCROLLS_REPO,
             PackageType::Aiken => AIKEN_REPO,
             PackageType::Oura => OURA_REPO,
             PackageType::Dolos => DOLOS_REPO,
@@ -189,6 +194,7 @@ impl Package {
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
+            Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Oura(Spec { alias, .. }) => alias.clone(),
@@ -215,6 +221,7 @@ impl Package {
             Package::CardanoNode(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
+            Package::Scrolls(Spec { version, .. }) => version.clone(),
             Package::Aiken(Spec { version, .. }) => version.clone(),
             Package::Dolos(Spec { version, .. }) => version.clone(),
             Package::Oura(Spec { version, .. }) => version.clone(),
@@ -241,6 +248,7 @@ impl Package {
             Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Scrolls(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Dolos(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
@@ -266,6 +274,7 @@ impl Package {
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
+            Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Oura(Spec { alias, .. }) => alias.clone(),
@@ -292,6 +301,7 @@ impl Package {
             Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
+            Package::Scrolls(Spec { package_type, .. }) => package_type.clone(),
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
             Package::Dolos(Spec { package_type, .. }) => package_type.clone(),
             Package::Oura(Spec { package_type, .. }) => package_type.clone(),
@@ -329,6 +339,10 @@ impl Package {
             PackageType::Mithril => format!(
                 "{}/{}/releases/download/{{version}}/mithril-{{version}}-{{OS}}-{{platform}}.\
                  {{file_type}}",
+                base, repo,
+            ),
+            PackageType::Scrolls => format!(
+                "{}/{}/releases/download/{{version}}/scrolls-{{platform}}.{{file_type}}",
                 base, repo,
             ),
             PackageType::Aiken => format!(
@@ -456,6 +470,12 @@ impl Package {
             }),
             PackageType::Oura => Package::Oura(Spec {
                 alias: "oura".to_string(),
+                version: Some(version),
+                binary_path: "".to_string(),
+                package_type,
+            }),
+            PackageType::Scrolls => Package::Scrolls(Spec {
+                alias: "scrolls".to_string(),
                 version: Some(version),
                 binary_path: "".to_string(),
                 package_type,

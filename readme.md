@@ -36,6 +36,7 @@ Now, let's talk about the all-in-one aspect. This isn't just a version manager; 
 | [Cardano Node](https://github.com/IntersectMBO/cardano-node)  | `cardano-node`   | Manage versions of the Cardano Node software.   |
 | [Cardano CLI](https://github.com/cardano-scaling/cardano-cli) | `cardano-cli`    | Manage versions of the Cardano CLI tool.        |
 | [Mithril](https://github.com/input-output-hk/mithril)         | `mithril-client` | Manage versions of the Mithril client software. |
+| [Scrolls](https://github.com/txpipe/scrolls)                  | `scrolls`        | Manage versions of the Scrolls client software. |
 | [Oura](https://github.com/txpipe/oura/tree/main)              | `oura`           | Manage versions of the Oura client software.    |
 | [Dolos](https://github.com/txpipe/dolos)                      | `dolos`          | Manage versions of the Dolos client software.   |
 | [Aiken](https://github.com/aiken-lang/aiken)                  | `aiken`          | Manage versions of the Aiken client software.   |

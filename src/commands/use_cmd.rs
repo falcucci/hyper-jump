@@ -18,6 +18,7 @@ pub enum Commands {
     CardanoNode { version: String },
     CardanoCli { version: String },
     Mithril { version: String },
+    Scrolls { version: String },
     Aiken { version: String },
     Oura { version: String },
     Dolos { version: String },
@@ -31,6 +32,10 @@ pub async fn run(
     match args.command {
         Commands::Mithril { version } => {
             let package = Package::new(PackageType::Mithril, version, client).await;
+            use_cmd(client, package).await.expect("Failed to use")
+        }
+        Commands::Scrolls { version } => {
+            let package = Package::new(PackageType::Scrolls, version, client).await;
             use_cmd(client, package).await.expect("Failed to use")
         }
         Commands::Aiken { version } => {

@@ -25,6 +25,7 @@ pub enum Commands {
     CardanoNode,
     CardanoCli,
     Mithril,
+    Scrolls,
     Aiken,
     Dolos,
     Oura,
@@ -58,6 +59,10 @@ pub async fn run(
         }
         Commands::Oura => {
             let package = Package::new(PackageType::Oura, String::new(), client).await;
+            list_remote(client, package).await.expect("Failed to list-remote versions")
+        }
+        Commands::Scrolls => {
+            let package = Package::new(PackageType::Scrolls, String::new(), client).await;
             list_remote(client, package).await.expect("Failed to list-remote versions")
         }
     }
@@ -105,6 +110,7 @@ pub async fn list_remote(client: Option<&Client>, package: Package) -> Result<()
             Package::CardanoNode(_) => version.tag_name.clone(),
             Package::CardanoCli(_) => version.tag_name.clone(),
             Package::Mithril(_) => version.tag_name.clone(),
+            Package::Scrolls(_) => version.tag_name.clone(),
             Package::Aiken(_) => version.tag_name.clone(),
             Package::Oura(_) => version.tag_name.clone(),
             Package::Dolos(_) => version.tag_name.clone(),
