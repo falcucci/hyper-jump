@@ -104,6 +104,7 @@ pub async fn install(client: Option<&Client>, package: Package) -> Result<(), Er
     copy_package_proxy(package.clone()).await?;
 
     if is_version_installed {
+        info!("{} is already installed.", version.tag_name);
         return Ok(());
     }
 
@@ -118,6 +119,8 @@ pub async fn install(client: Option<&Client>, package: Package) -> Result<(), Er
             unarchive(package, local_version).await?;
         }
     }
+
+    info!("Successfully installed {}", version.tag_name);
 
     Ok(())
 }

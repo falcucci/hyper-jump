@@ -8,7 +8,7 @@ _The console lights up, keys clack rapidly and then..._ 🛸
 
 Pff, the Cardano aircraft, where the only thing faster than the transactions is the hyper-jump between versions! It's the Swiss Army knife of version managers, the Batman utility belt for developers and the TARDIS for your codebase – it's bigger on the inside with all the versions it can handle!
 
-Imagine you're in the cockpit of the Cardano aircraft, your fingers dance across the command line like Ludovico does during a concerto. You type hyper-jump install latest, and jump! You've just skipped through versions like a time traveler at Café De Flore reading a book aside Picasso. But beware, type the wrong command and you might just end up installing "Cardano-node-vintage-0.0.1-alpha-beta-gamma" – so retro, it's practically a collector's item!
+Imagine you're in the cockpit of the Cardano aircraft, your fingers dance across the command line like Ludovico does during a concerto. You type hyper-jump install <package> latest, and jump! You've just skipped through versions like a time traveler at Café De Flore reading a book aside Picasso. But beware, type the wrong command and you might just end up installing "Cardano-node-vintage-0.0.1-alpha-beta-gamma" – so retro, it's practically a collector's item!
 
 Now, let's talk about the all-in-one aspect. This isn't just a version manager; it's a version festival, a version buffet where you can sample all the flavors of Cardano without the indigestion. Cross-platform? You bet! Whether you're a Windows wizard, a macOS maestro or a Linux luminary, the Cardano aircraft has got you covered. It's like having a universal adapter for your development needs.
 
@@ -80,7 +80,7 @@ hyper-jump --help
 Switch to a specific version of a package.
 
 ```sh
-hyper-jump cardano-node use --version <version>
+hyper-jump use cardano-node <version>
 ```
 
 ### Install
@@ -88,7 +88,7 @@ hyper-jump cardano-node use --version <version>
 Install a specific version of a package.
 
 ```sh
-hyper-jump cardano-node install --version <version>
+hyper-jump install cardano-node <version>
 ```
 
 ### Uninstall
@@ -96,7 +96,7 @@ hyper-jump cardano-node install --version <version>
 Uninstall a specific version of a package.
 
 ```sh
-hyper-jump cardano-node uninstall --version <version>
+hyper-jump uninstall cardano-node <version>
 ```
 
 ### List
@@ -104,7 +104,7 @@ hyper-jump cardano-node uninstall --version <version>
 List installed versions of a package:
 
 ```sh
-hyper-jump cardano-node list
+hyper-jump list cardano-node
 ```
 
 ### List Remote
@@ -112,5 +112,13 @@ hyper-jump cardano-node list
 List remote versions available for a package.
 
 ```sh
-hyper-jump cardano-node list-remote
+hyper-jump list-remote cardano-node
+```
+
+### Erase
+
+Remove all installed versions.
+
+```sh
+hyper-jump erase
 ```

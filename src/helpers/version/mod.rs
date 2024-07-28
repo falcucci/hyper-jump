@@ -220,8 +220,7 @@ pub async fn fetch_latest_version(
     package_type: PackageType,
 ) -> Result<ParsedVersion> {
     let url = package_type.get_latest_url();
-    println!("Fetching latest version from {}", url);
-    let response = api(client, url.into()).await.unwrap();
+    let response = api(client, url).await.unwrap();
     let latest_version: UpstreamVersion = serde_json::from_str(&response)?;
     let tag_name = latest_version.tag_name.clone();
 

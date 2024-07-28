@@ -58,6 +58,7 @@ pub async fn use_cmd(
     copy_package_proxy(package.clone()).await?;
 
     if is_version_used {
+        info!("{} is already in use.", version.tag_name);
         return Ok(());
     }
 
