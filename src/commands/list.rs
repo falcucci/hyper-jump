@@ -40,27 +40,27 @@ pub async fn run(
     match args.command {
         Commands::Mithril => {
             let package = Package::new(PackageType::Mithril, String::new(), client).await;
-            list(package).await.expect("Failed to use")
+            list(package).await.expect("Faile to list versions")
         }
         Commands::Aiken => {
             let package = Package::new(PackageType::Aiken, String::new(), client).await;
-            list(package).await.expect("Failed to use")
+            list(package).await.expect("Failed to list versions")
         }
         Commands::CardanoNode => {
             let package = Package::new(PackageType::CardanoNode, String::new(), client).await;
-            list(package).await.expect("Failed to use")
+            list(package).await.expect("Failed to list versions")
         }
         Commands::CardanoCli => {
             let package = Package::new(PackageType::CardanoCli, String::new(), client).await;
-            list(package).await.expect("Failed to use")
+            list(package).await.expect("Failed to list versions")
         }
         Commands::Dolos => {
             let package = Package::new(PackageType::Dolos, String::new(), client).await;
-            list(package).await.expect("Failed to use")
+            list(package).await.expect("Failed to list versions")
         }
         Commands::Oura => {
             let package = Package::new(PackageType::Oura, String::new(), client).await;
-            list(package).await.expect("Failed to use")
+            list(package).await.expect("Failed to list versions")
         }
     }
 

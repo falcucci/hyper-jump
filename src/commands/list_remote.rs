@@ -38,27 +38,27 @@ pub async fn run(
     match args.command {
         Commands::Mithril => {
             let package = Package::new(PackageType::Mithril, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to use")
+            list_remote(client, package).await.expect("Failed to list-remote versions")
         }
         Commands::Aiken => {
             let package = Package::new(PackageType::Aiken, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to use")
+            list_remote(client, package).await.expect("Failed to list-remote versions")
         }
         Commands::CardanoNode => {
             let package = Package::new(PackageType::CardanoNode, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to use")
+            list_remote(client, package).await.expect("Failed to list-remote versions")
         }
         Commands::CardanoCli => {
             let package = Package::new(PackageType::CardanoCli, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to use")
+            list_remote(client, package).await.expect("Failed to list-remote versions")
         }
         Commands::Dolos => {
             let package = Package::new(PackageType::Dolos, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to use")
+            list_remote(client, package).await.expect("Failed to list-remote versions")
         }
         Commands::Oura => {
             let package = Package::new(PackageType::Oura, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to use")
+            list_remote(client, package).await.expect("Failed to list-remote versions")
         }
     }
 
