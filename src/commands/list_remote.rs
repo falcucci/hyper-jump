@@ -14,19 +14,6 @@ use crate::packages::PackageType;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
 
-macro_rules! execute {
-    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
-        match $command {
-            $(
-                Commands::$variant => {
-                    let package = Package::new($package_type, String::new(), $client).await;
-                    list_remote($client, package).await.expect("Failed to list-remote versions")
-                }
-            )*
-        }
-    }
-}
-
 #[derive(clap::Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -42,6 +29,19 @@ pub enum Commands {
     Scrolls,
     CardanoCli,
     CardanoNode,
+}
+
+macro_rules! execute {
+    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+        match $command {
+            $(
+                Commands::$variant => {
+                    let package = Package::new($package_type, String::new(), $client).await;
+                    list_remote($client, package).await.expect("Failed to list-remote versions")
+                }
+            )*
+        }
+    }
 }
 
 pub async fn run(

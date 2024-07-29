@@ -32,19 +32,19 @@ pub struct Spec {
 
 /// Enum representing different types of packages.
 ///
-/// * `CardanoNode` - Represents a Cardano Node package.
-/// * `CardanoCli` - Represents a Cardano CLI package.
-/// * `Mithril` - Represents a Mithril package.
 /// * `Aiken` - Represents an Aiken package.
+/// * `Mithril` - Represents a Mithril package.
+/// * `CardanoCli` - Represents a Cardano CLI package.
+/// * `CardanoNode` - Represents a Cardano Node package.
 #[derive(Debug, Clone)]
 pub enum Package {
-    CardanoNode(Spec),
-    CardanoCli(Spec),
+    Oura(Spec),
+    Aiken(Spec),
+    Dolos(Spec),
     Mithril(Spec),
     Scrolls(Spec),
-    Aiken(Spec),
-    Oura(Spec),
-    Dolos(Spec),
+    CardanoCli(Spec),
+    CardanoNode(Spec),
 }
 
 /// Enum representing different types of package types.
@@ -55,13 +55,42 @@ pub enum Package {
 /// * `Aiken` - Represents the Aiken package type.
 #[derive(Debug, Clone)]
 pub enum PackageType {
-    CardanoNode,
-    CardanoCli,
+    Oura,
+    Aiken,
+    Dolos,
     Mithril,
     Scrolls,
-    Aiken,
-    Oura,
-    Dolos,
+    CardanoCli,
+    CardanoNode,
+}
+
+/// Macro to create a `Package` variant with the appropriate `Spec` struct.
+///
+/// This macro simplifies the creation of different `Package` variants by
+/// matching on the `PackageType` and constructing the corresponding `Spec`
+/// struct with the provided alias and binary path.
+///
+/// # Parameters
+/// - `$package_type`: The type of the package (of type `PackageType`).
+/// - `$version`: The version of the package (of type `VersionType`).
+/// - `$(($variant:ident, $alias:expr, $binary_path:expr)),*`: A list of tuples
+///   where each tuple contains:
+///   - `$variant`: The variant of the `PackageType` enum.
+///   - `$alias`: The alias string for the package.
+///   - `$binary_path`: The binary path string for the package.
+macro_rules! create_package {
+    ($package_type:expr, $version:expr, $(($variant:ident, $alias:expr, $binary_path:expr)),*) => {
+        match $package_type {
+            $(
+                PackageType::$variant => Package::$variant(Spec {
+                    alias: $alias,
+                    version: $version,
+                    binary_path: $binary_path,
+                    package_type: $package_type,
+                }),
+            )*
+        }
+    };
 }
 
 impl PackageType {
@@ -84,14 +113,39 @@ impl PackageType {
     /// ```
     pub fn from_str(package: &str) -> Self {
         match package {
-            "cardano-node" => PackageType::CardanoNode,
-            "cardano-cli" => PackageType::CardanoCli,
-            "mithril-client" => PackageType::Mithril,
-            "dolos" => PackageType::Dolos,
-            "aiken" => PackageType::Aiken,
             "oura" => PackageType::Oura,
+            "aiken" => PackageType::Aiken,
+            "dolos" => PackageType::Dolos,
             "scrolls" => PackageType::Scrolls,
+            "cardano-cli" => PackageType::CardanoCli,
+            "cardano-node" => PackageType::CardanoNode,
+            "mithril-client" => PackageType::Mithril,
             _ => panic!("Unknown package"),
+        }
+    }
+
+    pub fn alias(&self) -> String {
+        match self {
+            PackageType::Oura => "oura".to_string(),
+            PackageType::Aiken => "aiken".to_string(),
+            PackageType::Dolos => "dolos".to_string(),
+            PackageType::Scrolls => "scrolls".to_string(),
+            PackageType::Mithril => "mithril-client".to_string(),
+            PackageType::CardanoCli => "cardano-cli".to_string(),
+            PackageType::CardanoNode => "cardano-node".to_string(),
+        }
+    }
+
+    pub fn format_binary_path(&self) -> String {
+        let platform = get_platform_name_download(self.clone());
+        match self {
+            PackageType::CardanoNode => "bin".to_string(),
+            PackageType::CardanoCli => "bin".to_string(),
+            PackageType::Mithril => "".to_string(),
+            PackageType::Oura => "".to_string(),
+            PackageType::Scrolls => "".to_string(),
+            PackageType::Aiken => "aiken-{platform}".replace("{platform}", platform),
+            PackageType::Dolos => "dolos-{platform}".replace("{platform}", platform),
         }
     }
 
@@ -108,13 +162,13 @@ impl PackageType {
     /// ```
     pub fn repo(&self) -> &str {
         match self {
-            PackageType::CardanoNode => CARDANO_NODE_REPO,
-            PackageType::CardanoCli => CARDANO_CLI_REPO,
-            PackageType::Mithril => MITHRIL_REPO,
-            PackageType::Scrolls => SCROLLS_REPO,
-            PackageType::Aiken => AIKEN_REPO,
             PackageType::Oura => OURA_REPO,
+            PackageType::Aiken => AIKEN_REPO,
             PackageType::Dolos => DOLOS_REPO,
+            PackageType::Scrolls => SCROLLS_REPO,
+            PackageType::Mithril => MITHRIL_REPO,
+            PackageType::CardanoCli => CARDANO_CLI_REPO,
+            PackageType::CardanoNode => CARDANO_NODE_REPO,
         }
     }
 
@@ -191,13 +245,13 @@ impl Package {
     /// ```
     pub fn alias(&self) -> String {
         match self {
-            Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
-            Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
-            Package::Mithril(Spec { alias, .. }) => alias.clone(),
-            Package::Scrolls(Spec { alias, .. }) => alias.clone(),
+            Package::Oura(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
-            Package::Oura(Spec { alias, .. }) => alias.clone(),
+            Package::Mithril(Spec { alias, .. }) => alias.clone(),
+            Package::Scrolls(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -218,13 +272,13 @@ impl Package {
     /// ```
     pub fn version(&self) -> Option<ParsedVersion> {
         match self {
-            Package::CardanoNode(Spec { version, .. }) => version.clone(),
-            Package::CardanoCli(Spec { version, .. }) => version.clone(),
-            Package::Mithril(Spec { version, .. }) => version.clone(),
-            Package::Scrolls(Spec { version, .. }) => version.clone(),
+            Package::Oura(Spec { version, .. }) => version.clone(),
             Package::Aiken(Spec { version, .. }) => version.clone(),
             Package::Dolos(Spec { version, .. }) => version.clone(),
-            Package::Oura(Spec { version, .. }) => version.clone(),
+            Package::Scrolls(Spec { version, .. }) => version.clone(),
+            Package::Mithril(Spec { version, .. }) => version.clone(),
+            Package::CardanoCli(Spec { version, .. }) => version.clone(),
+            Package::CardanoNode(Spec { version, .. }) => version.clone(),
         }
     }
 
@@ -245,13 +299,13 @@ impl Package {
     /// ```
     pub fn binary_path(&self) -> String {
         match self {
-            Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
-            Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
-            Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
-            Package::Scrolls(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Dolos(Spec { binary_path, .. }) => binary_path.clone(),
-            Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Scrolls(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
     // Returns the binary name of the package.
@@ -271,13 +325,13 @@ impl Package {
     /// ```
     pub fn binary_name(&self) -> String {
         match self {
-            Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
-            Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
-            Package::Mithril(Spec { alias, .. }) => alias.clone(),
-            Package::Scrolls(Spec { alias, .. }) => alias.clone(),
+            Package::Oura(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
-            Package::Oura(Spec { alias, .. }) => alias.clone(),
+            Package::Scrolls(Spec { alias, .. }) => alias.clone(),
+            Package::Mithril(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -298,13 +352,13 @@ impl Package {
     /// ```
     pub fn package_type(&self) -> PackageType {
         match self {
-            Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
-            Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
-            Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
-            Package::Scrolls(Spec { package_type, .. }) => package_type.clone(),
+            Package::Oura(Spec { package_type, .. }) => package_type.clone(),
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
             Package::Dolos(Spec { package_type, .. }) => package_type.clone(),
-            Package::Oura(Spec { package_type, .. }) => package_type.clone(),
+            Package::Scrolls(Spec { package_type, .. }) => package_type.clone(),
+            Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
+            Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
+            Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
         }
     }
 
@@ -431,55 +485,18 @@ impl Package {
     /// ```
     pub async fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
         let version = VersionType::parse(&version, client, package_type.clone()).await.unwrap();
-        match package_type {
-            PackageType::CardanoNode => Package::CardanoNode(Spec {
-                alias: "cardano-node".to_string(),
-                version: Some(version),
-                binary_path: "bin".to_string(),
-                package_type,
-            }),
-            PackageType::CardanoCli => Package::CardanoCli(Spec {
-                alias: "cardano-cli".to_string(),
-                version: Some(version),
-                binary_path: "bin".to_string(),
-                package_type,
-            }),
-            PackageType::Mithril => Package::Mithril(Spec {
-                alias: "mithril-client".to_string(),
-                version: Some(version),
-                binary_path: "".to_string(),
-                package_type,
-            }),
-            PackageType::Aiken => Package::Aiken(Spec {
-                alias: "aiken".to_string(),
-                version: Some(version),
-                binary_path: "aiken-{platform}".replace(
-                    "{platform}",
-                    get_platform_name_download(package_type.clone()),
-                ),
-                package_type,
-            }),
-            PackageType::Dolos => Package::Dolos(Spec {
-                alias: "dolos".to_string(),
-                version: Some(version),
-                binary_path: "dolos-{platform}".replace(
-                    "{platform}",
-                    get_platform_name_download(package_type.clone()),
-                ),
-                package_type,
-            }),
-            PackageType::Oura => Package::Oura(Spec {
-                alias: "oura".to_string(),
-                version: Some(version),
-                binary_path: "".to_string(),
-                package_type,
-            }),
-            PackageType::Scrolls => Package::Scrolls(Spec {
-                alias: "scrolls".to_string(),
-                version: Some(version),
-                binary_path: "".to_string(),
-                package_type,
-            }),
-        }
+        let alias = package_type.alias();
+        let binary_path = package_type.format_binary_path();
+        create_package!(
+            package_type,
+            Some(version),
+            (Oura, alias, binary_path),
+            (Aiken, alias, binary_path),
+            (Dolos, alias, binary_path),
+            (Scrolls, alias, binary_path),
+            (Mithril, alias, binary_path),
+            (CardanoCli, alias, binary_path),
+            (CardanoNode, alias, binary_path)
+        )
     }
 }

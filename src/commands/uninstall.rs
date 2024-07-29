@@ -9,19 +9,6 @@ use crate::helpers::version::get_current_version;
 use crate::packages::Package;
 use crate::packages::PackageType;
 
-macro_rules! execute {
-    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
-        match $command {
-            $(
-                Commands::$variant { version } => {
-                    let package = Package::new($package_type, version, $client).await;
-                    uninstall(package).await.expect("Failed to uninstall")
-                }
-            )*
-        }
-    }
-}
-
 #[derive(Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -37,6 +24,19 @@ pub enum Commands {
     Scrolls { version: String },
     CardanoCli { version: String },
     CardanoNode { version: String },
+}
+
+macro_rules! execute {
+    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+        match $command {
+            $(
+                Commands::$variant { version } => {
+                    let package = Package::new($package_type, version, $client).await;
+                    uninstall(package).await.expect("Failed to uninstall")
+                }
+            )*
+        }
+    }
 }
 
 pub async fn run(

@@ -7,19 +7,6 @@ use crate::helpers::version::switch_version;
 use crate::packages::Package;
 use crate::packages::PackageType;
 
-macro_rules! execute {
-  ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
-    match $command {
-      $(
-        Commands::$variant { version } => {
-          let package = Package::new($package_type, version, $client).await;
-          use_cmd($client, package).await.expect("Failed to use");
-        }
-      )*
-    }
-  }
-}
-
 #[derive(clap::Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -35,6 +22,19 @@ pub enum Commands {
     Scrolls { version: String },
     CardanoCli { version: String },
     CardanoNode { version: String },
+}
+
+macro_rules! execute {
+  ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+    match $command {
+      $(
+        Commands::$variant { version } => {
+          let package = Package::new($package_type, version, $client).await;
+          use_cmd($client, package).await.expect("Failed to use");
+        }
+      )*
+    }
+  }
 }
 
 pub async fn run(
