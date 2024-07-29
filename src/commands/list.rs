@@ -33,6 +33,19 @@ pub enum Commands {
     CardanoNode,
 }
 
+/// Macro to execute a command based on the provided variant and package type.
+///
+/// This macro matches the provided command against a list of command variants
+/// and executes the corresponding code for each variant. It creates a new
+/// `Package` instance with the specified package type and client, and then
+/// lists the package versions.
+///
+/// # Parameters
+///
+/// - `$command`: The command to be matched and executed.
+/// - `$client`: The client to be used for creating the `Package`.
+/// - `$(($variant:ident, $package_type:expr)),*`: A list of tuples containing
+///   the command variant and the corresponding package type.
 macro_rules! execute {
     ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
         match $command {

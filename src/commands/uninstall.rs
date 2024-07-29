@@ -26,6 +26,21 @@ pub enum Commands {
     CardanoNode { version: String },
 }
 
+/// A macro to execute an uninstall command based on the provided variant and
+/// package type.
+///
+/// This macro matches the provided command against a list of command variants
+/// and executes the corresponding code for each variant. It creates a new
+/// `Package` instance with the specified package type, version, and client, and
+/// then uninstalls the package.
+///
+/// # Parameters
+///
+/// - `$command`: The command to be matched and executed. The command must
+///   include a `version`.
+/// - `$client`: The client to be used for creating the `Package`.
+/// - `$(($variant:ident, $package_type:expr)),*`: A list of tuples containing
+///   the command variant and the corresponding package type.
 macro_rules! execute {
     ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
         match $command {
