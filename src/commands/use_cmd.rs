@@ -7,6 +7,19 @@ use crate::helpers::version::switch_version;
 use crate::packages::Package;
 use crate::packages::PackageType;
 
+macro_rules! execute {
+  ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+    match $command {
+      $(
+        Commands::$variant { version } => {
+          let package = Package::new($package_type, version, $client).await;
+          use_cmd($client, package).await.expect("Failed to use");
+        }
+      )*
+    }
+  }
+}
+
 #[derive(clap::Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -15,13 +28,13 @@ pub struct Args {
 
 #[derive(clap::Parser)]
 pub enum Commands {
-    CardanoNode { version: String },
-    CardanoCli { version: String },
+    Oura { version: String },
+    Aiken { version: String },
+    Dolos { version: String },
     Mithril { version: String },
     Scrolls { version: String },
-    Aiken { version: String },
-    Oura { version: String },
-    Dolos { version: String },
+    CardanoCli { version: String },
+    CardanoNode { version: String },
 }
 
 pub async fn run(
@@ -29,36 +42,17 @@ pub async fn run(
     _ctx: &crate::Context,
     client: Option<&reqwest::Client>,
 ) -> miette::Result<()> {
-    match args.command {
-        Commands::Mithril { version } => {
-            let package = Package::new(PackageType::Mithril, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-        Commands::Scrolls { version } => {
-            let package = Package::new(PackageType::Scrolls, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-        Commands::Aiken { version } => {
-            let package = Package::new(PackageType::Aiken, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-        Commands::Oura { version } => {
-            let package = Package::new(PackageType::Oura, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-        Commands::Dolos { version } => {
-            let package = Package::new(PackageType::Dolos, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-        Commands::CardanoNode { version } => {
-            let package = Package::new(PackageType::CardanoNode, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-        Commands::CardanoCli { version } => {
-            let package = Package::new(PackageType::CardanoCli, version, client).await;
-            use_cmd(client, package).await.expect("Failed to use")
-        }
-    }
+    execute!(
+        args.command,
+        client,
+        (Oura, PackageType::Oura),
+        (Aiken, PackageType::Aiken),
+        (Dolos, PackageType::Dolos),
+        (Mithril, PackageType::Mithril),
+        (Scrolls, PackageType::Scrolls),
+        (CardanoCli, PackageType::CardanoCli),
+        (CardanoNode, PackageType::CardanoNode)
+    );
 
     Ok(())
 }

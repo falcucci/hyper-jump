@@ -25,6 +25,19 @@ use crate::helpers::version::VersionType;
 use crate::packages::Package;
 use crate::packages::PackageType;
 
+macro_rules! execute {
+    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+        match $command {
+            $(
+                Commands::$variant { version } => {
+                    let package = Package::new($package_type, version, $client).await;
+                    install($client, package).await.expect("Failed to install");
+                }
+            )*
+        }
+    }
+}
+
 #[derive(Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -33,13 +46,13 @@ pub struct Args {
 
 #[derive(Parser)]
 pub enum Commands {
-    CardanoNode { version: String },
-    CardanoCli { version: String },
-    Mithril { version: String },
-    Scrolls { version: String },
+    Oura { version: String },
     Aiken { version: String },
     Dolos { version: String },
-    Oura { version: String },
+    Mithril { version: String },
+    Scrolls { version: String },
+    CardanoCli { version: String },
+    CardanoNode { version: String },
 }
 
 pub async fn run(
@@ -47,36 +60,17 @@ pub async fn run(
     _ctx: &crate::Context,
     client: Option<&reqwest::Client>,
 ) -> miette::Result<()> {
-    match args.command {
-        Commands::Mithril { version } => {
-            let package = Package::new(PackageType::Mithril, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-        Commands::Aiken { version } => {
-            let package = Package::new(PackageType::Aiken, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-        Commands::Oura { version } => {
-            let package = Package::new(PackageType::Oura, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-        Commands::Dolos { version } => {
-            let package = Package::new(PackageType::Dolos, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-        Commands::Scrolls { version } => {
-            let package = Package::new(PackageType::Scrolls, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-        Commands::CardanoNode { version } => {
-            let package = Package::new(PackageType::CardanoNode, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-        Commands::CardanoCli { version } => {
-            let package = Package::new(PackageType::CardanoCli, version, client).await;
-            install(client, package).await.expect("Failed to install")
-        }
-    }
+    execute!(
+        args.command,
+        client,
+        (Oura, PackageType::Oura),
+        (Aiken, PackageType::Aiken),
+        (Dolos, PackageType::Dolos),
+        (Mithril, PackageType::Mithril),
+        (Scrolls, PackageType::Scrolls),
+        (CardanoCli, PackageType::CardanoCli),
+        (CardanoNode, PackageType::CardanoNode)
+    );
 
     Ok(())
 }

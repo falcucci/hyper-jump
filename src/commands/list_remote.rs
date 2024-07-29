@@ -14,6 +14,19 @@ use crate::packages::PackageType;
 use crate::services::github::api;
 use crate::services::github::deserialize_response;
 
+macro_rules! execute {
+    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+        match $command {
+            $(
+                Commands::$variant => {
+                    let package = Package::new($package_type, String::new(), $client).await;
+                    list_remote($client, package).await.expect("Failed to list-remote versions")
+                }
+            )*
+        }
+    }
+}
+
 #[derive(clap::Parser)]
 pub struct Args {
     #[command(subcommand)]
@@ -22,13 +35,13 @@ pub struct Args {
 
 #[derive(clap::Parser)]
 pub enum Commands {
-    CardanoNode,
-    CardanoCli,
-    Mithril,
-    Scrolls,
+    Oura,
     Aiken,
     Dolos,
-    Oura,
+    Mithril,
+    Scrolls,
+    CardanoCli,
+    CardanoNode,
 }
 
 pub async fn run(
@@ -36,36 +49,17 @@ pub async fn run(
     _ctx: &crate::Context,
     client: Option<&reqwest::Client>,
 ) -> miette::Result<()> {
-    match args.command {
-        Commands::Mithril => {
-            let package = Package::new(PackageType::Mithril, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-        Commands::Aiken => {
-            let package = Package::new(PackageType::Aiken, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-        Commands::CardanoNode => {
-            let package = Package::new(PackageType::CardanoNode, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-        Commands::CardanoCli => {
-            let package = Package::new(PackageType::CardanoCli, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-        Commands::Dolos => {
-            let package = Package::new(PackageType::Dolos, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-        Commands::Oura => {
-            let package = Package::new(PackageType::Oura, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-        Commands::Scrolls => {
-            let package = Package::new(PackageType::Scrolls, String::new(), client).await;
-            list_remote(client, package).await.expect("Failed to list-remote versions")
-        }
-    }
+    execute!(
+        args.command,
+        client,
+        (Oura, PackageType::Oura),
+        (Aiken, PackageType::Aiken),
+        (Dolos, PackageType::Dolos),
+        (Mithril, PackageType::Mithril),
+        (Scrolls, PackageType::Scrolls),
+        (CardanoCli, PackageType::CardanoCli),
+        (CardanoNode, PackageType::CardanoNode)
+    );
 
     Ok(())
 }
