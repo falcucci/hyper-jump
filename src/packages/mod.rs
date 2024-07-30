@@ -485,8 +485,8 @@ impl Package {
     /// ```
     pub async fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
         let version = VersionType::parse(&version, client, package_type.clone()).await.unwrap();
-        let alias = package_type.alias();
         let binary_path = package_type.format_binary_path();
+        let alias = package_type.alias();
         create_package!(
             package_type,
             Some(version),
