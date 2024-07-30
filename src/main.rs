@@ -120,8 +120,8 @@ async fn main() -> miette::Result<()> {
     let client = Some(client::create_reqwest_client().map_err(|e| miette::miette!(e))?);
 
     match cli.command {
-        Commands::List(args) => list::run(args, &ctx, client.as_ref()).await,
         Commands::Use(args) => use_cmd::run(args, &ctx, client.as_ref()).await,
+        Commands::List(args) => list::run(args, &ctx, client.as_ref()).await,
         Commands::Install(args) => install::run(args, &ctx, client.as_ref()).await,
         Commands::Uninstall(args) => uninstall::run(args, &ctx, client.as_ref()).await,
         Commands::ListRemote(args) => list_remote::run(args, &ctx, client.as_ref()).await,
