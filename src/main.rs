@@ -62,13 +62,13 @@ pub enum OutputFormat {
 
 #[derive(Subcommand)]
 enum Commands {
-    Install(install::Args),
-    Uninstall(uninstall::Args),
     Use(use_cmd::Args),
     List(list::Args),
+    Install(install::Args),
+    Uninstall(uninstall::Args),
     ListRemote(list_remote::Args),
-    Erase,
     Prefix,
+    Erase,
 }
 
 pub struct Context {
