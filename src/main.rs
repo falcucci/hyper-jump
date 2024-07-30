@@ -125,7 +125,7 @@ async fn main() -> miette::Result<()> {
         Commands::Install(args) => install::run(args, &ctx, client.as_ref()).await,
         Commands::Uninstall(args) => uninstall::run(args, &ctx, client.as_ref()).await,
         Commands::ListRemote(args) => list_remote::run(args, &ctx, client.as_ref()).await,
-        Commands::Erase => erase::run().await,
         Commands::Prefix => prefix::run().await,
+        Commands::Erase => erase::run().await,
     }
 }
