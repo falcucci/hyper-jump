@@ -162,6 +162,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     #[cfg(target_os = "macos")]
     {
         match package_type {
+            PackageType::CardanoSubmitApi => "tar.gz",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -175,6 +176,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     #[cfg(target_os = "linux")]
     {
         match package_type {
+            PackageType::CardanoSubmitApi => "tar.gz",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -232,6 +234,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
         #[cfg(target_arch = "aarch64")]
         {
             match package_type {
+                PackageType::CardanoSubmitApi => "",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
@@ -245,6 +248,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
         #[cfg(target_arch = "x86_64")]
         {
             match package_type {
+                PackageType::CardanoSubmitApi => "",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "x86_64",
@@ -259,6 +263,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
     #[cfg(target_os = "linux")]
     {
         match package_type {
+            PackageType::CardanoSubmitApi => "",
             PackageType::CardanoNode => "",
             PackageType::CardanoCli => "",
             PackageType::Mithril => "x64",

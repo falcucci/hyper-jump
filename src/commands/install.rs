@@ -40,6 +40,7 @@ pub enum Commands {
     Scrolls { version: String },
     CardanoCli { version: String },
     CardanoNode { version: String },
+    CardanoSubmitApi { version: String },
 }
 
 /// Macro to execute a command based on the provided variant and package type.
@@ -83,7 +84,8 @@ pub async fn run(
         (Mithril, PackageType::Mithril),
         (Scrolls, PackageType::Scrolls),
         (CardanoCli, PackageType::CardanoCli),
-        (CardanoNode, PackageType::CardanoNode)
+        (CardanoNode, PackageType::CardanoNode),
+        (CardanoSubmitApi, PackageType::CardanoSubmitApi)
     );
 
     Ok(())

@@ -24,6 +24,7 @@ pub enum Commands {
     Scrolls { version: String },
     CardanoCli { version: String },
     CardanoNode { version: String },
+    CardanoSubmitApi { version: String },
 }
 
 /// A macro to execute an uninstall command based on the provided variant and
@@ -68,7 +69,8 @@ pub async fn run(
         (Mithril, PackageType::Mithril),
         (Scrolls, PackageType::Scrolls),
         (CardanoCli, PackageType::CardanoCli),
-        (CardanoNode, PackageType::CardanoNode)
+        (CardanoNode, PackageType::CardanoNode),
+        (CardanoSubmitApi, PackageType::CardanoSubmitApi)
     );
 
     Ok(())

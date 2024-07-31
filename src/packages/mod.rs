@@ -45,6 +45,7 @@ pub enum Package {
     Scrolls(Spec),
     CardanoCli(Spec),
     CardanoNode(Spec),
+    CardanoSubmitApi(Spec),
 }
 
 /// Enum representing different types of package types.
@@ -62,6 +63,7 @@ pub enum PackageType {
     Scrolls,
     CardanoCli,
     CardanoNode,
+    CardanoSubmitApi,
 }
 
 /// Macro to create a `Package` variant with the appropriate `Spec` struct.
@@ -120,6 +122,7 @@ impl PackageType {
             "cardano-cli" => PackageType::CardanoCli,
             "cardano-node" => PackageType::CardanoNode,
             "mithril-client" => PackageType::Mithril,
+            "cardano-submit-api" => PackageType::CardanoSubmitApi,
             _ => panic!("Unknown package"),
         }
     }
@@ -133,12 +136,14 @@ impl PackageType {
             PackageType::Mithril => "mithril-client".to_string(),
             PackageType::CardanoCli => "cardano-cli".to_string(),
             PackageType::CardanoNode => "cardano-node".to_string(),
+            PackageType::CardanoSubmitApi => "cardano-submit-api".to_string(),
         }
     }
 
     pub fn format_binary_path(&self) -> String {
         let platform = get_platform_name_download(self.clone());
         match self {
+            PackageType::CardanoSubmitApi => "bin".to_string(),
             PackageType::CardanoNode => "bin".to_string(),
             PackageType::CardanoCli => "bin".to_string(),
             PackageType::Mithril => "".to_string(),
@@ -169,6 +174,7 @@ impl PackageType {
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::CardanoCli => CARDANO_CLI_REPO,
             PackageType::CardanoNode => CARDANO_NODE_REPO,
+            PackageType::CardanoSubmitApi => CARDANO_NODE_REPO,
         }
     }
 
@@ -252,6 +258,7 @@ impl Package {
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoSubmitApi(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -279,6 +286,7 @@ impl Package {
             Package::Mithril(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::CardanoNode(Spec { version, .. }) => version.clone(),
+            Package::CardanoSubmitApi(Spec { version, .. }) => version.clone(),
         }
     }
 
@@ -306,6 +314,7 @@ impl Package {
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoSubmitApi(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
     // Returns the binary name of the package.
@@ -332,6 +341,7 @@ impl Package {
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoSubmitApi(Spec { alias, .. }) => alias.clone(),
         }
     }
 
@@ -359,6 +369,7 @@ impl Package {
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
+            Package::CardanoSubmitApi(Spec { package_type, .. }) => package_type.clone(),
         }
     }
 
@@ -382,6 +393,10 @@ impl Package {
         let base = p.base_url();
         let repo = p.repo();
         match p {
+            PackageType::CardanoSubmitApi => format!(
+                "{}/{}/releases/download/{{version}}/cardano-node-{{version}}-{{OS}}.{{file_type}}",
+                base, repo,
+            ),
             PackageType::CardanoNode => format!(
                 "{}/{}/releases/download/{{version}}/cardano-node-{{version}}-{{OS}}.{{file_type}}",
                 base, repo,
@@ -496,7 +511,8 @@ impl Package {
             (Scrolls, alias, binary_path),
             (Mithril, alias, binary_path),
             (CardanoCli, alias, binary_path),
-            (CardanoNode, alias, binary_path)
+            (CardanoNode, alias, binary_path),
+            (CardanoSubmitApi, alias, binary_path)
         )
     }
 }
