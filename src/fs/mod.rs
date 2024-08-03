@@ -163,6 +163,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "tar.gz",
+            PackageType::CardanoDbSync => "tar.gz",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -235,6 +236,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
         {
             match package_type {
                 PackageType::CardanoSubmitApi => "",
+                PackageType::CardanoDbSync => "macos",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
@@ -329,7 +331,12 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
         }
     }
 
+    println!("Copying the proxy to the installation directory");
+    println!("Proxy version: {}", env!("CARGO_PKG_VERSION"));
+    println!("Installation directory: {}", installation_dir.display());
+    println!("Proxy path: {}", exe_path.display());
     fs::copy(&exe_path, &installation_dir).map_err(|_| anyhow!("Could not copy the proxy"))?;
+    println!("Proxy copied successfully");
 
     Ok(())
 }

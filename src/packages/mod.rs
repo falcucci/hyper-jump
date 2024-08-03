@@ -8,6 +8,7 @@ use crate::helpers::version::VersionType;
 
 const GITHUB_BASE_URL: &str = "https://github.com";
 const GITHUB_API_BASE_URL: &str = "https://api.github.com/repos";
+const CARDANO_DB_SYNC: &str = "IntersectMBO/cardano-db-sync";
 const CARDANO_NODE_REPO: &str = "IntersectMBO/cardano-node";
 const CARDANO_CLI_REPO: &str = "IntersectMBO/cardano-node";
 const MITHRIL_REPO: &str = "input-output-hk/mithril";
@@ -45,6 +46,7 @@ pub enum Package {
     Scrolls(Spec),
     CardanoCli(Spec),
     CardanoNode(Spec),
+    CardanoDbSync(Spec),
     CardanoSubmitApi(Spec),
 }
 
@@ -63,6 +65,7 @@ pub enum PackageType {
     Scrolls,
     CardanoCli,
     CardanoNode,
+    CardanoDbSync,
     CardanoSubmitApi,
 }
 
@@ -122,6 +125,7 @@ impl PackageType {
             "cardano-cli" => PackageType::CardanoCli,
             "cardano-node" => PackageType::CardanoNode,
             "mithril-client" => PackageType::Mithril,
+            "cardano-db-sync" => PackageType::CardanoDbSync,
             "cardano-submit-api" => PackageType::CardanoSubmitApi,
             _ => panic!("Unknown package"),
         }
@@ -136,14 +140,16 @@ impl PackageType {
             PackageType::Mithril => "mithril-client".to_string(),
             PackageType::CardanoCli => "cardano-cli".to_string(),
             PackageType::CardanoNode => "cardano-node".to_string(),
+            PackageType::CardanoDbSync => "cardano-db-sync".to_string(),
             PackageType::CardanoSubmitApi => "cardano-submit-api".to_string(),
         }
     }
 
-    pub fn format_binary_path(&self) -> String {
+    pub fn format_binary_path(&self, version: &str) -> String {
         let platform = get_platform_name_download(self.clone());
         match self {
             PackageType::CardanoSubmitApi => "bin".to_string(),
+            PackageType::CardanoDbSync => "{version}".replace("{version}", version),
             PackageType::CardanoNode => "bin".to_string(),
             PackageType::CardanoCli => "bin".to_string(),
             PackageType::Mithril => "".to_string(),
@@ -174,6 +180,7 @@ impl PackageType {
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::CardanoCli => CARDANO_CLI_REPO,
             PackageType::CardanoNode => CARDANO_NODE_REPO,
+            PackageType::CardanoDbSync => CARDANO_DB_SYNC,
             PackageType::CardanoSubmitApi => CARDANO_NODE_REPO,
         }
     }
@@ -258,6 +265,7 @@ impl Package {
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoDbSync(Spec { alias, .. }) => alias.clone(),
             Package::CardanoSubmitApi(Spec { alias, .. }) => alias.clone(),
         }
     }
@@ -286,6 +294,7 @@ impl Package {
             Package::Mithril(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::CardanoNode(Spec { version, .. }) => version.clone(),
+            Package::CardanoDbSync(Spec { version, .. }) => version.clone(),
             Package::CardanoSubmitApi(Spec { version, .. }) => version.clone(),
         }
     }
@@ -314,6 +323,7 @@ impl Package {
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::CardanoDbSync(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoSubmitApi(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
@@ -341,6 +351,7 @@ impl Package {
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
+            Package::CardanoDbSync(Spec { alias, .. }) => alias.clone(),
             Package::CardanoSubmitApi(Spec { alias, .. }) => alias.clone(),
         }
     }
@@ -369,6 +380,7 @@ impl Package {
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
+            Package::CardanoDbSync(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoSubmitApi(Spec { package_type, .. }) => package_type.clone(),
         }
     }
@@ -399,6 +411,11 @@ impl Package {
             ),
             PackageType::CardanoNode => format!(
                 "{}/{}/releases/download/{{version}}/cardano-node-{{version}}-{{OS}}.{{file_type}}",
+                base, repo,
+            ),
+            PackageType::CardanoDbSync => format!(
+                "{}/{}/releases/download/{{version}}/cardano-db-sync-{{version}}-{{platform}}.\
+                 {{file_type}}",
                 base, repo,
             ),
             PackageType::CardanoCli => format!(
@@ -500,7 +517,7 @@ impl Package {
     /// ```
     pub async fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
         let version = VersionType::parse(&version, client, package_type.clone()).await.unwrap();
-        let binary_path = package_type.format_binary_path();
+        let binary_path = package_type.format_binary_path(version.non_parsed_string.as_str());
         let alias = package_type.alias();
         create_package!(
             package_type,
@@ -512,6 +529,7 @@ impl Package {
             (Mithril, alias, binary_path),
             (CardanoCli, alias, binary_path),
             (CardanoNode, alias, binary_path),
+            (CardanoDbSync, alias, binary_path),
             (CardanoSubmitApi, alias, binary_path)
         )
     }

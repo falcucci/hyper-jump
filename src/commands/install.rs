@@ -40,6 +40,7 @@ pub enum Commands {
     Scrolls { version: String },
     CardanoCli { version: String },
     CardanoNode { version: String },
+    CardanoDbSync { version: String },
     CardanoSubmitApi { version: String },
 }
 
@@ -85,6 +86,7 @@ pub async fn run(
         (Scrolls, PackageType::Scrolls),
         (CardanoCli, PackageType::CardanoCli),
         (CardanoNode, PackageType::CardanoNode),
+        (CardanoDbSync, PackageType::CardanoDbSync),
         (CardanoSubmitApi, PackageType::CardanoSubmitApi)
     );
 
