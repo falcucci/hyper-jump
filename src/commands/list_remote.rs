@@ -29,6 +29,7 @@ pub enum Commands {
     Scrolls,
     CardanoCli,
     CardanoNode,
+    SidechainCli,
     PartnerChainCli,
     PartnerChainNode,
     CardanoSubmitApi,
@@ -75,6 +76,7 @@ pub async fn run(
         (Scrolls, PackageType::Scrolls),
         (CardanoCli, PackageType::CardanoCli),
         (CardanoNode, PackageType::CardanoNode),
+        (SidechainCli, PackageType::SidechainCli),
         (PartnerChainCli, PackageType::PartnerChainCli),
         (PartnerChainNode, PackageType::PartnerChainNode),
         (CardanoSubmitApi, PackageType::CardanoSubmitApi)
@@ -123,6 +125,7 @@ pub async fn list_remote(client: Option<&Client>, package: Package) -> Result<()
             Package::CardanoSubmitApi(_) => version.tag_name.clone(),
             Package::PartnerChainNode(_) => version.tag_name.clone(),
             Package::PartnerChainCli(_) => version.tag_name.clone(),
+            Package::SidechainCli(_) => version.tag_name.clone(),
             Package::CardanoNode(_) => version.tag_name.clone(),
             Package::CardanoCli(_) => version.tag_name.clone(),
             Package::Mithril(_) => version.tag_name.clone(),

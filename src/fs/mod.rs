@@ -10,7 +10,6 @@ use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
 use xz2::read::XzDecoder;
-use zip::ZipArchive;
 use zip_extract::extract;
 
 use crate::helpers::version::LocalVersion;
@@ -169,6 +168,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::CardanoSubmitApi => "tar.gz",
             PackageType::PartnerChainNode => "zip",
             PackageType::PartnerChainCli => "zip",
+            PackageType::SidechainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -185,6 +185,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::CardanoSubmitApi => "tar.gz",
             PackageType::PartnerChainNode => "zip",
             PackageType::PartnerChainCli => "zip",
+            PackageType::SidechainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -245,6 +246,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::CardanoSubmitApi => "",
                 PackageType::PartnerChainNode => "arm64",
                 PackageType::PartnerChainCli => "arm64",
+                PackageType::SidechainCli => "arm64",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
@@ -276,6 +278,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
             PackageType::CardanoSubmitApi => "",
             PackageType::PartnerChainNode => "",
             PackageType::PartnerChainCli => "",
+            PackageType::SidechainCli => "",
             PackageType::CardanoNode => "",
             PackageType::CardanoCli => "",
             PackageType::Mithril => "x64",
