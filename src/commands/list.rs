@@ -31,6 +31,7 @@ pub enum Commands {
     Scrolls,
     CardanoCli,
     CardanoNode,
+    SidechainCli,
     PartnerChainCli,
     PartnerChainNode,
     CardanoSubmitApi,
@@ -77,6 +78,7 @@ pub async fn run(
         (Scrolls, PackageType::Scrolls),
         (CardanoCli, PackageType::CardanoCli),
         (CardanoNode, PackageType::CardanoNode),
+        (SidechainCli, PackageType::SidechainCli),
         (PartnerChainCli, PackageType::PartnerChainCli),
         (PartnerChainNode, PackageType::PartnerChainNode),
         (CardanoSubmitApi, PackageType::CardanoSubmitApi)
