@@ -1,5 +1,7 @@
 use std::env;
 use std::fs;
+use std::io;
+use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -8,6 +10,7 @@ use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
 use xz2::read::XzDecoder;
+use zip_extract::extract;
 
 use crate::helpers::version::LocalVersion;
 use crate::packages::Package;
@@ -163,6 +166,9 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "tar.gz",
+            PackageType::PartnerChainNode => "zip",
+            PackageType::PartnerChainCli => "zip",
+            PackageType::SidechainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -177,6 +183,9 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "tar.gz",
+            PackageType::PartnerChainNode => "zip",
+            PackageType::PartnerChainCli => "zip",
+            PackageType::SidechainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
@@ -235,6 +244,9 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
         {
             match package_type {
                 PackageType::CardanoSubmitApi => "",
+                PackageType::PartnerChainNode => "arm64",
+                PackageType::PartnerChainCli => "arm64",
+                PackageType::SidechainCli => "arm64",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "arm64",
@@ -264,6 +276,9 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "",
+            PackageType::PartnerChainNode => "",
+            PackageType::PartnerChainCli => "",
+            PackageType::SidechainCli => "",
             PackageType::CardanoNode => "",
             PackageType::CardanoCli => "",
             PackageType::Mithril => "x64",
@@ -517,17 +532,27 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
 
     let output = format!("{}/{}", tmp.path, tmp.file_name);
     let decompress_stream: Box<dyn std::io::Read> = match tmp.file_format.as_str() {
-        "tar.gz" => Box::new(GzDecoder::new(file)),
-        "tar.xz" => Box::new(XzDecoder::new(file)),
+        "tar.gz" => Box::new(GzDecoder::new(&file)),
+        "tar.xz" => Box::new(XzDecoder::new(&file)),
+        "zip" => Box::new(io::empty()),
         _ => return Err(anyhow!("Unsupported file format")),
     };
 
-    Archive::new(decompress_stream).unpack(&output).with_context(|| {
-        format!(
-            "Failed to decompress or extract file {}.{}",
-            tmp.file_name, tmp.file_format
-        )
-    })?;
+    let context_msg = format!(
+        "Failed to decompress or extract file {}.{}",
+        tmp.file_name, tmp.file_format
+    );
+
+    match tmp.file_format.as_str() {
+        "tar.gz" | "tar.xz" => {
+            let mut archive = Archive::new(decompress_stream);
+            archive.unpack(&output).with_context(|| context_msg)?;
+        }
+        "zip" => {
+            extract(&file, Path::new(&output), true).with_context(|| context_msg)?;
+        }
+        _ => return Err(anyhow!("Unsupported file format")),
+    }
 
     let binary = &format!(
         "{}/{}/{}",
