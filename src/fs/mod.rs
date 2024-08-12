@@ -1,5 +1,7 @@
 use std::env;
 use std::fs;
+use std::io;
+use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -8,6 +10,8 @@ use anyhow::anyhow;
 use anyhow::Result;
 use tracing::info;
 use xz2::read::XzDecoder;
+use zip::ZipArchive;
+use zip_extract::extract;
 
 use crate::helpers::version::LocalVersion;
 use crate::packages::Package;
@@ -522,15 +526,27 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
     let decompress_stream: Box<dyn std::io::Read> = match tmp.file_format.as_str() {
         "tar.gz" => Box::new(GzDecoder::new(file)),
         "tar.xz" => Box::new(XzDecoder::new(file)),
+        "zip" => {
+            let output_path = Path::new(&output);
+            extract(&file, output_path, true).with_context(|| {
+                format!(
+                    "Failed to decompress or extract file {}.{}",
+                    tmp.file_name, tmp.file_format
+                )
+            })?;
+            Box::new(io::empty())
+        }
         _ => return Err(anyhow!("Unsupported file format")),
     };
 
-    Archive::new(decompress_stream).unpack(&output).with_context(|| {
-        format!(
-            "Failed to decompress or extract file {}.{}",
-            tmp.file_name, tmp.file_format
-        )
-    })?;
+    if tmp.file_format != "zip" {
+        Archive::new(decompress_stream).unpack(&output).with_context(|| {
+            format!(
+                "Failed to decompress or extract file {}.{}",
+                tmp.file_name, tmp.file_format
+            )
+        })?;
+    }
 
     let binary = &format!(
         "{}/{}/{}",
@@ -538,6 +554,7 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
         package.binary_path(),
         package.binary_name()
     );
+    println!("binary: {}", binary);
     let mut perms = fs::metadata(binary)?.permissions();
     perms.set_mode(0o551);
     fs::set_permissions(binary, perms)?;

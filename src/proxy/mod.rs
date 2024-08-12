@@ -101,6 +101,8 @@ pub async fn handle_package_process(args: &[String], package: Package) -> Result
         .join(package.binary_path())
         .join(package.binary_name());
 
+    println!("Running command: {:?}", location);
+
     let _term = Arc::new(AtomicBool::new(false));
 
     #[cfg(unix)]

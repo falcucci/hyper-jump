@@ -125,7 +125,7 @@ impl PackageType {
             "cardano-cli" => PackageType::CardanoCli,
             "cardano-node" => PackageType::CardanoNode,
             "mithril-client" => PackageType::Mithril,
-            "partner-chain-cli" => PackageType::PartnerChainCli,
+            "partner-chains-cli" => PackageType::PartnerChainCli,
             "cardano-submit-api" => PackageType::CardanoSubmitApi,
             _ => panic!("Unknown package"),
         }
@@ -140,7 +140,7 @@ impl PackageType {
             PackageType::Mithril => "mithril-client".to_string(),
             PackageType::CardanoCli => "cardano-cli".to_string(),
             PackageType::CardanoNode => "cardano-node".to_string(),
-            PackageType::PartnerChainCli => "partner-chain-cli".to_string(),
+            PackageType::PartnerChainCli => "partner-chains-cli".to_string(),
             PackageType::CardanoSubmitApi => "cardano-submit-api".to_string(),
         }
     }
