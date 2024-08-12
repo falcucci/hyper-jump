@@ -167,6 +167,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "tar.gz",
+            PackageType::PartnerChainNode => "zip",
             PackageType::PartnerChainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
@@ -182,6 +183,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "tar.gz",
+            PackageType::PartnerChainNode => "zip",
             PackageType::PartnerChainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
@@ -241,6 +243,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
         {
             match package_type {
                 PackageType::CardanoSubmitApi => "",
+                PackageType::PartnerChainNode => "arm64",
                 PackageType::PartnerChainCli => "arm64",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
@@ -271,6 +274,8 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
     {
         match package_type {
             PackageType::CardanoSubmitApi => "",
+            PackageType::PartnerChainNode => "",
+            PackageType::PartnerChainCli => "",
             PackageType::CardanoNode => "",
             PackageType::CardanoCli => "",
             PackageType::Mithril => "x64",
