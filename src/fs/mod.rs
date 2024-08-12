@@ -557,7 +557,6 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
         package.binary_path(),
         package.binary_name()
     );
-    println!("binary: {}", binary);
     let mut perms = fs::metadata(binary)?.permissions();
     perms.set_mode(0o551);
     fs::set_permissions(binary, perms)?;
