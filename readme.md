@@ -6,11 +6,7 @@ _The console lights up, keys clack rapidly and then..._ 🛸
 
 </div>
 
-Pff, the Cardano aircraft, where the only thing faster than the transactions is the hyper-jump between versions! It's the Swiss Army knife of version managers, the Batman utility belt for developers and the TARDIS for your codebase – it's bigger on the inside with all the versions it can handle!
-
-Imagine you're in the cockpit of the Cardano aircraft, your fingers dance across the command line like Ludovico does in the piano during a concerto. You type hyper-jump install <package> latest, and jump! You've just skipped through versions like a time traveler at Café De Flore reading a book aside Picasso. But beware, type the wrong command and you might just end up installing "Cardano-node-vintage-0.0.1-alpha-beta-gamma" – and get stuck in the past!
-
-Now, let's talk about the all-in-one aspect. This isn't just a version manager; it's a version festival, where you can sample all the flavors of Cardano without the indigestion. Cross-platform? Whether you're a Windows wizard, a macOS maestro or a Linux luminary, the hyper-jump has got you covered. It's like having a universal adapter for your development needs.
+hyper-jump is the Cardano aircraft action where the only thing faster than the transactions is the jump between versions ⚡ Skip through versions like a time traveler: but beware, type the wrong command and you might just end up installing `cardano-node-0.0.1-alpha` - and get stuck in the past 👀
 
 ## Core Features
 
