@@ -191,6 +191,7 @@ async fn handle_process_exit(
 ) -> Result<()> {
     match status?.code() {
         Some(0) => Ok(()),
+        Some(2) => Ok(()),
         Some(code) => Err(anyhow!("Process exited with error code {}", code)),
         None => Err(anyhow!("Process terminated by signal")),
     }
