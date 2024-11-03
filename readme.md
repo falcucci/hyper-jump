@@ -6,7 +6,7 @@ _The console lights up, keys clack rapidly and then..._ 🛸
 
 </div>
 
-hyper-jump is an agnostic all-in-one and cross-platform command-line version manager toolset which I have created and used personally based on internal tools I daily interact with for many different reasons, that being for educational purposes or as a proffessional project/task.
+hyper-jump is an agnostic all-in-one and cross-platform command-line version manager toolset which I have created and used personally based on internal tools I daily interact with for many different reasons, that being for educational purposes or as a professional project/task.
 
 ## Core Features
 
