@@ -6,7 +6,7 @@ _The console lights up, keys clack rapidly and then..._ 🛸
 
 </div>
 
-hyper-jump is the Cardano aircraft action where the only thing faster than the transactions is the jump between versions ⚡ Skip through versions like a time traveler: but beware, type the wrong command and you might just end up installing `cardano-node-0.0.1-alpha` - and get stuck in the past 👀
+hyper-jump is an agnostic all-in-one and cross-platform command-line version manager toolset which I have created and used personally based on internal tools I daily interact with for many different reasons, that being for educational purposes or as a proffessional project/task.
 
 ## Core Features
 
