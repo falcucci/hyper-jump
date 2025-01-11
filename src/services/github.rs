@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use anyhow::anyhow;
 use anyhow::Result;
 use reqwest::Client;

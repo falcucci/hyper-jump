@@ -29,11 +29,12 @@ hyper-jump is an agnostic all-in-one and cross-platform command-line version man
 
 | Package Name                                                                   | Alias                 | Description                                          |
 | ------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------- |
-| [Cardano Submit Api](https://github.com/IntersectMBO/cardano-node)             | `cardano-submit-api`  | Manage versions of the Cardano Submit Api software.  |
+| [Zellij](https://github.com/zellij-org/zellij)                                 | `zellij`              | Manage versions of the Zellij client software.       |
 | [Cardano Node](https://github.com/IntersectMBO/cardano-node)                   | `cardano-node`        | Manage versions of the Cardano Node software.        |
 | [Cardano CLI](https://github.com/cardano-scaling/cardano-cli)                  | `cardano-cli`         | Manage versions of the Cardano CLI tool.             |
 | [Partner Chains CLI](https://github.com/input-output-hk/partner-chains)        | `partner-chains-cli`  | Manage versions of the Partner Chains CLI tool.      |
 | [Partner Chains Node](https://github.com/input-output-hk/partner-chains)       | `partner-chains-node` | Manage versions of the Partner Chains Node software. |
+| [Cardano Submit Api](https://github.com/IntersectMBO/cardano-node)             | `cardano-submit-api`  | Manage versions of the Cardano Submit Api software.  |
 | [SideChain](https://github.com/input-output-hk/partner-chains-smart-contracts) | `sidechain-cli`       | Manage versions of the SideChain CLI tool.           |
 | [Mithril](https://github.com/input-output-hk/mithril)                          | `mithril-client`      | Manage versions of the Mithril client software.      |
 | [Scrolls](https://github.com/txpipe/scrolls)                                   | `scrolls`             | Manage versions of the Scrolls client software.      |
@@ -54,7 +55,7 @@ cargo install hyper-jump
 Add the following line to your shell configuration file (e.g., `~/.bashrc`, `~/.zshrc`, etc.):
 
 ```bash
-export PATH="$HOME/.local/share/hyper-jump/cardano-bin:$PATH"
+export PATH="$HOME/.local/share/hyper-jump/bin:$PATH"
 ```
 
 Or add the hyper-jump binary path to your PATH by running:
@@ -80,7 +81,7 @@ hyper-jump --help
 Switch to a specific version of a package.
 
 ```sh
-hyper-jump use cardano-node <version>
+hyper-jump use <package-name> <version>
 ```
 
 ### Install
@@ -88,7 +89,7 @@ hyper-jump use cardano-node <version>
 Install a specific version of a package.
 
 ```sh
-hyper-jump install cardano-node <version>
+hyper-jump install <package-name> <version>
 ```
 
 ### List
@@ -96,7 +97,7 @@ hyper-jump install cardano-node <version>
 List installed versions of a package:
 
 ```sh
-hyper-jump list cardano-node
+hyper-jump list <package-name>
 ```
 
 ### List Remote
@@ -104,7 +105,7 @@ hyper-jump list cardano-node
 List remote versions available for a package.
 
 ```sh
-hyper-jump list-remote cardano-node
+hyper-jump list-remote <package-name>
 ```
 
 ### Uninstall
@@ -112,7 +113,7 @@ hyper-jump list-remote cardano-node
 Uninstall a specific version of a package.
 
 ```sh
-hyper-jump uninstall cardano-node <version>
+hyper-jump uninstall <package-name> <version>
 ```
 
 ### Erase

@@ -12,6 +12,7 @@ const PARTNER_CHAIN_CLI_REPO: &str = "input-output-hk/partner-chains";
 const CARDANO_NODE_REPO: &str = "IntersectMBO/cardano-node";
 const CARDANO_CLI_REPO: &str = "IntersectMBO/cardano-node";
 const MITHRIL_REPO: &str = "input-output-hk/mithril";
+const ZELLIJ_REPO: &str = "zellij-org/zellij";
 const AIKEN_REPO: &str = "aiken-lang/aiken";
 const OURA_REPO: &str = "txpipe/oura";
 const DOLOS_REPO: &str = "txpipe/dolos";
@@ -42,6 +43,7 @@ pub enum Package {
     Oura(Spec),
     Aiken(Spec),
     Dolos(Spec),
+    Zellij(Spec),
     Mithril(Spec),
     Scrolls(Spec),
     CardanoCli(Spec),
@@ -63,6 +65,7 @@ pub enum PackageType {
     Oura,
     Aiken,
     Dolos,
+    Zellij,
     Mithril,
     Scrolls,
     CardanoCli,
@@ -125,6 +128,7 @@ impl PackageType {
             "oura" => PackageType::Oura,
             "aiken" => PackageType::Aiken,
             "dolos" => PackageType::Dolos,
+            "zellij" => PackageType::Zellij,
             "scrolls" => PackageType::Scrolls,
             "cardano-cli" => PackageType::CardanoCli,
             "cardano-node" => PackageType::CardanoNode,
@@ -142,6 +146,7 @@ impl PackageType {
             PackageType::Oura => "oura".to_string(),
             PackageType::Aiken => "aiken".to_string(),
             PackageType::Dolos => "dolos".to_string(),
+            PackageType::Zellij => "zellij".to_string(),
             PackageType::Scrolls => "scrolls".to_string(),
             PackageType::Mithril => "mithril-client".to_string(),
             PackageType::CardanoCli => "cardano-cli".to_string(),
@@ -163,6 +168,7 @@ impl PackageType {
             PackageType::CardanoNode => "bin".to_string(),
             PackageType::CardanoCli => "bin".to_string(),
             PackageType::Mithril => "".to_string(),
+            PackageType::Zellij => "".to_string(),
             PackageType::Oura => "".to_string(),
             PackageType::Scrolls => "".to_string(),
             PackageType::Aiken => "aiken-{platform}".replace("{platform}", platform),
@@ -186,6 +192,7 @@ impl PackageType {
             PackageType::Oura => OURA_REPO,
             PackageType::Aiken => AIKEN_REPO,
             PackageType::Dolos => DOLOS_REPO,
+            PackageType::Zellij => ZELLIJ_REPO,
             PackageType::Scrolls => SCROLLS_REPO,
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::CardanoCli => CARDANO_CLI_REPO,
@@ -273,6 +280,7 @@ impl Package {
             Package::Oura(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
+            Package::Zellij(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
@@ -304,6 +312,7 @@ impl Package {
             Package::Oura(Spec { version, .. }) => version.clone(),
             Package::Aiken(Spec { version, .. }) => version.clone(),
             Package::Dolos(Spec { version, .. }) => version.clone(),
+            Package::Zellij(Spec { version, .. }) => version.clone(),
             Package::Scrolls(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
@@ -335,6 +344,7 @@ impl Package {
             Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Dolos(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Zellij(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Scrolls(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
@@ -365,6 +375,7 @@ impl Package {
             Package::Oura(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
+            Package::Zellij(Spec { alias, .. }) => alias.clone(),
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
@@ -396,6 +407,7 @@ impl Package {
             Package::Oura(Spec { package_type, .. }) => package_type.clone(),
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
             Package::Dolos(Spec { package_type, .. }) => package_type.clone(),
+            Package::Zellij(Spec { package_type, .. }) => package_type.clone(),
             Package::Scrolls(Spec { package_type, .. }) => package_type.clone(),
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
@@ -466,6 +478,10 @@ impl Package {
             ),
             PackageType::Dolos => format!(
                 "{}/{}/releases/download/{{version}}/dolos-{{platform}}.{{file_type}}",
+                base, repo,
+            ),
+            PackageType::Zellij => format!(
+                "{}/{}/releases/download/{{version}}/zellij-{{platform}}.{{file_type}}",
                 base, repo,
             ),
             PackageType::Oura => format!(
@@ -554,6 +570,7 @@ impl Package {
             (Oura, alias, binary_path),
             (Aiken, alias, binary_path),
             (Dolos, alias, binary_path),
+            (Zellij, alias, binary_path),
             (Scrolls, alias, binary_path),
             (Mithril, alias, binary_path),
             (CardanoCli, alias, binary_path),

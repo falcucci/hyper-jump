@@ -1,7 +1,6 @@
 use std::env;
 use std::fs;
 use std::io;
-use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -174,6 +173,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::Mithril => "tar.gz",
             PackageType::Scrolls => "tar.gz",
             PackageType::Aiken => "tar.gz",
+            PackageType::Zellij => "tar.gz",
             PackageType::Dolos => "tar.xz",
             PackageType::Oura => "tar.gz",
         }
@@ -253,6 +253,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::Scrolls => "aarch64-apple-darwin",
                 PackageType::Aiken => "aarch64-apple-darwin",
                 PackageType::Dolos => "aarch64-apple-darwin",
+                PackageType::Zellij => "aarch64-apple-darwin",
                 PackageType::Oura => "aarch64-apple-darwin",
             }
         }
@@ -267,6 +268,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::Scrolls => "x86_64",
                 PackageType::Aiken => "x86_64-apple-darwin",
                 PackageType::Dolos => "x86_64-apple-darwin",
+                PackageType::Zellij => "x86_64-apple-darwin",
                 PackageType::Oura => "x86_64-apple-darwin",
             }
         }
@@ -285,7 +287,8 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
             PackageType::Scrolls => "x64",
             PackageType::Aiken => "x86_64-unknown-linux-gnu",
             PackageType::Dolos => "x86_64-unknown-linux-gnu",
-            PackageType::Oura => "x86_64-unknown-linux-gnu",
+            PackageType::Zellij => "x86_64-unknown-linux-gnu",
+            PackageType::Oura => "x86_64-unknown-linux-musl",
         }
     }
 }
@@ -381,7 +384,7 @@ pub async fn copy_package_proxy(package: Package) -> Result<()> {
 fn add_to_path(installation_dir: &Path) -> Result<()> {
     let installation_dir = installation_dir.to_str().unwrap();
 
-    if !std::env::var("PATH")?.contains("cardano-bin") {
+    if !std::env::var("PATH")?.contains("bin") {
         info!("Make sure to have {installation_dir} in PATH");
     }
 
@@ -410,7 +413,7 @@ fn add_to_path(installation_dir: &Path) -> Result<()> {
 pub async fn get_installation_directory() -> Result<PathBuf> {
     let mut installation_location = get_local_data_dir()?;
 
-    installation_location.push("cardano-bin");
+    installation_location.push("bin");
 
     Ok(installation_location)
 }
