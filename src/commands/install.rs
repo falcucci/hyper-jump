@@ -16,7 +16,6 @@ use super::PostDownloadVersionType;
 use crate::fs::copy_package_proxy;
 use crate::fs::get_downloads_directory;
 use crate::fs::get_file_type;
-use crate::fs::get_platform_name;
 use crate::fs::unarchive;
 use crate::helpers::version::is_version_installed;
 use crate::helpers::version::LocalVersion;
@@ -36,6 +35,7 @@ pub enum Commands {
     Oura { version: String },
     Aiken { version: String },
     Dolos { version: String },
+    Zellij { version: String },
     Mithril { version: String },
     Scrolls { version: String },
     CardanoCli { version: String },
@@ -84,6 +84,7 @@ pub async fn run(
         (Oura, PackageType::Oura),
         (Aiken, PackageType::Aiken),
         (Dolos, PackageType::Dolos),
+        (Zellij, PackageType::Zellij),
         (Mithril, PackageType::Mithril),
         (Scrolls, PackageType::Scrolls),
         (CardanoCli, PackageType::CardanoCli),
@@ -359,10 +360,6 @@ async fn send_request(
     client: Option<&Client>,
     package: Package,
 ) -> Result<reqwest::Response, reqwest::Error> {
-    let platform = get_platform_name();
-    let package_type = package.package_type();
-    let file_type = get_file_type(package_type);
-
     let package_url = package.download_url();
     info!("Downloading: {}", package_url);
 
