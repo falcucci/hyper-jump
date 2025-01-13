@@ -24,6 +24,7 @@ pub struct Args {
 
 #[derive(clap::Parser)]
 pub enum Commands {
+    Reth,
     Oura,
     Aiken,
     Dolos,
@@ -72,6 +73,7 @@ pub async fn run(
     execute!(
         args.command,
         client,
+        (Reth, PackageType::Reth),
         (Oura, PackageType::Oura),
         (Aiken, PackageType::Aiken),
         (Dolos, PackageType::Dolos),

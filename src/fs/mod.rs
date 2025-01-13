@@ -176,6 +176,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::Zellij => "tar.gz",
             PackageType::Dolos => "tar.xz",
             PackageType::Oura => "tar.gz",
+            PackageType::Reth => "tar.gz",
         }
     }
 
@@ -192,6 +193,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::Aiken => "tar.gz",
             PackageType::Dolos => "tar.xz",
             PackageType::Oura => "tar.gz",
+            PackageType::Reth => "tar.gz",
         }
     }
 }
@@ -255,6 +257,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::Dolos => "aarch64-apple-darwin",
                 PackageType::Zellij => "aarch64-apple-darwin",
                 PackageType::Oura => "aarch64-apple-darwin",
+                PackageType::Reth => "aarch64-apple-darwin",
             }
         }
 
@@ -270,6 +273,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
                 PackageType::Dolos => "x86_64-apple-darwin",
                 PackageType::Zellij => "x86_64-apple-darwin",
                 PackageType::Oura => "x86_64-apple-darwin",
+                PackageType::Reth => "x86_64-apple-darwin",
             }
         }
     }

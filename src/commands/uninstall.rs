@@ -17,6 +17,7 @@ pub struct Args {
 
 #[derive(Parser)]
 pub enum Commands {
+    Reth { version: String },
     Oura { version: String },
     Aiken { version: String },
     Dolos { version: String },
@@ -67,6 +68,7 @@ pub async fn run(
     execute!(
         args.command,
         client,
+        (Reth, PackageType::Reth),
         (Oura, PackageType::Oura),
         (Aiken, PackageType::Aiken),
         (Dolos, PackageType::Dolos),

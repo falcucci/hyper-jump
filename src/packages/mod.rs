@@ -16,6 +16,7 @@ const ZELLIJ_REPO: &str = "zellij-org/zellij";
 const AIKEN_REPO: &str = "aiken-lang/aiken";
 const OURA_REPO: &str = "txpipe/oura";
 const DOLOS_REPO: &str = "txpipe/dolos";
+const RETH_REPO: &str = "paradigmxyz/reth";
 const SCROLLS_REPO: &str = "txpipe/scrolls";
 
 /// Represents the specification of a package.
@@ -40,6 +41,7 @@ pub struct Spec {
 /// * `CardanoNode` - Represents a Cardano Node package.
 #[derive(Debug, Clone)]
 pub enum Package {
+    Reth(Spec),
     Oura(Spec),
     Aiken(Spec),
     Dolos(Spec),
@@ -62,6 +64,7 @@ pub enum Package {
 /// * `Aiken` - Represents the Aiken package type.
 #[derive(Debug, Clone)]
 pub enum PackageType {
+    Reth,
     Oura,
     Aiken,
     Dolos,
@@ -125,6 +128,7 @@ impl PackageType {
     /// ```
     pub fn from_str(package: &str) -> Self {
         match package {
+            "reth" => PackageType::Reth,
             "oura" => PackageType::Oura,
             "aiken" => PackageType::Aiken,
             "dolos" => PackageType::Dolos,
@@ -143,6 +147,7 @@ impl PackageType {
 
     pub fn alias(&self) -> String {
         match self {
+            PackageType::Reth => "reth".to_string(),
             PackageType::Oura => "oura".to_string(),
             PackageType::Aiken => "aiken".to_string(),
             PackageType::Dolos => "dolos".to_string(),
@@ -173,6 +178,7 @@ impl PackageType {
             PackageType::Scrolls => "".to_string(),
             PackageType::Aiken => "aiken-{platform}".replace("{platform}", platform),
             PackageType::Dolos => "dolos-{platform}".replace("{platform}", platform),
+            PackageType::Reth => "".to_string(),
         }
     }
 
@@ -189,6 +195,7 @@ impl PackageType {
     /// ```
     pub fn repo(&self) -> &str {
         match self {
+            PackageType::Reth => RETH_REPO,
             PackageType::Oura => OURA_REPO,
             PackageType::Aiken => AIKEN_REPO,
             PackageType::Dolos => DOLOS_REPO,
@@ -277,6 +284,7 @@ impl Package {
     /// ```
     pub fn alias(&self) -> String {
         match self {
+            Package::Reth(Spec { alias, .. }) => alias.clone(),
             Package::Oura(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
@@ -309,6 +317,7 @@ impl Package {
     /// ```
     pub fn version(&self) -> Option<ParsedVersion> {
         match self {
+            Package::Reth(Spec { version, .. }) => version.clone(),
             Package::Oura(Spec { version, .. }) => version.clone(),
             Package::Aiken(Spec { version, .. }) => version.clone(),
             Package::Dolos(Spec { version, .. }) => version.clone(),
@@ -341,6 +350,7 @@ impl Package {
     /// ```
     pub fn binary_path(&self) -> String {
         match self {
+            Package::Reth(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Oura(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Dolos(Spec { binary_path, .. }) => binary_path.clone(),
@@ -372,6 +382,7 @@ impl Package {
     /// ```
     pub fn binary_name(&self) -> String {
         match self {
+            Package::Reth(Spec { alias, .. }) => alias.clone(),
             Package::Oura(Spec { alias, .. }) => alias.clone(),
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
@@ -404,6 +415,7 @@ impl Package {
     /// ```
     pub fn package_type(&self) -> PackageType {
         match self {
+            Package::Reth(Spec { package_type, .. }) => package_type.clone(),
             Package::Oura(Spec { package_type, .. }) => package_type.clone(),
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
             Package::Dolos(Spec { package_type, .. }) => package_type.clone(),
@@ -488,6 +500,10 @@ impl Package {
                 "{}/{}/releases/download/{{version}}/oura-{{platform}}.{{file_type}}",
                 base, repo,
             ),
+            PackageType::Reth => format!(
+                "{}/{}/releases/download/{{version}}/reth-{{version}}-{{platform}}.{{file_type}}",
+                base, repo,
+            ),
         }
     }
 
@@ -567,6 +583,7 @@ impl Package {
         create_package!(
             package_type,
             Some(version),
+            (Reth, alias, binary_path),
             (Oura, alias, binary_path),
             (Aiken, alias, binary_path),
             (Dolos, alias, binary_path),
