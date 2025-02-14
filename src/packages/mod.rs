@@ -13,6 +13,7 @@ const CARDANO_NODE_REPO: &str = "IntersectMBO/cardano-node";
 const CARDANO_CLI_REPO: &str = "IntersectMBO/cardano-node";
 const MITHRIL_REPO: &str = "input-output-hk/mithril";
 const ZELLIJ_REPO: &str = "zellij-org/zellij";
+const NEOVIM_REPO: &str = "neovim/neovim";
 const AIKEN_REPO: &str = "aiken-lang/aiken";
 const OURA_REPO: &str = "txpipe/oura";
 const DOLOS_REPO: &str = "txpipe/dolos";
@@ -46,6 +47,7 @@ pub enum Package {
     Aiken(Spec),
     Dolos(Spec),
     Zellij(Spec),
+    Neovim(Spec),
     Mithril(Spec),
     Scrolls(Spec),
     CardanoCli(Spec),
@@ -69,6 +71,7 @@ pub enum PackageType {
     Aiken,
     Dolos,
     Zellij,
+    Neovim,
     Mithril,
     Scrolls,
     CardanoCli,
@@ -133,6 +136,7 @@ impl PackageType {
             "aiken" => PackageType::Aiken,
             "dolos" => PackageType::Dolos,
             "zellij" => PackageType::Zellij,
+            "nvim" => PackageType::Neovim,
             "scrolls" => PackageType::Scrolls,
             "cardano-cli" => PackageType::CardanoCli,
             "cardano-node" => PackageType::CardanoNode,
@@ -152,6 +156,7 @@ impl PackageType {
             PackageType::Aiken => "aiken".to_string(),
             PackageType::Dolos => "dolos".to_string(),
             PackageType::Zellij => "zellij".to_string(),
+            PackageType::Neovim => "nvim".to_string(),
             PackageType::Scrolls => "scrolls".to_string(),
             PackageType::Mithril => "mithril-client".to_string(),
             PackageType::CardanoCli => "cardano-cli".to_string(),
@@ -165,6 +170,7 @@ impl PackageType {
 
     pub fn format_binary_path(&self) -> String {
         let platform = get_platform_name_download(self.clone());
+        let os = get_platform_name();
         match self {
             PackageType::CardanoSubmitApi => "bin".to_string(),
             PackageType::PartnerChainNode => "".to_string(),
@@ -174,10 +180,13 @@ impl PackageType {
             PackageType::CardanoCli => "bin".to_string(),
             PackageType::Mithril => "".to_string(),
             PackageType::Zellij => "".to_string(),
+            PackageType::Neovim => {
+                format!("nvim-{os}-{platform}/bin", os = os, platform = platform)
+            }
             PackageType::Oura => "".to_string(),
             PackageType::Scrolls => "".to_string(),
-            PackageType::Aiken => "aiken-{platform}".replace("{platform}", platform),
-            PackageType::Dolos => "dolos-{platform}".replace("{platform}", platform),
+            PackageType::Aiken => format!("aiken-{platform}", platform = platform),
+            PackageType::Dolos => format!("dolos-{platform}", platform = platform),
             PackageType::Reth => "".to_string(),
         }
     }
@@ -200,6 +209,7 @@ impl PackageType {
             PackageType::Aiken => AIKEN_REPO,
             PackageType::Dolos => DOLOS_REPO,
             PackageType::Zellij => ZELLIJ_REPO,
+            PackageType::Neovim => NEOVIM_REPO,
             PackageType::Scrolls => SCROLLS_REPO,
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::CardanoCli => CARDANO_CLI_REPO,
@@ -289,6 +299,7 @@ impl Package {
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Zellij(Spec { alias, .. }) => alias.clone(),
+            Package::Neovim(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
@@ -322,6 +333,7 @@ impl Package {
             Package::Aiken(Spec { version, .. }) => version.clone(),
             Package::Dolos(Spec { version, .. }) => version.clone(),
             Package::Zellij(Spec { version, .. }) => version.clone(),
+            Package::Neovim(Spec { version, .. }) => version.clone(),
             Package::Scrolls(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
@@ -355,6 +367,7 @@ impl Package {
             Package::Aiken(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Dolos(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Zellij(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Neovim(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Scrolls(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
@@ -387,6 +400,7 @@ impl Package {
             Package::Aiken(Spec { alias, .. }) => alias.clone(),
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Zellij(Spec { alias, .. }) => alias.clone(),
+            Package::Neovim(Spec { alias, .. }) => alias.clone(),
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
@@ -420,6 +434,7 @@ impl Package {
             Package::Aiken(Spec { package_type, .. }) => package_type.clone(),
             Package::Dolos(Spec { package_type, .. }) => package_type.clone(),
             Package::Zellij(Spec { package_type, .. }) => package_type.clone(),
+            Package::Neovim(Spec { package_type, .. }) => package_type.clone(),
             Package::Scrolls(Spec { package_type, .. }) => package_type.clone(),
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
@@ -494,6 +509,10 @@ impl Package {
             ),
             PackageType::Zellij => format!(
                 "{}/{}/releases/download/{{version}}/zellij-{{platform}}.{{file_type}}",
+                base, repo,
+            ),
+            PackageType::Neovim => format!(
+                "{}/{}/releases/download/{{version}}/nvim-{{OS}}-{{platform}}.{{file_type}}",
                 base, repo,
             ),
             PackageType::Oura => format!(
@@ -588,6 +607,7 @@ impl Package {
             (Aiken, alias, binary_path),
             (Dolos, alias, binary_path),
             (Zellij, alias, binary_path),
+            (Neovim, alias, binary_path),
             (Scrolls, alias, binary_path),
             (Mithril, alias, binary_path),
             (CardanoCli, alias, binary_path),
