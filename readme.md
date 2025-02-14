@@ -29,8 +29,8 @@ hyper-jump is an agnostic all-in-one and cross-platform command-line version man
 
 | Package Name                                                                   | Alias                 | Description                                          |
 | ------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------- |
-| [Zellij](https://github.com/zellij-org/zellij)                                 | `zellij`              | Manage versions of the Zellij client software.       |
 | [Neovim](https://github.com/neovim/neovim)                                     | `neovim`              | Manage versions of the Neovim client software.       |
+| [Zellij](https://github.com/zellij-org/zellij)                                 | `zellij`              | Manage versions of the Zellij client software.       |
 | [Reth](https://github.com/paradigmxyz/reth)                                    | `reth`                | Manage versions of the Reth client software.         |
 | [Cardano Node](https://github.com/IntersectMBO/cardano-node)                   | `cardano-node`        | Manage versions of the Cardano Node software.        |
 | [Cardano CLI](https://github.com/cardano-scaling/cardano-cli)                  | `cardano-cli`         | Manage versions of the Cardano CLI tool.             |
