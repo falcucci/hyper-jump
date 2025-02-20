@@ -10,7 +10,7 @@ hyper-jump is an agnostic all-in-one and cross-platform command-line version man
 
 ## Core Features
 
-- **Version Management**: Install and switch between different versions of Cardano ecosystem tools.
+- **Version Management**: Install and switch between different versions of package.
 - **Environment Isolation**: Create isolated environments for different projects, each with its own set of package versions.
 - **Remote Listing**: View available versions of packages from remote repositories.
 - **Package Installation**: Download and install specific versions of packages with ease.
