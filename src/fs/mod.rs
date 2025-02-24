@@ -191,6 +191,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
             PackageType::Mithril => "tar.gz",
+            PackageType::Scrolls => "tar.gz",
             PackageType::Zellij => "tar.gz",
             PackageType::Neovim => "tar.gz",
             PackageType::Aiken => "tar.gz",
@@ -269,6 +270,9 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
         {
             match package_type {
                 PackageType::CardanoSubmitApi => "",
+                PackageType::PartnerChainNode => "x86_64",
+                PackageType::PartnerChainCli => "x86_64",
+                PackageType::SidechainCli => "x86_64",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",
                 PackageType::Mithril => "x86_64",
@@ -299,6 +303,7 @@ pub fn get_platform_name_download(package_type: PackageType) -> &'static str {
             PackageType::Zellij => "x86_64-unknown-linux-gnu",
             PackageType::Neovim => "x86_64",
             PackageType::Oura => "x86_64-unknown-linux-musl",
+            PackageType::Reth => "x86_64-unknown-linux-gnu",
         }
     }
 }
