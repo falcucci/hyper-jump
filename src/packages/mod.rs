@@ -11,6 +11,7 @@ const GITHUB_API_BASE_URL: &str = "https://api.github.com/repos";
 const PARTNER_CHAIN_CLI_REPO: &str = "input-output-hk/partner-chains";
 const CARDANO_NODE_REPO: &str = "IntersectMBO/cardano-node";
 const CARDANO_CLI_REPO: &str = "IntersectMBO/cardano-node";
+const JUJUTSU_REPO: &str = "jj-vcs/jj";
 const MITHRIL_REPO: &str = "input-output-hk/mithril";
 const ZELLIJ_REPO: &str = "zellij-org/zellij";
 const NEOVIM_REPO: &str = "neovim/neovim";
@@ -48,6 +49,7 @@ pub enum Package {
     Dolos(Spec),
     Zellij(Spec),
     Neovim(Spec),
+    Jujutsu(Spec),
     Mithril(Spec),
     Scrolls(Spec),
     CardanoCli(Spec),
@@ -72,6 +74,7 @@ pub enum PackageType {
     Dolos,
     Zellij,
     Neovim,
+    Jujutsu,
     Mithril,
     Scrolls,
     CardanoCli,
@@ -140,6 +143,7 @@ impl PackageType {
             "scrolls" => PackageType::Scrolls,
             "cardano-cli" => PackageType::CardanoCli,
             "cardano-node" => PackageType::CardanoNode,
+            "jj" => PackageType::Jujutsu,
             "mithril-client" => PackageType::Mithril,
             "sidechain-main-cli" => PackageType::SidechainCli,
             "partner-chains-cli" => PackageType::PartnerChainCli,
@@ -158,6 +162,7 @@ impl PackageType {
             PackageType::Zellij => "zellij".to_string(),
             PackageType::Neovim => "nvim".to_string(),
             PackageType::Scrolls => "scrolls".to_string(),
+            PackageType::Jujutsu => "jj".to_string(),
             PackageType::Mithril => "mithril-client".to_string(),
             PackageType::CardanoCli => "cardano-cli".to_string(),
             PackageType::CardanoNode => "cardano-node".to_string(),
@@ -178,6 +183,7 @@ impl PackageType {
             PackageType::SidechainCli => "".to_string(),
             PackageType::CardanoNode => "bin".to_string(),
             PackageType::CardanoCli => "bin".to_string(),
+            PackageType::Jujutsu => "".to_string(),
             PackageType::Mithril => "".to_string(),
             PackageType::Zellij => "".to_string(),
             PackageType::Neovim => {
@@ -211,6 +217,7 @@ impl PackageType {
             PackageType::Zellij => ZELLIJ_REPO,
             PackageType::Neovim => NEOVIM_REPO,
             PackageType::Scrolls => SCROLLS_REPO,
+            PackageType::Jujutsu => JUJUTSU_REPO,
             PackageType::Mithril => MITHRIL_REPO,
             PackageType::CardanoCli => CARDANO_CLI_REPO,
             PackageType::CardanoNode => CARDANO_NODE_REPO,
@@ -300,6 +307,7 @@ impl Package {
             Package::Dolos(Spec { alias, .. }) => alias.clone(),
             Package::Zellij(Spec { alias, .. }) => alias.clone(),
             Package::Neovim(Spec { alias, .. }) => alias.clone(),
+            Package::Jujutsu(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
@@ -336,6 +344,7 @@ impl Package {
             Package::Neovim(Spec { version, .. }) => version.clone(),
             Package::Scrolls(Spec { version, .. }) => version.clone(),
             Package::Mithril(Spec { version, .. }) => version.clone(),
+            Package::Jujutsu(Spec { version, .. }) => version.clone(),
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::CardanoNode(Spec { version, .. }) => version.clone(),
             Package::SidechainCli(Spec { version, .. }) => version.clone(),
@@ -369,6 +378,7 @@ impl Package {
             Package::Zellij(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Neovim(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Scrolls(Spec { binary_path, .. }) => binary_path.clone(),
+            Package::Jujutsu(Spec { binary_path, .. }) => binary_path.clone(),
             Package::Mithril(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
@@ -402,6 +412,7 @@ impl Package {
             Package::Zellij(Spec { alias, .. }) => alias.clone(),
             Package::Neovim(Spec { alias, .. }) => alias.clone(),
             Package::Scrolls(Spec { alias, .. }) => alias.clone(),
+            Package::Jujutsu(Spec { alias, .. }) => alias.clone(),
             Package::Mithril(Spec { alias, .. }) => alias.clone(),
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
@@ -436,6 +447,7 @@ impl Package {
             Package::Zellij(Spec { package_type, .. }) => package_type.clone(),
             Package::Neovim(Spec { package_type, .. }) => package_type.clone(),
             Package::Scrolls(Spec { package_type, .. }) => package_type.clone(),
+            Package::Jujutsu(Spec { package_type, .. }) => package_type.clone(),
             Package::Mithril(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
@@ -488,6 +500,10 @@ impl Package {
             ),
             PackageType::CardanoCli => format!(
                 "{}/{}/releases/download/{{version}}/cardano-node-{{version}}-{{OS}}.{{file_type}}",
+                base, repo,
+            ),
+            PackageType::Jujutsu => format!(
+                "{}/{}/releases/download/{{version}}/jj-{{version}}-{{platform}}.{{file_type}}",
                 base, repo,
             ),
             PackageType::Mithril => format!(
@@ -609,6 +625,7 @@ impl Package {
             (Zellij, alias, binary_path),
             (Neovim, alias, binary_path),
             (Scrolls, alias, binary_path),
+            (Jujutsu, alias, binary_path),
             (Mithril, alias, binary_path),
             (CardanoCli, alias, binary_path),
             (CardanoNode, alias, binary_path),
