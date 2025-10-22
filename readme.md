@@ -30,6 +30,7 @@ hyper-jump is an agnostic all-in-one and cross-platform command-line version man
 | Package Name                                                                   | Alias                 | Description                                          |
 | ------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------- |
 | [Neovim](https://github.com/neovim/neovim)                                     | `neovim`              | Manage versions of the Neovim client software.       |
+| [Jujutsu](https://github.com/jj-vcs/jj)                                        | `jj`                  | Manage versions of the Jujutsu client software.      |
 | [Zellij](https://github.com/zellij-org/zellij)                                 | `zellij`              | Manage versions of the Zellij client software.       |
 | [Reth](https://github.com/paradigmxyz/reth)                                    | `reth`                | Manage versions of the Reth client software.         |
 | [Cardano Node](https://github.com/IntersectMBO/cardano-node)                   | `cardano-node`        | Manage versions of the Cardano Node software.        |
