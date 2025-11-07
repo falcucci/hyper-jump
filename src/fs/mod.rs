@@ -191,6 +191,7 @@ pub fn get_file_type(package_type: PackageType) -> &'static str {
             PackageType::SidechainCli => "zip",
             PackageType::CardanoNode => "tar.gz",
             PackageType::CardanoCli => "tar.gz",
+            PackageType::Jujutsu => "tar.gz",
             PackageType::Mithril => "tar.gz",
             PackageType::Scrolls => "tar.gz",
             PackageType::Zellij => "tar.gz",
