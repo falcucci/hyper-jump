@@ -49,7 +49,9 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
     let package_type = PackageType::from_str(exec_name);
     let package = Package::new(package_type, String::new(), None).await;
 
-    handle_package_process(rest_args, package).await.unwrap();
+    handle_package_process(rest_args, package)
+        .await
+        .map_err(|err| miette::miette!("{err}"))?;
 
     Ok(())
 }
@@ -61,11 +63,11 @@ pub async fn handle_proxy(exec_name: &str, rest_args: &[String]) -> miette::Resu
 /// process with the given arguments. The function then enters a loop where it
 /// continuously checks the status of the spawned process. If the process exits
 /// with a status code of `0`, the function returns `Ok(())`. If the process
-/// exits with a non-zero status code, the function returns an error with the
-/// status code as the error message. If the process is terminated by a signal,
-/// the function returns an error with the message "Process terminated by
-/// signal". If the function fails to wait on the child process, it returns an
-/// error with the message "Failed to wait on child process".
+/// exits with a non-zero status code, the current process is terminated with the
+/// same exit code. If the process is terminated by a signal, the function
+/// returns an error with the message "Process terminated by signal". If the
+/// function fails to wait on the child process, it returns an error with the
+/// message "Failed to wait on child process".
 ///
 /// # Arguments
 ///
@@ -172,13 +174,11 @@ async fn watch_process(
 /// operation.
 ///
 /// * `Ok(())` - The process exited successfully.
-/// * `Err(anyhow::Error)` - The process exited with an error code or was
-///   terminated by a signal.
+/// * `Err(anyhow::Error)` - The process was terminated by a signal.
 ///
 /// # Errors
 ///
-/// This function will return an error if the process exited with a non-zero
-/// exit code or was terminated by a signal.
+/// This function will return an error if the process was terminated by a signal.
 ///
 /// # Examples
 ///
@@ -191,8 +191,9 @@ async fn handle_process_exit(
 ) -> Result<()> {
     match status?.code() {
         Some(0) => Ok(()),
-        Some(2) => Ok(()),
-        Some(code) => Err(anyhow!("Process exited with error code {}", code)),
+        Some(code) => {
+            std::process::exit(code);
+        }
         None => Err(anyhow!("Process terminated by signal")),
     }
 }
