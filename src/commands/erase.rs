@@ -1,5 +1,5 @@
-use tokio::fs;
-use tracing::info;
+use crate::adapters::fs::TokioFs;
+use crate::app::erase::erase;
 
 /// Asynchronously erases the hyper-jump installation and downloads folders.
 ///
@@ -11,24 +11,7 @@ use tracing::info;
 ///
 /// Returns an error if both the installation and downloads directories do not
 /// exist or cannot be removed.
-///
-/// # Examples
-///
-/// ```no_run
-/// #[tokio::main]
-/// async fn main() -> miette::Result<()> {
-///     run().await?;
-///     Ok(())
-/// }
-/// ```
-pub async fn run() -> miette::Result<()> {
-    let downloads = crate::fs::get_local_data_dir().unwrap();
-
-    if fs::remove_dir_all(&downloads).await.is_ok() {
-        info!("Successfully removed hyper-jump installation folder");
-    } else {
-        info!("No hyper-jump installation or downloads folder to remove");
-    }
-
-    Ok(())
+pub async fn run(ctx: &crate::Context) -> miette::Result<()> {
+    let fs = TokioFs;
+    erase(&ctx.dirs, &fs).await.map_err(|e| miette::miette!(e))
 }

@@ -24,6 +24,7 @@ anyhow = "1.0.86"
 reqwest = { version = "0.12.5", features = ["stream", "rustls-tls"] }
 indicatif = "0.17.8"
 futures-util = { version = "0.3.30", default-features = false }
+fs4 = "0.7.0"
 flate2 = "1.0.30"
 tar = "0.4.41"
 zip = "2.1.6"
