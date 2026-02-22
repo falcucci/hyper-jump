@@ -79,8 +79,7 @@ notes
 
 ## supported packages
 
-these are hardcoded for now. if you want another tool, send a patch with a
-clear reason and a reliable release source.
+these are hardcoded for now.
 
 - [neovim](https://github.com/neovim/neovim)
 - [jujutsu](https://github.com/jj-vcs/jj)
