@@ -38,44 +38,44 @@ cargo install hyper-jump
 make sure the install directory is on your `PATH`.
 
 ```bash
-export PATH="$(hyper-jump prefix):$PATH"
+export PATH="$(hj prefix):$PATH"
 ```
 
 on macos, you can also set the user path once:
 
 ```bash
-sudo launchctl config user path "$(hyper-jump prefix):${PATH}"
+sudo launchctl config user path "$(hj prefix):${PATH}"
 ```
 
 ## usage
 
-run `hyper-jump --help` if you can't remember the subcommands.
+run `hj --help` if you can't remember the subcommands.
 
 quick start
 
 ```sh
-hyper-jump list-remote reth
-hyper-jump install reth v1.10.2
-hyper-jump use reth v1.10.2
-hyper-jump list reth
+hj list-remote reth
+hj install reth v1.10.2
+hj use reth v1.10.2
+hj list reth
 ```
 
 commands
 
-- `hyper-jump install <package> <version|latest>` install a version
-- `hyper-jump use <package> <version|latest>` switch to a version and mark it as used
-- `hyper-jump list <package>` show installed versions
-- `hyper-jump list-remote <package>` show remote versions
-- `hyper-jump uninstall <package> <version>` remove a version
-- `hyper-jump erase` remove all installed versions
-- `hyper-jump prefix` print the bin dir used for shims
+- `hj install <package> <version|latest>` install a version
+- `hj use <package> <version|latest>` switch to a version and mark it as used
+- `hj list <package>` show installed versions
+- `hj list-remote <package>` show remote versions
+- `hj uninstall <package> <version>` remove a version
+- `hj erase` remove all installed versions
+- `hj prefix` print the bin dir used for shims
 
 notes
 
 - `version` accepts tags like `v1.10.2` or `latest`
 - `--output-format json|table` or `HYPER_JUMP_OUTPUT_FORMAT` changes list output format
 - `--root-dir <path>` or `HYPER_JUMP_ROOT_DIR` overrides the data dir
-- make sure the path from `hyper-jump prefix` is on your `PATH` or nothing will run
+- make sure the path from `hj prefix` is on your `PATH` or nothing will run
 
 ## supported packages
 
