@@ -30,7 +30,7 @@ pub async fn list_remote(
     used_store: &impl UsedVersionStore,
     fs: &impl Fs,
 ) -> Result<(), Error> {
-    let versions = provider.list(package.package_type()).await?;
+    let versions = provider.list(package.spec()).await?;
     let downloads_dir = paths.downloads_dir(package.clone()).await?;
     let local_versions: Vec<PathBuf> = filter_local_versions(fs, downloads_dir).await?;
     let filtered_versions: Vec<RemoteVersion> = filter_versions(versions)?;
@@ -41,22 +41,7 @@ pub async fn list_remote(
     let current_norm = current.as_deref().map(normalize_tag);
     for version in filtered_versions {
         let version_installed = check_version_installed(&local_versions, &version.tag_name);
-        let tag = match package {
-            Package::CardanoSubmitApi(_) => version.tag_name.clone(),
-            Package::PartnerChainNode(_) => version.tag_name.clone(),
-            Package::SidechainCli(_) => version.tag_name.clone(),
-            Package::CardanoNode(_) => version.tag_name.clone(),
-            Package::CardanoCli(_) => version.tag_name.clone(),
-            Package::Jujutsu(_) => version.tag_name.clone(),
-            Package::Mithril(_) => version.tag_name.clone(),
-            Package::Scrolls(_) => version.tag_name.clone(),
-            Package::Zellij(_) => version.tag_name.clone(),
-            Package::Neovim(_) => version.tag_name.clone(),
-            Package::Aiken(_) => version.tag_name.clone(),
-            Package::Dolos(_) => version.tag_name.clone(),
-            Package::Oura(_) => version.tag_name.clone(),
-            Package::Reth(_) => version.tag_name.clone(),
-        };
+        let tag = version.tag_name.clone();
 
         let tag_norm = normalize_tag(&tag);
         let version_status = match current_norm {

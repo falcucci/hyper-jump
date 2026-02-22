@@ -1,0 +1,205 @@
+[defaults]
+base_url = "https://github.com"
+api_base_url = "https://api.github.com/repos"
+
+[defaults.platform.macos]
+aarch64 = "aarch64-apple-darwin"
+x86_64 = "x86_64-apple-darwin"
+
+[defaults.platform.linux]
+x86_64 = "x86_64-unknown-linux-gnu"
+
+[defaults.platform.windows]
+x86_64 = "win64"
+
+[defaults.ext]
+macos = "tar.gz"
+linux = "tar.gz"
+windows = "zip"
+
+[[org]]
+name = "paradigmxyz"
+
+[[org.package]]
+id = "reth"
+alias = "reth"
+repo = "reth"
+download_template = "{base}/{repo}/releases/download/{version}/reth-{version}-{platform}.{file_type}"
+
+[[org]]
+name = "txpipe"
+
+[[org.package]]
+id = "oura"
+alias = "oura"
+repo = "oura"
+download_template = "{base}/{repo}/releases/download/{version}/oura-{platform}.{file_type}"
+
+[org.package.platform.linux]
+x86_64 = "x86_64-unknown-linux-musl"
+
+[org.package.ext]
+macos = "tar.xz"
+linux = "tar.xz"
+
+[[org.package]]
+id = "dolos"
+alias = "dolos"
+repo = "dolos"
+download_template = "{base}/{repo}/releases/download/{version}/dolos-{platform}.{file_type}"
+binary_path_template = "dolos-{platform}"
+
+[[org.package]]
+id = "scrolls"
+alias = "scrolls"
+repo = "scrolls"
+download_template = "{base}/{repo}/releases/download/{version}/scrolls-{platform}.{file_type}"
+
+[org.package.platform.macos]
+x86_64 = "x86_64"
+
+[org.package.platform.linux]
+x86_64 = "x64"
+
+[[org]]
+name = "aiken-lang"
+
+[[org.package]]
+id = "aiken"
+alias = "aiken"
+repo = "aiken"
+download_template = "{base}/{repo}/releases/download/{version}/aiken-{platform}.{file_type}"
+binary_path_template = "aiken-{platform}"
+
+[[org]]
+name = "zellij-org"
+
+[[org.package]]
+id = "zellij"
+alias = "zellij"
+repo = "zellij"
+download_template = "{base}/{repo}/releases/download/{version}/zellij-{platform}.{file_type}"
+
+[[org]]
+name = "neovim"
+
+[[org.package]]
+id = "neovim"
+alias = "nvim"
+repo = "neovim"
+download_template = "{base}/{repo}/releases/download/{version}/nvim-{OS}-{platform}.{file_type}"
+binary_path_template = "nvim-{OS}-{platform}/bin"
+
+[org.package.platform.macos]
+aarch64 = "arm64"
+x86_64 = "x86_64"
+
+[org.package.platform.linux]
+x86_64 = "x86_64"
+
+[[org]]
+name = "jj-vcs"
+
+[[org.package]]
+id = "jujutsu"
+alias = "jj"
+repo = "jj"
+download_template = "{base}/{repo}/releases/download/{version}/jj-{version}-{platform}.{file_type}"
+
+[org.package.platform.linux]
+x86_64 = "x86_64-unknown-linux-musl"
+
+[[org]]
+name = "input-output-hk"
+
+[[org.package]]
+id = "mithril"
+alias = "mithril-client"
+repo = "mithril"
+download_template = "{base}/{repo}/releases/download/{version}/mithril-{version}-{OS}-{platform}.{file_type}"
+
+[org.package.platform.macos]
+aarch64 = "arm64"
+x86_64 = "x86_64"
+
+[org.package.platform.linux]
+x86_64 = "x64"
+
+[[org.package]]
+id = "sidechain-cli"
+alias = "sidechain-main-cli"
+repo = "partner-chains"
+download_template = "{base}/{repo}/releases/download/{version}/{OS}_{platform}.{file_type}"
+
+[org.package.platform.macos]
+aarch64 = "arm64"
+x86_64 = "x86_64"
+
+[org.package.platform.linux]
+x86_64 = ""
+
+[org.package.ext]
+macos = "zip"
+linux = "zip"
+
+[[org.package]]
+id = "partner-chains-node"
+alias = "partner-chains-node"
+repo = "partner-chains"
+download_template = "{base}/{repo}/releases/download/{version}/{OS}_{platform}.{file_type}"
+
+[org.package.platform.macos]
+aarch64 = "arm64"
+x86_64 = "x86_64"
+
+[org.package.platform.linux]
+x86_64 = ""
+
+[org.package.ext]
+macos = "zip"
+linux = "zip"
+
+[[org]]
+name = "IntersectMBO"
+
+[[org.package]]
+id = "cardano-cli"
+alias = "cardano-cli"
+repo = "cardano-node"
+download_template = "{base}/{repo}/releases/download/{version}/cardano-node-{version}-{OS}.{file_type}"
+binary_path_template = "bin"
+
+[org.package.platform.macos]
+aarch64 = ""
+x86_64 = ""
+
+[org.package.platform.linux]
+x86_64 = ""
+
+[[org.package]]
+id = "cardano-node"
+alias = "cardano-node"
+repo = "cardano-node"
+download_template = "{base}/{repo}/releases/download/{version}/cardano-node-{version}-{OS}.{file_type}"
+binary_path_template = "bin"
+
+[org.package.platform.macos]
+aarch64 = ""
+x86_64 = ""
+
+[org.package.platform.linux]
+x86_64 = ""
+
+[[org.package]]
+id = "cardano-submit-api"
+alias = "cardano-submit-api"
+repo = "cardano-node"
+download_template = "{base}/{repo}/releases/download/{version}/cardano-node-{version}-{OS}.{file_type}"
+binary_path_template = "bin"
+
+[org.package.platform.macos]
+aarch64 = ""
+x86_64 = ""
+
+[org.package.platform.linux]
+x86_64 = ""

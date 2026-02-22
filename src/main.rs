@@ -18,6 +18,7 @@ use commands::list_remote;
 use commands::prefix;
 use commands::uninstall;
 use commands::use_cmd;
+use domain::package::PackageRegistry;
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::layer::SubscriberExt;
@@ -70,16 +71,19 @@ enum Commands {
 pub struct Context {
     pub dirs: adapters::dirs::Dirs,
     pub output_format: OutputFormat,
+    pub packages: PackageRegistry,
 }
 
 impl Context {
     fn for_cli(cli: &Cli, env: &dyn crate::ports::Env) -> miette::Result<Self> {
         let dirs = adapters::dirs::Dirs::try_new(cli.root_dir.as_deref(), env)?;
         let output_format = cli.output_format.clone().unwrap_or(OutputFormat::Table);
+        let packages = load_registry(env, &dirs)?;
 
         Ok(Context {
             dirs,
             output_format,
+            packages,
         })
     }
 }
@@ -94,6 +98,16 @@ pub fn with_tracing() {
         .init();
 }
 
+fn load_registry(
+    env: &dyn crate::ports::Env,
+    dirs: &adapters::dirs::Dirs,
+) -> miette::Result<PackageRegistry> {
+    let explicit = env.packages_file();
+    let default_path = dirs.root_dir.join("packages.toml");
+    PackageRegistry::load_from_paths(explicit, default_path, include_str!("../packages.toml"))
+        .map_err(|e| miette::miette!(e))
+}
+
 #[tokio::main]
 async fn main() -> miette::Result<()> {
     tracing_subscriber::fmt::init();
@@ -106,6 +120,7 @@ async fn main() -> miette::Result<()> {
     if !exe_name.eq(env!("CARGO_BIN_NAME")) {
         let root_dir = env_ref.root_dir();
         let dirs = adapters::dirs::Dirs::try_new(root_dir.as_deref(), env_ref)?;
+        let registry = load_registry(env_ref, &dirs)?;
         let paths = adapters::path::FsPaths::new(dirs.root_dir.clone());
         let used_store = adapters::used_store::UsedFileStore::new(paths.clone());
         let platform = adapters::platform::StdPlatform;
@@ -114,6 +129,7 @@ async fn main() -> miette::Result<()> {
         return app::proxy::handle_proxy(
             &exe_name,
             &rest_args,
+            &registry,
             &output,
             &paths,
             &used_store,

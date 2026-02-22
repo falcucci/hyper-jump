@@ -9,14 +9,14 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use crate::domain::package::Package;
-use crate::domain::package::PackageType;
+use crate::domain::package::PackageSpec;
 use crate::domain::version::LocalVersion;
 use crate::domain::version::ParsedVersion;
 use crate::domain::version::RemoteVersion;
 
 pub trait ReleaseProvider: Send + Sync {
-    async fn latest(&self, package: PackageType) -> anyhow::Result<ParsedVersion>;
-    async fn list(&self, package: PackageType) -> anyhow::Result<Vec<RemoteVersion>>;
+    async fn latest(&self, package: &PackageSpec) -> anyhow::Result<ParsedVersion>;
+    async fn list(&self, package: &PackageSpec) -> anyhow::Result<Vec<RemoteVersion>>;
 }
 
 pub trait Downloader: Send + Sync {
@@ -49,8 +49,7 @@ pub trait RootDir: Send + Sync {
 
 pub trait Platform: Send + Sync {
     fn os(&self) -> &'static str;
-    fn download(&self, package_type: PackageType) -> &'static str;
-    fn file_type(&self, package_type: PackageType) -> &'static str;
+    fn arch(&self) -> &'static str;
 }
 
 pub trait Output: Send + Sync {
@@ -71,6 +70,7 @@ pub trait Env: Send + Sync {
     fn exe_name(&self) -> String;
     fn args(&self) -> Vec<String>;
     fn root_dir(&self) -> Option<PathBuf>;
+    fn packages_file(&self) -> Option<PathBuf>;
     fn home_dir(&self) -> Option<PathBuf>;
     fn current_exe(&self) -> anyhow::Result<PathBuf>;
     fn path_var(&self) -> Option<String>;

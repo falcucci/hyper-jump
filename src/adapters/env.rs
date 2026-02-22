@@ -20,6 +20,9 @@ impl Env for StdEnv {
     fn root_dir(&self) -> Option<PathBuf> {
         std::env::var_os("HYPER_JUMP_ROOT_DIR").map(PathBuf::from)
     }
+    fn packages_file(&self) -> Option<PathBuf> {
+        std::env::var_os("HYPER_JUMP_PACKAGES_FILE").map(PathBuf::from)
+    }
     fn home_dir(&self) -> Option<PathBuf> { std::env::var_os("HOME").map(PathBuf::from) }
     fn current_exe(&self) -> anyhow::Result<PathBuf> { Ok(std::env::current_exe()?) }
     fn path_var(&self) -> Option<String> { std::env::var("PATH").ok() }
