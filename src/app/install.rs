@@ -1,13 +1,13 @@
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use tracing::info;
 
 use crate::app::download;
-use crate::app::layout;
 use crate::app::resolve::resolve_requested_version;
 use crate::domain::package::Package;
-use crate::domain::package::PackageType;
+use crate::domain::package::PackageSpec;
 use crate::domain::version::LocalVersion;
 use crate::domain::version::ParsedVersion;
 use crate::ports::Archive;
@@ -20,7 +20,7 @@ use crate::ports::ReleaseProvider;
 
 #[allow(clippy::too_many_arguments)]
 pub async fn install<R, D, A, F>(
-    package_type: PackageType,
+    spec: Arc<PackageSpec>,
     requested_version: String,
     release_provider: &R,
     downloader: &D,
@@ -40,11 +40,9 @@ where
 {
     let _guard = lock.acquire().await?;
     let parsed_version: ParsedVersion =
-        resolve_requested_version(&requested_version, package_type.clone(), release_provider)
-            .await?;
+        resolve_requested_version(&requested_version, &spec, release_provider).await?;
 
-    let binary_path = layout::binary_path(package_type.clone(), platform);
-    let package = Package::with_parsed(package_type.clone(), parsed_version.clone(), binary_path);
+    let package = Package::with_parsed(spec.clone(), parsed_version.clone(), platform)?;
     let root: PathBuf = paths.downloads_dir(package.clone()).await?;
     fs.ensure_dir(&root).await?;
     fs.set_current_dir(&root).await?;
@@ -62,7 +60,7 @@ where
         used_store.set_current(package.clone(), &parsed_version.tag_name).await?;
     }
 
-    let file_type = platform.file_type(package_type.clone());
+    let file_type = spec.file_type(platform)?;
     let file_path = root.join(format!("{}.{}", parsed_version.tag_name, file_type));
     let download_url = download::download_url(&package, platform);
     downloader.download(&download_url, &file_path).await?;

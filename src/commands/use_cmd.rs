@@ -6,46 +6,15 @@ use crate::adapters::fs::TokioFs;
 use crate::adapters::github_release::GitHubReleaseProvider;
 use crate::app::install;
 use crate::app::resolve::resolve_requested_version;
-use crate::domain::package::PackageType;
+use crate::domain::package::Package;
+use crate::domain::package::PackageSpec;
 use crate::ports::ProxyInstaller;
 use crate::ports::UsedVersionStore;
 
 #[derive(clap::Parser)]
 pub struct Args {
-    #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(clap::Parser)]
-pub enum Commands {
-    Reth { version: String },
-    Oura { version: String },
-    Aiken { version: String },
-    Dolos { version: String },
-    Neovim { version: String },
-    Zellij { version: String },
-    Jujutsu { version: String },
-    Mithril { version: String },
-    Scrolls { version: String },
-    CardanoCli { version: String },
-    CardanoNode { version: String },
-    SidechainCli { version: String },
-    PartnerChainNode { version: String },
-    CardanoSubmitApi { version: String },
-}
-
-macro_rules! execute {
-  ($command:expr, $client:expr, $paths:expr, $platform:expr, $(($variant:ident, $package_type:expr)),*) => {
-    match $command {
-      $(
-        Commands::$variant { version } => {
-          use_cmd($client, $package_type, version, $paths, $platform)
-            .await
-            .expect("Failed to use");
-        }
-      )*
-    }
-  }
+    pub package: String,
+    pub version: String,
 }
 
 pub async fn run(
@@ -53,39 +22,23 @@ pub async fn run(
     ctx: &crate::Context,
     client: Option<&reqwest::Client>,
 ) -> miette::Result<()> {
+    let spec = ctx.packages.resolve(&args.package).map_err(|e| miette::miette!(e))?;
     let paths = crate::adapters::path::FsPaths::new(ctx.dirs.root_dir.clone());
     let platform = crate::adapters::platform::StdPlatform;
-    execute!(
-        args.command,
-        client,
-        &paths,
-        &platform,
-        (Reth, PackageType::Reth),
-        (Oura, PackageType::Oura),
-        (Aiken, PackageType::Aiken),
-        (Dolos, PackageType::Dolos),
-        (Zellij, PackageType::Zellij),
-        (Neovim, PackageType::Neovim),
-        (Jujutsu, PackageType::Jujutsu),
-        (Mithril, PackageType::Mithril),
-        (Scrolls, PackageType::Scrolls),
-        (CardanoCli, PackageType::CardanoCli),
-        (CardanoNode, PackageType::CardanoNode),
-        (SidechainCli, PackageType::SidechainCli),
-        (PartnerChainNode, PackageType::PartnerChainNode),
-        (CardanoSubmitApi, PackageType::CardanoSubmitApi)
-    );
+    use_cmd(client, spec, args.version, &paths, &platform)
+        .await
+        .map_err(|err| miette::miette!(err))?;
 
     Ok(())
 }
 
 pub async fn use_cmd(
     client: Option<&reqwest::Client>,
-    package_type: PackageType,
+    spec: std::sync::Arc<PackageSpec>,
     requested_version: String,
     paths: &crate::adapters::path::FsPaths,
     platform: &impl crate::ports::Platform,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> anyhow::Result<()> {
     let provider = GitHubReleaseProvider::new(client);
     let downloader = ReqwestDownloader::new(client);
     let archive = LocalArchive;
@@ -99,14 +52,8 @@ pub async fn use_cmd(
     );
     let used_store = crate::adapters::used_store::UsedFileStore::new(paths.clone());
 
-    let parsed_version =
-        resolve_requested_version(&requested_version, package_type.clone(), &provider).await?;
-    let binary_path = crate::app::layout::binary_path(package_type.clone(), platform);
-    let package = crate::domain::package::Package::with_parsed(
-        package_type,
-        parsed_version.clone(),
-        binary_path,
-    );
+    let parsed_version = resolve_requested_version(&requested_version, &spec, &provider).await?;
+    let package = Package::with_parsed(spec.clone(), parsed_version.clone(), platform)?;
     let version = parsed_version;
     let is_version_used = match used_store.current(package.clone()).await? {
         Some(current) => current == version.tag_name,
@@ -121,7 +68,7 @@ pub async fn use_cmd(
     }
 
     install::install(
-        package.package_type(),
+        spec,
         version.tag_name.clone(),
         &provider,
         &downloader,

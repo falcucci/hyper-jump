@@ -75,11 +75,13 @@ notes
 - `version` accepts tags like `v1.10.2` or `latest`
 - `--output-format json|table` or `HYPER_JUMP_OUTPUT_FORMAT` changes list output format
 - `--root-dir <path>` or `HYPER_JUMP_ROOT_DIR` overrides the data dir
+- `HYPER_JUMP_PACKAGES_FILE` points to a custom `packages.toml`
 - make sure the path from `hj prefix` is on your `PATH` or nothing will run
 
 ## supported packages
 
-these are hardcoded for now.
+these come from `packages.toml`. by default the binary uses the embedded list,
+or you can drop a file at `<root_dir>/packages.toml` to override it.
 
 - [neovim](https://github.com/neovim/neovim)
 - [jujutsu](https://github.com/jj-vcs/jj)

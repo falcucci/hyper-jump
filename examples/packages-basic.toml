@@ -1,0 +1,24 @@
+[defaults]
+base_url = "https://github.com"
+api_base_url = "https://api.github.com/repos"
+
+[defaults.platform.macos]
+aarch64 = "aarch64-apple-darwin"
+x86_64 = "x86_64-apple-darwin"
+
+[defaults.platform.linux]
+x86_64 = "x86_64-unknown-linux-gnu"
+
+[defaults.ext]
+macos = "tar.gz"
+linux = "tar.gz"
+windows = "zip"
+
+[[org]]
+name = "zellij-org"
+
+[[org.package]]
+id = "zellij"
+alias = "zellij"
+repo = "zellij"
+download_template = "{base}/{repo}/releases/download/{version}/zellij-{platform}.{file_type}"

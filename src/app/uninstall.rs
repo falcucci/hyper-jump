@@ -2,10 +2,9 @@ use anyhow::Error;
 use anyhow::Result;
 use tracing::info;
 
-use crate::app::layout;
 use crate::app::resolve::resolve_requested_version;
 use crate::domain::package::Package;
-use crate::domain::package::PackageType;
+use crate::domain::package::PackageSpec;
 use crate::ports::Fs;
 use crate::ports::Paths;
 use crate::ports::Platform;
@@ -13,7 +12,7 @@ use crate::ports::ReleaseProvider;
 use crate::ports::UsedVersionStore;
 
 pub async fn uninstall_requested(
-    package_type: PackageType,
+    spec: std::sync::Arc<PackageSpec>,
     requested_version: String,
     release_provider: &impl ReleaseProvider,
     platform: &impl Platform,
@@ -21,11 +20,8 @@ pub async fn uninstall_requested(
     paths: &impl Paths,
     used_store: &impl UsedVersionStore,
 ) -> Result<(), Error> {
-    let parsed =
-        resolve_requested_version(&requested_version, package_type.clone(), release_provider)
-            .await?;
-    let binary_path = layout::binary_path(package_type.clone(), platform);
-    let package = Package::with_parsed(package_type, parsed, binary_path);
+    let parsed = resolve_requested_version(&requested_version, &spec, release_provider).await?;
+    let package = Package::with_parsed(spec, parsed, platform)?;
     uninstall(package, fs, paths, used_store).await
 }
 

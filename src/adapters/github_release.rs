@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::adapters::github::api;
 use crate::adapters::github::deserialize_response;
-use crate::domain::package::PackageType;
+use crate::domain::package::PackageSpec;
 use crate::domain::version::parse_normal_version;
 use crate::domain::version::ParsedVersion;
 use crate::domain::version::RemoteVersion;
@@ -27,15 +27,15 @@ impl GitHubReleaseProvider {
 }
 
 impl ReleaseProvider for GitHubReleaseProvider {
-    async fn latest(&self, package: PackageType) -> Result<ParsedVersion> {
-        let url = package.get_latest_url();
+    async fn latest(&self, package: &PackageSpec) -> Result<ParsedVersion> {
+        let url = package.latest_url();
         let response = api(self.client.as_ref(), url).await?;
         let latest: UpstreamVersion = deserialize_response(response)?;
         parse_normal_version(&latest.tag_name).await
     }
 
-    async fn list(&self, package: PackageType) -> Result<Vec<RemoteVersion>> {
-        let url = format!("{}/{}/releases", package.api_base_url(), package.repo());
+    async fn list(&self, package: &PackageSpec) -> Result<Vec<RemoteVersion>> {
+        let url = package.releases_url();
         let response = api(self.client.as_ref(), url).await?;
         let versions: Vec<RemoteVersion> = deserialize_response(response)?;
         Ok(versions)

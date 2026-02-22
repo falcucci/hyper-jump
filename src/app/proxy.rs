@@ -1,9 +1,8 @@
 use anyhow::anyhow;
 use anyhow::Result;
 
-use crate::app::layout;
 use crate::domain::package::Package;
-use crate::domain::package::PackageType;
+use crate::domain::package::PackageRegistry;
 use crate::ports::Output;
 use crate::ports::Paths;
 use crate::ports::Platform;
@@ -13,6 +12,7 @@ use crate::ports::UsedVersionStore;
 pub async fn handle_proxy(
     exec_name: &str,
     rest_args: &[String],
+    registry: &PackageRegistry,
     output: &impl Output,
     paths: &impl Paths,
     used_store: &impl UsedVersionStore,
@@ -30,9 +30,8 @@ pub async fn handle_proxy(
         return Ok(());
     }
 
-    let package_type = PackageType::from_str(exec_name);
-    let binary_path = layout::binary_path(package_type.clone(), platform);
-    let package = Package::from_type(package_type, binary_path);
+    let spec = registry.get_by_alias(exec_name).map_err(|err| miette::miette!(err))?;
+    let package = Package::from_spec(spec, platform).map_err(|err| miette::miette!(err))?;
 
     handle_package_process(rest_args, package, paths, used_store, process)
         .await
