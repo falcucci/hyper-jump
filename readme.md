@@ -1,128 +1,104 @@
-<div align="center">
-
 # hyper-jump
 
-_The console lights up, keys clack rapidly and then..._ 🛸
+hyper-jump is a small, cross-platform version manager for a fixed set of
+command-line tools. it downloads release binaries, installs them under the
+hyper-jump data dir and gives you a single command to manage versions.
 
-</div>
+this project is intentionally narrow. it does one job and keeps the surface
+area small.
 
-hyper-jump is an agnostic all-in-one and cross-platform command-line version manager toolset which I have created and used personally based on internal tools I daily interact with for many different reasons, that being for educational purposes or as a professional project/task.
+## motivation
 
-## Core Features
+i needed a small, predictable tool for a handful of binaries that ship on github releases. nix pkgs, homebrew and friends are fine for stable apps, but they tend to lag behind upstream tags and i didn't want to maintain overlays or wait for packaging updates.
 
-- **Version Management**: Install and switch between different versions of package.
-- **Environment Isolation**: Create isolated environments for different projects, each with its own set of package versions.
-- **Remote Listing**: View available versions of packages from remote repositories.
-- **Package Installation**: Download and install specific versions of packages with ease.
-- **Package Uninstallation**: Remove installed versions of packages to declutter the environment.
-- **Version Switching**: Seamlessly switch between installed versions with a single command.
-- **Version Cleanup**: Erase all installed versions of packages to start fresh.
-- **Proxy Handling**: Hyper-Jump acts as a proxy, allowing users to run commands from the selected package version.
+i also wanted to handle the usual setup effort: nix's steep learning curve, inconsistent idioms and rough discoverability, plus brew's dependency resolution churn, disk bloat and periodic support or sudo friction on older macs. a single binary plus a private data dir was the simplest thing that stayed out of the way.
 
-## Potential Features
+i avoided nix packages because they pull you into a full ecosystem with its own workflows and that’s more ceremony than this problem needed. even if you like nix, it’s a hard sell for teams who just want a binary to exist and a version to be pinned without retraining or extra concepts. hyper-jump keeps versions side by side, pulls directly from upstream releases and lets you switch instantly without touching system state.
 
-- **Updates notification**: Notify users when new versions of packages are available.
-- **Custom Package Sources**: Allow users to add custom package sources or repositories for more flexibility.
-- **Enhanced List Filtering**: Provide options to filter the list of installed and remote versions based on criteria such as release date or stability.
+## what this is
 
-## Supported Packages
+- a practical version manager for the supported packages listed below
+- built for daily use rather than general-purpose plugin ecosystems
+- a single cli with explicit subcommands and predictable paths
 
-| Package Name                                                                   | Alias                 | Description                                          |
-| ------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------- |
-| [Neovim](https://github.com/neovim/neovim)                                     | `neovim`              | Manage versions of the Neovim client software.       |
-| [Jujutsu](https://github.com/jj-vcs/jj)                                        | `jj`                  | Manage versions of the Jujutsu client software.      |
-| [Zellij](https://github.com/zellij-org/zellij)                                 | `zellij`              | Manage versions of the Zellij client software.       |
-| [Reth](https://github.com/paradigmxyz/reth)                                    | `reth`                | Manage versions of the Reth client software.         |
-| [Cardano Node](https://github.com/IntersectMBO/cardano-node)                   | `cardano-node`        | Manage versions of the Cardano Node software.        |
-| [Cardano CLI](https://github.com/cardano-scaling/cardano-cli)                  | `cardano-cli`         | Manage versions of the Cardano CLI tool.             |
-| [Partner Chains CLI](https://github.com/input-output-hk/partner-chains)        | `partner-chains-cli`  | Manage versions of the Partner Chains CLI tool.      |
-| [Partner Chains Node](https://github.com/input-output-hk/partner-chains)       | `partner-chains-node` | Manage versions of the Partner Chains Node software. |
-| [Cardano Submit Api](https://github.com/IntersectMBO/cardano-node)             | `cardano-submit-api`  | Manage versions of the Cardano Submit Api software.  |
-| [SideChain](https://github.com/input-output-hk/partner-chains-smart-contracts) | `sidechain-cli`       | Manage versions of the SideChain CLI tool.           |
-| [Mithril](https://github.com/input-output-hk/mithril)                          | `mithril-client`      | Manage versions of the Mithril client software.      |
-| [Scrolls](https://github.com/txpipe/scrolls)                                   | `scrolls`             | Manage versions of the Scrolls client software.      |
-| [Oura](https://github.com/txpipe/oura/tree/main)                               | `oura`                | Manage versions of the Oura client software.         |
-| [Dolos](https://github.com/txpipe/dolos)                                       | `dolos`               | Manage versions of the Dolos client software.        |
-| [Aiken](https://github.com/aiken-lang/aiken)                                   | `aiken`               | Manage versions of the Aiken client software.        |
+## what this is not
 
-## Installation
+- a universal version manager for arbitrary tools
+- a long-running background service
+- a plugin framework
+
+## installation
 
 ```bash
 cargo install hyper-jump
 ```
 
-## Configuration
+## configuration
 
-#### On Linux and macOS:
-
-Add the following line to your shell configuration file (e.g., `~/.bashrc`, `~/.zshrc`, etc.):
+make sure the install directory is on your `PATH`.
 
 ```bash
-export PATH="$HOME/.local/share/hyper-jump/bin:$PATH"
+export PATH="$(hyper-jump prefix):$PATH"
 ```
 
-Or add the hyper-jump binary path to your PATH by running:
+on macos, you can also set the user path once:
 
 ```bash
 sudo launchctl config user path "$(hyper-jump prefix):${PATH}"
 ```
 
-## Usage
+## usage
 
-To manage packages, use the following subcommands:
+run `hyper-jump --help` if you can't remember the subcommands.
 
-### Help
-
-Display help information:
-
-```bash
-hyper-jump --help
-```
-
-### Use
-
-Switch to a specific version of a package.
+quick start
 
 ```sh
-hyper-jump use <package-name> <version>
+hyper-jump list-remote reth
+hyper-jump install reth v1.10.2
+hyper-jump use reth v1.10.2
+hyper-jump list reth
 ```
 
-### Install
+commands
 
-Install a specific version of a package.
+- `hyper-jump install <package> <version|latest>` install a version
+- `hyper-jump use <package> <version|latest>` switch to a version and mark it as used
+- `hyper-jump list <package>` show installed versions
+- `hyper-jump list-remote <package>` show remote versions
+- `hyper-jump uninstall <package> <version>` remove a version
+- `hyper-jump erase` remove all installed versions
+- `hyper-jump prefix` print the bin dir used for shims
 
-```sh
-hyper-jump install <package-name> <version>
-```
+notes
 
-### List
+- `version` accepts tags like `v1.10.2` or `latest`
+- `--output-format json|table` or `HYPER_JUMP_OUTPUT_FORMAT` changes list output format
+- `--root-dir <path>` or `HYPER_JUMP_ROOT_DIR` overrides the data dir
+- make sure the path from `hyper-jump prefix` is on your `PATH` or nothing will run
 
-List installed versions of a package:
+## supported packages
 
-```sh
-hyper-jump list <package-name>
-```
+these are hardcoded for now. if you want another tool, send a patch with a
+clear reason and a reliable release source.
 
-### List Remote
+- [neovim](https://github.com/neovim/neovim)
+- [jujutsu](https://github.com/jj-vcs/jj)
+- [zellij](https://github.com/zellij-org/zellij)
+- [reth](https://github.com/paradigmxyz/reth)
+- [cardano node](https://github.com/IntersectMBO/cardano-node)
+- [cardano cli](https://github.com/cardano-scaling/cardano-cli)
+- [partner chains cli](https://github.com/input-output-hk/partner-chains)
+- [partner chains node](https://github.com/input-output-hk/partner-chains)
+- [cardano submit api](https://github.com/IntersectMBO/cardano-node)
+- [sidechain cli](https://github.com/input-output-hk/partner-chains-smart-contracts)
+- [mithril client](https://github.com/input-output-hk/mithril)
+- [scrolls](https://github.com/txpipe/scrolls)
+- [oura](https://github.com/txpipe/oura/tree/main)
+- [dolos](https://github.com/txpipe/dolos)
+- [aiken](https://github.com/aiken-lang/aiken)
 
-List remote versions available for a package.
+## potential features
 
-```sh
-hyper-jump list-remote <package-name>
-```
-
-### Uninstall
-
-Uninstall a specific version of a package.
-
-```sh
-hyper-jump uninstall <package-name> <version>
-```
-
-### Erase
-
-Remove all installed versions.
-
-```sh
-hyper-jump erase
-```
+- update notifications for new releases
+- custom package sources

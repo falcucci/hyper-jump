@@ -36,7 +36,7 @@ struct Cli {
         long,
         global = true,
         help = "root dir for config and data",
-        env = "Hyper-jump_ROOT_DIR"
+        env = "HYPER_JUMP_ROOT_DIR"
     )]
     root_dir: Option<PathBuf>,
 
@@ -45,7 +45,7 @@ struct Cli {
         long,
         global = true,
         help = "output format for command response",
-        env = "Hyper-jump_OUTPUT_FORMAT"
+        env = "HYPER_JUMP_OUTPUT_FORMAT"
     )]
     output_format: Option<OutputFormat>,
 }
