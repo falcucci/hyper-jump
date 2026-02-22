@@ -101,4 +101,3 @@ or you can drop a file at `<root_dir>/packages.toml` to override it.
 ## potential features
 
 - update notifications for new releases
-- custom package sources
