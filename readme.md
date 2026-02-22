@@ -9,11 +9,11 @@ area small.
 
 ## motivation
 
-i needed a small, predictable tool for a handful of binaries that ship on github releases. nix pkgs, homebrew and friends are fine for stable apps, but they tend to lag behind upstream tags and i didn't want to maintain overlays or wait for packaging updates.
+the goal is a small, predictable tool for a handful of binaries that ship on github releases. nix pkgs, homebrew and friends are fine for stable apps, but they tend to lag behind upstream tags and keeping overlays or waiting for packaging updates adds overhead.
 
-i also wanted to handle the usual setup effort: nix's steep learning curve, inconsistent idioms and rough discoverability, plus brew's dependency resolution churn, disk bloat and periodic support or sudo friction on older macs. a single binary plus a private data dir was the simplest thing that stayed out of the way.
+the usual setup effort adds friction: nix's steep learning curve, inconsistent idioms and rough discoverability, plus brew's dependency resolution churn, disk bloat and periodic support or sudo friction on older macs. a single binary plus a private data dir stays out of the way.
 
-i avoided nix packages because they pull you into a full ecosystem with its own workflows and that’s more ceremony than this problem needed. even if you like nix, it’s a hard sell for teams who just want a binary to exist and a version to be pinned without retraining or extra concepts. hyper-jump keeps versions side by side, pulls directly from upstream releases and lets you switch instantly without touching system state.
+nix packages were intentionally skipped because they pull users into a full ecosystem with its own workflows, which is more ceremony than this problem needed. even if you like nix, it's a hard sell for teams who just want a binary to exist and a version to be pinned without retraining or extra concepts. hyper-jump keeps versions side by side, pulls directly from upstream releases and lets you switch instantly without touching system state.
 
 ## what this is
 
