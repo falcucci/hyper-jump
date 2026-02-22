@@ -1,13 +1,11 @@
-use anyhow::Error;
-use anyhow::Result;
 use clap::Parser;
-use tokio::fs;
-use tracing::info;
 
-use crate::fs::get_downloads_directory;
-use crate::helpers::version::get_current_version;
-use crate::packages::Package;
-use crate::packages::PackageType;
+use crate::adapters::fs::TokioFs;
+use crate::adapters::github_release::GitHubReleaseProvider;
+use crate::adapters::path::FsPaths;
+use crate::adapters::used_store::UsedFileStore;
+use crate::app::uninstall::uninstall_requested;
+use crate::domain::package::PackageType;
 
 #[derive(Parser)]
 pub struct Args {
@@ -50,12 +48,22 @@ pub enum Commands {
 /// - `$(($variant:ident, $package_type:expr)),*`: A list of tuples containing
 ///   the command variant and the corresponding package type.
 macro_rules! execute {
-    ($command:expr, $client:expr, $(($variant:ident, $package_type:expr)),*) => {
+    ($command:expr, $client:expr, $paths:expr, $used:expr, $fs:expr, $platform:expr, $(($variant:ident, $package_type:expr)),*) => {
         match $command {
             $(
                 Commands::$variant { version } => {
-                    let package = Package::new($package_type, version, $client).await;
-                    uninstall(package).await.expect("Failed to uninstall")
+                    let provider = GitHubReleaseProvider::new($client);
+                    uninstall_requested(
+                        $package_type,
+                        version,
+                        &provider,
+                        $platform,
+                        &$fs,
+                        &$paths,
+                        &$used,
+                    )
+                    .await
+                    .expect("Failed to uninstall")
                 }
             )*
         }
@@ -64,12 +72,20 @@ macro_rules! execute {
 
 pub async fn run(
     args: Args,
-    _ctx: &crate::Context,
+    ctx: &crate::Context,
     client: Option<&reqwest::Client>,
 ) -> miette::Result<()> {
+    let paths = FsPaths::new(ctx.dirs.root_dir.clone());
+    let used_store = UsedFileStore::new(paths.clone());
+    let fs = TokioFs;
+    let platform = crate::adapters::platform::StdPlatform;
     execute!(
         args.command,
         client,
+        paths,
+        used_store,
+        fs,
+        &platform,
         (Reth, PackageType::Reth),
         (Oura, PackageType::Oura),
         (Aiken, PackageType::Aiken),
@@ -86,35 +102,6 @@ pub async fn run(
         (PartnerChainNode, PackageType::PartnerChainNode),
         (CardanoSubmitApi, PackageType::CardanoSubmitApi)
     );
-
-    Ok(())
-}
-
-pub async fn uninstall(package: Package) -> Result<(), Error> {
-    let parsed_version = package.version().expect("Failed to parse version");
-    let version = parsed_version.non_parsed_string.clone();
-    let used_version = get_current_version(package.clone()).await?;
-    let same_version = used_version == version;
-
-    let mut downloads = get_downloads_directory(package.clone()).await?;
-    let location = downloads.join("used");
-    downloads.push(&version);
-
-    if fs::remove_dir_all(&downloads).await.is_ok() {
-        info!("Successfully uninstalled {} installation", &version);
-    } else {
-        info!("There's nothing to uninstall");
-    }
-
-    if !same_version {
-        return Ok(());
-    }
-
-    if fs::remove_file(location).await.is_ok() {
-        info!("Successfully removed {} from used versions", &version);
-    } else {
-        info!("There's nothing to uninstall");
-    }
 
     Ok(())
 }

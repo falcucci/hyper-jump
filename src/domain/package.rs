@@ -1,10 +1,4 @@
-use reqwest::Client;
-
-use crate::fs::get_file_type;
-use crate::fs::get_platform_name;
-use crate::fs::get_platform_name_download;
-use crate::helpers::version::ParsedVersion;
-use crate::helpers::version::VersionType;
+use crate::domain::version::ParsedVersion;
 
 const GITHUB_BASE_URL: &str = "https://github.com";
 const GITHUB_API_BASE_URL: &str = "https://api.github.com/repos";
@@ -22,11 +16,6 @@ const RETH_REPO: &str = "paradigmxyz/reth";
 const SCROLLS_REPO: &str = "txpipe/scrolls";
 
 /// Represents the specification of a package.
-///
-/// * `alias` - Alias of the package.
-/// * `version` - Optional version of the package.
-/// * `binary_path` - Path to the binary of the package.
-/// * `package_type` - Type of the package.
 #[derive(Debug, Clone)]
 pub struct Spec {
     pub alias: String,
@@ -35,12 +24,6 @@ pub struct Spec {
     pub package_type: PackageType,
 }
 
-/// Enum representing different types of packages.
-///
-/// * `Aiken` - Represents an Aiken package.
-/// * `Mithril` - Represents a Mithril package.
-/// * `CardanoCli` - Represents a Cardano CLI package.
-/// * `CardanoNode` - Represents a Cardano Node package.
 #[derive(Debug, Clone)]
 pub enum Package {
     Reth(Spec),
@@ -60,12 +43,6 @@ pub enum Package {
     CardanoSubmitApi(Spec),
 }
 
-/// Enum representing different types of package types.
-///
-/// * `CardanoNode` - Represents the Cardano Node package type.
-/// * `CardanoCli` - Represents the Cardano CLI package type.
-/// * `Mithril` - Represents the Mithril package type.
-/// * `Aiken` - Represents the Aiken package type.
 #[derive(Debug, Clone)]
 pub enum PackageType {
     Reth,
@@ -85,20 +62,6 @@ pub enum PackageType {
     CardanoSubmitApi,
 }
 
-/// Macro to create a `Package` variant with the appropriate `Spec` struct.
-///
-/// This macro simplifies the creation of different `Package` variants by
-/// matching on the `PackageType` and constructing the corresponding `Spec`
-/// struct with the provided alias and binary path.
-///
-/// # Parameters
-/// - `$package_type`: The type of the package (of type `PackageType`).
-/// - `$version`: The version of the package (of type `VersionType`).
-/// - `$(($variant:ident, $alias:expr, $binary_path:expr)),*`: A list of tuples
-///   where each tuple contains:
-///   - `$variant`: The variant of the `PackageType` enum.
-///   - `$alias`: The alias string for the package.
-///   - `$binary_path`: The binary path string for the package.
 macro_rules! create_package {
     ($package_type:expr, $version:expr, $(($variant:ident, $alias:expr, $binary_path:expr)),*) => {
         match $package_type {
@@ -115,23 +78,6 @@ macro_rules! create_package {
 }
 
 impl PackageType {
-    /// Creates a `PackageType` from a string.
-    ///
-    /// # Arguments
-    ///
-    /// * `package` - A string slice representing the package.
-    ///
-    /// Returns a `PackageType`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the provided string does not match any known package type.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package_type = PackageType::from_str("cardano-node"); 
-    /// ```
     pub fn from_str(package: &str) -> Self {
         match package {
             "reth" => PackageType::Reth,
@@ -173,41 +119,6 @@ impl PackageType {
         }
     }
 
-    pub fn format_binary_path(&self) -> String {
-        let platform = get_platform_name_download(self.clone());
-        let os = get_platform_name();
-        match self {
-            PackageType::CardanoSubmitApi => "bin".to_string(),
-            PackageType::PartnerChainNode => "".to_string(),
-            PackageType::PartnerChainCli => "".to_string(),
-            PackageType::SidechainCli => "".to_string(),
-            PackageType::CardanoNode => "bin".to_string(),
-            PackageType::CardanoCli => "bin".to_string(),
-            PackageType::Jujutsu => "".to_string(),
-            PackageType::Mithril => "".to_string(),
-            PackageType::Zellij => "".to_string(),
-            PackageType::Neovim => {
-                format!("nvim-{os}-{platform}/bin", os = os, platform = platform)
-            }
-            PackageType::Oura => "".to_string(),
-            PackageType::Scrolls => "".to_string(),
-            PackageType::Aiken => format!("aiken-{platform}", platform = platform),
-            PackageType::Dolos => format!("dolos-{platform}", platform = platform),
-            PackageType::Reth => "".to_string(),
-        }
-    }
-
-    /// Returns the repository URL for the package type.
-    ///
-    /// # Returns
-    ///
-    /// A string slice representing the repository URL.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let repo_url = PackageType::CardanoNode.repo(); 
-    /// ```
     pub fn repo(&self) -> &str {
         match self {
             PackageType::Reth => RETH_REPO,
@@ -228,77 +139,66 @@ impl PackageType {
         }
     }
 
-    /// Returns the base URL for GitHub.
-    ///
-    /// # Returns
-    ///
-    /// A string slice representing the base URL.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let base_url = PackageType::CardanoNode.base_url(); 
-    /// ```
     pub fn base_url(&self) -> &str { GITHUB_BASE_URL }
 
-    /// Returns the base URL for the GitHub API.
-    ///
-    /// # Returns
-    ///
-    /// A string slice representing the API base URL.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let api_base_url = PackageType::CardanoNode.api_base_url(); 
-    /// ```
     pub fn api_base_url(&self) -> &str { GITHUB_API_BASE_URL }
 
-    /// Constructs the URL to get the latest release for the package type.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the URL to get the latest release.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let latest_url = PackageType::CardanoNode.get_latest_url(); 
-    /// ```
     pub fn get_latest_url(&self) -> String {
         format!("{}/{}/releases/latest", self.api_base_url(), self.repo())
     }
 }
 
-/// Constructs a new `Package` with the specified type and version.
-///
-/// # Arguments
-///
-/// * `package_type` - The type of the package to construct.
-///
-/// * `version` - The version string of the package.
-/// * `client` - An optional reference to a `reqwest::Client` for making HTTP
-///   requests.
-///
-/// # Returns
-///
-/// Returns a new instance of `Package`.
 impl Package {
-    /// Returns the alias of the package.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the alias of the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     alias: "cardano-node".to_string(),
-    ///     ..Default::default()
-    /// });
-    /// let alias = package.alias();
-    /// ```
+    pub fn from_type(package_type: PackageType, binary_path: String) -> Self {
+        let alias = package_type.alias();
+        create_package!(
+            package_type,
+            None,
+            (Reth, alias, binary_path),
+            (Oura, alias, binary_path),
+            (Aiken, alias, binary_path),
+            (Dolos, alias, binary_path),
+            (Zellij, alias, binary_path),
+            (Neovim, alias, binary_path),
+            (Scrolls, alias, binary_path),
+            (Jujutsu, alias, binary_path),
+            (Mithril, alias, binary_path),
+            (CardanoCli, alias, binary_path),
+            (CardanoNode, alias, binary_path),
+            (SidechainCli, alias, binary_path),
+            (PartnerChainCli, alias, binary_path),
+            (PartnerChainNode, alias, binary_path),
+            (CardanoSubmitApi, alias, binary_path)
+        )
+    }
+
+    pub fn with_parsed(
+        package_type: PackageType,
+        version: ParsedVersion,
+        binary_path: String,
+    ) -> Self {
+        let alias = package_type.alias();
+        create_package!(
+            package_type,
+            Some(version),
+            (Reth, alias, binary_path),
+            (Oura, alias, binary_path),
+            (Aiken, alias, binary_path),
+            (Dolos, alias, binary_path),
+            (Zellij, alias, binary_path),
+            (Neovim, alias, binary_path),
+            (Scrolls, alias, binary_path),
+            (Jujutsu, alias, binary_path),
+            (Mithril, alias, binary_path),
+            (CardanoCli, alias, binary_path),
+            (CardanoNode, alias, binary_path),
+            (SidechainCli, alias, binary_path),
+            (PartnerChainCli, alias, binary_path),
+            (PartnerChainNode, alias, binary_path),
+            (CardanoSubmitApi, alias, binary_path)
+        )
+    }
+
     pub fn alias(&self) -> String {
         match self {
             Package::Reth(Spec { alias, .. }) => alias.clone(),
@@ -319,21 +219,6 @@ impl Package {
         }
     }
 
-    /// Returns the version of the package.
-    ///
-    /// # Returns
-    ///
-    /// An optional `ParsedVersion` representing the version of the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     version: Some(ParsedVersion::new("1.0.0")),
-    ///     ..Default::default()
-    /// });
-    /// let version = package.version();
-    /// ```
     pub fn version(&self) -> Option<ParsedVersion> {
         match self {
             Package::Reth(Spec { version, .. }) => version.clone(),
@@ -354,21 +239,6 @@ impl Package {
         }
     }
 
-    /// Returns the binary path of the package.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the binary path of the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     binary_path: "bin".to_string(),
-    ///     ..Default::default()
-    /// });
-    /// let binary_path = package.binary_path();
-    /// ```
     pub fn binary_path(&self) -> String {
         match self {
             Package::Reth(Spec { binary_path, .. }) => binary_path.clone(),
@@ -388,21 +258,7 @@ impl Package {
             Package::CardanoSubmitApi(Spec { binary_path, .. }) => binary_path.clone(),
         }
     }
-    // Returns the binary name of the package.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the binary name of the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     alias: "cardano-node".to_string(),
-    ///     ..Default::default()
-    /// });
-    /// let binary_name = package.binary_name();
-    /// ```
+
     pub fn binary_name(&self) -> String {
         match self {
             Package::Reth(Spec { alias, .. }) => alias.clone(),
@@ -423,21 +279,6 @@ impl Package {
         }
     }
 
-    /// Returns the package type of the package.
-    ///
-    /// # Returns
-    ///
-    /// A `PackageType` representing the type of the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     package_type: PackageType::CardanoNode,
-    ///     ..Default::default()
-    /// });
-    /// let package_type = package.package_type();
-    /// ```
     pub fn package_type(&self) -> PackageType {
         match self {
             Package::Reth(Spec { package_type, .. }) => package_type.clone(),
@@ -458,21 +299,6 @@ impl Package {
         }
     }
 
-    /// Constructs the template URL for the package.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the template URL for the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     package_type: PackageType::CardanoNode,
-    ///     ..Default::default()
-    /// });
-    /// let template_url = package.get_template_url();
-    /// ```
     pub fn get_template_url(&self) -> String {
         let p = self.package_type();
         let base = p.base_url();
@@ -542,97 +368,5 @@ impl Package {
         }
     }
 
-    /// Constructs the download URL for the package.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the download URL for the package.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the version is not set.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     version: Some(ParsedVersion::new("1.0.0")),
-    ///     ..Default::default()
-    /// });
-    /// let download_url = package.download_url();
-    /// ```
-    pub fn download_url(&self) -> String {
-        let v = self.version().expect("Version not set");
-        let p = self.package_type();
-
-        self.get_template_url()
-            .replace("{version}", v.non_parsed_string.as_str())
-            .replace("{OS}", get_platform_name())
-            .replace("{platform}", get_platform_name_download(p))
-            .replace("{file_type}", get_file_type(self.package_type()))
-    }
-
-    /// Constructs the releases URL for the package.
-    ///
-    /// # Returns
-    ///
-    /// A string representing the releases URL for the package.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let package = Package::CardanoNode(Spec {
-    ///     package_type: PackageType::CardanoNode,
-    ///     ..Default::default()
-    /// });
-    /// let releases_url = package.releases_url();
-    /// ```
-    pub fn releases_url(&self) -> String {
-        let p = self.package_type();
-        format!("{}/{}/releases", p.api_base_url(), p.repo())
-    }
-
-    /// Creates a new instance of `Package`.
-    ///
-    /// # Arguments
-    ///
-    /// * `package_type` - The type of the package to construct.
-    /// * `version` - The version string of the package.
-    /// * `client` - An optional reference to a `reqwest::Client` for making
-    ///   HTTP requests.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of `Package`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let client = Client::new();
-    /// let package = Package::new(PackageType::CardanoNode, "1.0.0".to_string(), Some(&client)).await;
-    /// ```
-    pub async fn new(package_type: PackageType, version: String, client: Option<&Client>) -> Self {
-        let version = VersionType::parse(&version, client, package_type.clone()).await.unwrap();
-        let binary_path = package_type.format_binary_path();
-        let alias = package_type.alias();
-        create_package!(
-            package_type,
-            Some(version),
-            (Reth, alias, binary_path),
-            (Oura, alias, binary_path),
-            (Aiken, alias, binary_path),
-            (Dolos, alias, binary_path),
-            (Zellij, alias, binary_path),
-            (Neovim, alias, binary_path),
-            (Scrolls, alias, binary_path),
-            (Jujutsu, alias, binary_path),
-            (Mithril, alias, binary_path),
-            (CardanoCli, alias, binary_path),
-            (CardanoNode, alias, binary_path),
-            (SidechainCli, alias, binary_path),
-            (PartnerChainCli, alias, binary_path),
-            (PartnerChainNode, alias, binary_path),
-            (CardanoSubmitApi, alias, binary_path)
-        )
-    }
+    // download_url moved to app layer to keep domain independent of platform/ports.
 }

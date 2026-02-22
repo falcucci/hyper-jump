@@ -1,15 +1,13 @@
+mod adapters;
+mod app;
 mod commands;
-mod dirs;
-mod fs;
-mod helpers;
-mod packages;
-mod proxy;
-mod services;
+mod domain;
+mod ports;
 
-use std::env;
-use std::path::Path;
 use std::path::PathBuf;
 
+use adapters::client;
+use adapters::env::StdEnv;
 use clap::Parser;
 use clap::Subcommand;
 use clap::ValueEnum;
@@ -20,8 +18,6 @@ use commands::list_remote;
 use commands::prefix;
 use commands::uninstall;
 use commands::use_cmd;
-use helpers::client;
-use proxy::handle_proxy;
 use tracing::Level;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::layer::SubscriberExt;
@@ -72,13 +68,13 @@ enum Commands {
 }
 
 pub struct Context {
-    pub dirs: dirs::Dirs,
+    pub dirs: adapters::dirs::Dirs,
     pub output_format: OutputFormat,
 }
 
 impl Context {
-    fn for_cli(cli: &Cli) -> miette::Result<Self> {
-        let dirs = dirs::Dirs::try_new(cli.root_dir.as_deref())?;
+    fn for_cli(cli: &Cli, env: &dyn crate::ports::Env) -> miette::Result<Self> {
+        let dirs = adapters::dirs::Dirs::try_new(cli.root_dir.as_deref(), env)?;
         let output_format = cli.output_format.clone().unwrap_or(OutputFormat::Table);
 
         Ok(Context {
@@ -98,25 +94,37 @@ pub fn with_tracing() {
         .init();
 }
 
-fn parse_args(args: Vec<String>) -> (String, Vec<String>) {
-    let exe_name_path = Path::new(&args[0]);
-    let exe_name = exe_name_path.file_stem().unwrap().to_str().unwrap();
-    let rest_args = &args[1..];
-    (exe_name.to_string(), rest_args.to_vec())
-}
-
 #[tokio::main]
 async fn main() -> miette::Result<()> {
     tracing_subscriber::fmt::init();
-    let args: Vec<String> = env::args().collect();
-    let (exe_name, rest_args) = parse_args(args);
+    let env_adapter = StdEnv;
+    let env_ref: &dyn crate::ports::Env = &env_adapter;
+    let args: Vec<String> = env_ref.args();
+    let exe_name = env_ref.exe_name();
+    let rest_args = args[1..].to_vec();
 
     if !exe_name.eq(env!("CARGO_PKG_NAME")) {
-        return handle_proxy(&exe_name, &rest_args).await;
+        let root_dir = env_ref.root_dir();
+        let dirs = adapters::dirs::Dirs::try_new(root_dir.as_deref(), env_ref)?;
+        let paths = adapters::path::FsPaths::new(dirs.root_dir.clone());
+        let used_store = adapters::used_store::UsedFileStore::new(paths.clone());
+        let platform = adapters::platform::StdPlatform;
+        let process = adapters::process::TokioProcess;
+        let output = adapters::output::StdoutOutput;
+        return app::proxy::handle_proxy(
+            &exe_name,
+            &rest_args,
+            &output,
+            &paths,
+            &used_store,
+            &platform,
+            &process,
+        )
+        .await;
     }
 
     let cli = Cli::parse();
-    let ctx = Context::for_cli(&cli)?;
+    let ctx = Context::for_cli(&cli, env_ref)?;
     let client = Some(client::create_reqwest_client().map_err(|e| miette::miette!(e))?);
 
     match cli.command {
@@ -125,7 +133,7 @@ async fn main() -> miette::Result<()> {
         Commands::Install(args) => install::run(args, &ctx, client.as_ref()).await,
         Commands::Uninstall(args) => uninstall::run(args, &ctx, client.as_ref()).await,
         Commands::ListRemote(args) => list_remote::run(args, &ctx, client.as_ref()).await,
-        Commands::Prefix => prefix::run().await,
-        Commands::Erase => erase::run().await,
+        Commands::Prefix => prefix::run(&ctx).await,
+        Commands::Erase => erase::run(&ctx).await,
     }
 }
