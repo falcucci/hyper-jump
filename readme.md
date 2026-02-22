@@ -15,13 +15,13 @@ the usual setup effort adds friction: nix's steep learning curve, inconsistent i
 
 nix packages were intentionally skipped because they pull users into a full ecosystem with its own workflows, which is more ceremony than this problem needed. even if you like nix, it's a hard sell for teams who just want a binary to exist and a version to be pinned without retraining or extra concepts. hyper-jump keeps versions side by side, pulls directly from upstream releases and lets you switch instantly without touching system state.
 
-## what this is
+## what it is
 
 - a practical version manager for the supported packages listed below
 - built for daily use rather than general-purpose plugin ecosystems
 - a single cli with explicit subcommands and predictable paths
 
-## what this is not
+## what it is not
 
 - a universal version manager for arbitrary tools
 - a long-running background service
