@@ -86,7 +86,8 @@ fn add_to_path(env: &impl Env, installation_dir: &Path) -> Result<()> {
 }
 
 async fn read_proxy_version(process: &impl Process, alias: &str) -> Result<Option<String>> {
-    let output = match process.output(Path::new(alias), &["--&hyper-jump".to_string()]).await {
+    let version_arg = format!("--{}", env!("CARGO_BIN_NAME"));
+    let output = match process.output(Path::new(alias), &[version_arg]).await {
         Ok(output) => output,
         Err(_) => return Ok(None),
     };

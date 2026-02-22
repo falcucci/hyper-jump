@@ -19,9 +19,13 @@ pub async fn handle_proxy(
     platform: &impl Platform,
     process: &impl Process,
 ) -> miette::Result<()> {
-    if !rest_args.is_empty() && rest_args[0].eq("--hyper-jump") {
+    if !rest_args.is_empty() && rest_args[0].eq(concat!("--", env!("CARGO_BIN_NAME"))) {
         output
-            .write_line(&format!("hyper-jump v{}", env!("CARGO_PKG_VERSION")))
+            .write_line(&format!(
+                "{} v{}",
+                env!("CARGO_BIN_NAME"),
+                env!("CARGO_PKG_VERSION")
+            ))
             .map_err(|err| miette::miette!(err))?;
         return Ok(());
     }

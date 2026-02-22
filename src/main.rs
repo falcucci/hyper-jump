@@ -26,7 +26,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 extern crate core;
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None, name = "hj")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -103,7 +103,7 @@ async fn main() -> miette::Result<()> {
     let exe_name = env_ref.exe_name();
     let rest_args = args[1..].to_vec();
 
-    if !exe_name.eq(env!("CARGO_PKG_NAME")) {
+    if !exe_name.eq(env!("CARGO_BIN_NAME")) {
         let root_dir = env_ref.root_dir();
         let dirs = adapters::dirs::Dirs::try_new(root_dir.as_deref(), env_ref)?;
         let paths = adapters::path::FsPaths::new(dirs.root_dir.clone());
