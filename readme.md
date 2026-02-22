@@ -87,7 +87,6 @@ these are hardcoded for now.
 - [reth](https://github.com/paradigmxyz/reth)
 - [cardano node](https://github.com/IntersectMBO/cardano-node)
 - [cardano cli](https://github.com/cardano-scaling/cardano-cli)
-- [partner chains cli](https://github.com/input-output-hk/partner-chains)
 - [partner chains node](https://github.com/input-output-hk/partner-chains)
 - [cardano submit api](https://github.com/IntersectMBO/cardano-node)
 - [sidechain cli](https://github.com/input-output-hk/partner-chains-smart-contracts)

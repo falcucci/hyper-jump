@@ -27,7 +27,6 @@ pub enum Commands {
     CardanoCli { version: String },
     CardanoNode { version: String },
     SidechainCli { version: String },
-    PartnerChainCli { version: String },
     PartnerChainNode { version: String },
     CardanoSubmitApi { version: String },
 }
@@ -47,7 +46,6 @@ macro_rules! execute {
             Commands::CardanoCli { version } => (PackageType::CardanoCli, version),
             Commands::CardanoNode { version } => (PackageType::CardanoNode, version),
             Commands::SidechainCli { version } => (PackageType::SidechainCli, version),
-            Commands::PartnerChainCli { version } => (PackageType::PartnerChainCli, version),
             Commands::PartnerChainNode { version } => (PackageType::PartnerChainNode, version),
             Commands::CardanoSubmitApi { version } => (PackageType::CardanoSubmitApi, version),
         };

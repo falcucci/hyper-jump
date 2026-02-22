@@ -7,7 +7,6 @@ pub fn binary_path(package_type: PackageType, platform: &impl Platform) -> Strin
     match package_type {
         PackageType::CardanoSubmitApi => "bin".to_string(),
         PackageType::PartnerChainNode => "".to_string(),
-        PackageType::PartnerChainCli => "".to_string(),
         PackageType::SidechainCli => "".to_string(),
         PackageType::CardanoNode => "bin".to_string(),
         PackageType::CardanoCli => "bin".to_string(),
