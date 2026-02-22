@@ -17,7 +17,6 @@ impl Platform for StdPlatform {
             match package_type {
                 PackageType::CardanoSubmitApi => "tar.gz",
                 PackageType::PartnerChainNode => "zip",
-                PackageType::PartnerChainCli => "zip",
                 PackageType::SidechainCli => "zip",
                 PackageType::CardanoNode => "tar.gz",
                 PackageType::CardanoCli => "tar.gz",
@@ -38,7 +37,6 @@ impl Platform for StdPlatform {
             match package_type {
                 PackageType::CardanoSubmitApi => "tar.gz",
                 PackageType::PartnerChainNode => "zip",
-                PackageType::PartnerChainCli => "zip",
                 PackageType::SidechainCli => "zip",
                 PackageType::CardanoNode => "tar.gz",
                 PackageType::CardanoCli => "tar.gz",
@@ -68,7 +66,6 @@ impl Platform for StdPlatform {
                 match package_type {
                     PackageType::CardanoSubmitApi => "",
                     PackageType::PartnerChainNode => "arm64",
-                    PackageType::PartnerChainCli => "arm64",
                     PackageType::SidechainCli => "arm64",
                     PackageType::CardanoNode => "",
                     PackageType::CardanoCli => "",
@@ -89,7 +86,6 @@ impl Platform for StdPlatform {
                 match package_type {
                     PackageType::CardanoSubmitApi => "",
                     PackageType::PartnerChainNode => "x86_64",
-                    PackageType::PartnerChainCli => "x86_64",
                     PackageType::SidechainCli => "x86_64",
                     PackageType::CardanoNode => "",
                     PackageType::CardanoCli => "",
@@ -111,7 +107,6 @@ impl Platform for StdPlatform {
             match package_type {
                 PackageType::CardanoSubmitApi => "",
                 PackageType::PartnerChainNode => "",
-                PackageType::PartnerChainCli => "",
                 PackageType::SidechainCli => "",
                 PackageType::CardanoNode => "",
                 PackageType::CardanoCli => "",

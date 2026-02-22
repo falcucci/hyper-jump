@@ -44,7 +44,6 @@ pub async fn list_remote(
         let tag = match package {
             Package::CardanoSubmitApi(_) => version.tag_name.clone(),
             Package::PartnerChainNode(_) => version.tag_name.clone(),
-            Package::PartnerChainCli(_) => version.tag_name.clone(),
             Package::SidechainCli(_) => version.tag_name.clone(),
             Package::CardanoNode(_) => version.tag_name.clone(),
             Package::CardanoCli(_) => version.tag_name.clone(),

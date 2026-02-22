@@ -38,7 +38,6 @@ pub enum Package {
     CardanoCli(Spec),
     CardanoNode(Spec),
     SidechainCli(Spec),
-    PartnerChainCli(Spec),
     PartnerChainNode(Spec),
     CardanoSubmitApi(Spec),
 }
@@ -57,7 +56,6 @@ pub enum PackageType {
     CardanoCli,
     CardanoNode,
     SidechainCli,
-    PartnerChainCli,
     PartnerChainNode,
     CardanoSubmitApi,
 }
@@ -92,7 +90,6 @@ impl PackageType {
             "jj" => PackageType::Jujutsu,
             "mithril-client" => PackageType::Mithril,
             "sidechain-main-cli" => PackageType::SidechainCli,
-            "partner-chains-cli" => PackageType::PartnerChainCli,
             "partner-chains-node" => PackageType::PartnerChainNode,
             "cardano-submit-api" => PackageType::CardanoSubmitApi,
             _ => panic!("Unknown package"),
@@ -113,7 +110,6 @@ impl PackageType {
             PackageType::CardanoCli => "cardano-cli".to_string(),
             PackageType::CardanoNode => "cardano-node".to_string(),
             PackageType::SidechainCli => "sidechain-main-cli".to_string(),
-            PackageType::PartnerChainCli => "partner-chains-cli".to_string(),
             PackageType::PartnerChainNode => "partner-chains-node".to_string(),
             PackageType::CardanoSubmitApi => "cardano-submit-api".to_string(),
         }
@@ -134,7 +130,6 @@ impl PackageType {
             PackageType::CardanoNode => CARDANO_NODE_REPO,
             PackageType::CardanoSubmitApi => CARDANO_NODE_REPO,
             PackageType::SidechainCli => PARTNER_CHAIN_CLI_REPO,
-            PackageType::PartnerChainCli => PARTNER_CHAIN_CLI_REPO,
             PackageType::PartnerChainNode => PARTNER_CHAIN_CLI_REPO,
         }
     }
@@ -166,7 +161,6 @@ impl Package {
             (CardanoCli, alias, binary_path),
             (CardanoNode, alias, binary_path),
             (SidechainCli, alias, binary_path),
-            (PartnerChainCli, alias, binary_path),
             (PartnerChainNode, alias, binary_path),
             (CardanoSubmitApi, alias, binary_path)
         )
@@ -193,7 +187,6 @@ impl Package {
             (CardanoCli, alias, binary_path),
             (CardanoNode, alias, binary_path),
             (SidechainCli, alias, binary_path),
-            (PartnerChainCli, alias, binary_path),
             (PartnerChainNode, alias, binary_path),
             (CardanoSubmitApi, alias, binary_path)
         )
@@ -213,7 +206,6 @@ impl Package {
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::SidechainCli(Spec { alias, .. }) => alias.clone(),
-            Package::PartnerChainCli(Spec { alias, .. }) => alias.clone(),
             Package::PartnerChainNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoSubmitApi(Spec { alias, .. }) => alias.clone(),
         }
@@ -233,7 +225,6 @@ impl Package {
             Package::CardanoCli(Spec { version, .. }) => version.clone(),
             Package::CardanoNode(Spec { version, .. }) => version.clone(),
             Package::SidechainCli(Spec { version, .. }) => version.clone(),
-            Package::PartnerChainCli(Spec { version, .. }) => version.clone(),
             Package::PartnerChainNode(Spec { version, .. }) => version.clone(),
             Package::CardanoSubmitApi(Spec { version, .. }) => version.clone(),
         }
@@ -253,7 +244,6 @@ impl Package {
             Package::CardanoCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoNode(Spec { binary_path, .. }) => binary_path.clone(),
             Package::SidechainCli(Spec { binary_path, .. }) => binary_path.clone(),
-            Package::PartnerChainCli(Spec { binary_path, .. }) => binary_path.clone(),
             Package::PartnerChainNode(Spec { binary_path, .. }) => binary_path.clone(),
             Package::CardanoSubmitApi(Spec { binary_path, .. }) => binary_path.clone(),
         }
@@ -273,7 +263,6 @@ impl Package {
             Package::CardanoCli(Spec { alias, .. }) => alias.clone(),
             Package::CardanoNode(Spec { alias, .. }) => alias.clone(),
             Package::SidechainCli(Spec { alias, .. }) => alias.clone(),
-            Package::PartnerChainCli(Spec { alias, .. }) => alias.clone(),
             Package::PartnerChainNode(Spec { alias, .. }) => alias.clone(),
             Package::CardanoSubmitApi(Spec { alias, .. }) => alias.clone(),
         }
@@ -293,7 +282,6 @@ impl Package {
             Package::CardanoCli(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoNode(Spec { package_type, .. }) => package_type.clone(),
             Package::SidechainCli(Spec { package_type, .. }) => package_type.clone(),
-            Package::PartnerChainCli(Spec { package_type, .. }) => package_type.clone(),
             Package::PartnerChainNode(Spec { package_type, .. }) => package_type.clone(),
             Package::CardanoSubmitApi(Spec { package_type, .. }) => package_type.clone(),
         }
@@ -309,10 +297,6 @@ impl Package {
                 base, repo,
             ),
             PackageType::PartnerChainNode => format!(
-                "{}/{}/releases/download/{{version}}/{{OS}}_{{platform}}.{{file_type}}",
-                base, repo,
-            ),
-            PackageType::PartnerChainCli => format!(
                 "{}/{}/releases/download/{{version}}/{{OS}}_{{platform}}.{{file_type}}",
                 base, repo,
             ),
