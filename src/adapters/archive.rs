@@ -1,11 +1,9 @@
 use std::fs;
-use std::io;
-use std::path::Path;
 
 use anyhow::anyhow;
 use anyhow::Result;
-use xz2::read::XzDecoder;
-use zip_extract::extract;
+use liblzma::read::XzDecoder;
+use zip::ZipArchive as ZipReader;
 
 use crate::domain::package::Package;
 use crate::domain::version::LocalVersion;
@@ -52,12 +50,6 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
     })?;
 
     let output = format!("{}/{}", tmp.path, tmp.file_name);
-    let decompress_stream: Box<dyn std::io::Read> = match tmp.file_format.as_str() {
-        "tar.gz" => Box::new(GzDecoder::new(&file)),
-        "tar.xz" => Box::new(XzDecoder::new(&file)),
-        "zip" => Box::new(io::empty()),
-        _ => return Err(anyhow!("Unsupported file format")),
-    };
 
     let context_msg = format!(
         "Failed to decompress or extract file {}.{}",
@@ -65,12 +57,20 @@ fn expand(package: Package, tmp: LocalVersion) -> Result<()> {
     );
 
     match tmp.file_format.as_str() {
-        "tar.gz" | "tar.xz" => {
+        "tar.gz" => {
+            let decompress_stream = GzDecoder::new(file);
+            let mut archive = Archive::new(decompress_stream);
+            archive.unpack(&output).with_context(|| context_msg)?;
+        }
+        "tar.xz" => {
+            let decompress_stream = XzDecoder::new(file);
             let mut archive = Archive::new(decompress_stream);
             archive.unpack(&output).with_context(|| context_msg)?;
         }
         "zip" => {
-            extract(&file, Path::new(&output), true).with_context(|| context_msg)?;
+            let mut archive = ZipReader::new(file)
+                .map_err(|error| anyhow!("{context_msg}. additional info: {error}"))?;
+            archive.extract(&output).with_context(|| context_msg)?;
         }
         _ => return Err(anyhow!("Unsupported file format")),
     }
