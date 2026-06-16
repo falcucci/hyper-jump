@@ -1,0 +1,141 @@
+name: Nightly Release
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild nightly even if HEAD already matches the nightly tag
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check_current_nightly:
+    name: Check Current Nightly
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.compare.outputs.should_skip }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare HEAD to nightly tag
+        id: compare
+        env:
+          FORCE_REBUILD: ${{ github.event_name == 'workflow_dispatch' && inputs.force && 'true' || 'false' }}
+        run: |
+          if [[ "$FORCE_REBUILD" == "true" ]]; then
+            echo "Force rebuild requested"
+            echo "should_skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          head_sha=$(git rev-parse HEAD)
+          nightly_sha=$(
+            git ls-remote origin "refs/tags/nightly" "refs/tags/nightly^{}" |
+              awk '
+                /\^\{\}$/ { peeled = $1 }
+                !/\^\{\}$/ { direct = $1 }
+                END { print peeled ? peeled : direct }
+              '
+          )
+
+          if [[ -n "$nightly_sha" && "$nightly_sha" == "$head_sha" ]]; then
+            echo "Nightly already points at $head_sha"
+            echo "should_skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nightly needs update"
+            echo "HEAD: ${head_sha}"
+            echo "nightly: ${nightly_sha:-<missing>}"
+            echo "should_skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: check_current_nightly
+    if: needs.check_current_nightly.outputs.should_skip != 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            asset_name: hj-x86_64-unknown-linux-gnu.tar.gz
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            asset_name: hj-x86_64-apple-darwin.tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            asset_name: hj-aarch64-apple-darwin.tar.gz
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --locked --profile optimized --target ${{ matrix.target }}
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          tar -czf "dist/${{ matrix.asset_name }}" -C "target/${{ matrix.target }}/optimized" hj
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
+          if-no-files-found: error
+
+  publish_release:
+    name: Publish Release
+    needs: [check_current_nightly, build]
+    if: needs.check_current_nightly.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Replace nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete nightly --yes || true
+          git push origin :refs/tags/nightly || true
+
+          gh release create nightly \
+            --target "$GITHUB_SHA" \
+            --draft \
+            --prerelease \
+            --latest=false \
+            --title "Nightly" \
+            --notes "This is a pre-release build of hyper-jump from the latest main branch commit."
+
+          gh release upload nightly dist/*.tar.gz
+          gh release edit nightly --draft=false
