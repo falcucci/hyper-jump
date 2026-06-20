@@ -135,7 +135,7 @@ jobs:
             --prerelease \
             --latest=false \
             --title "Nightly" \
-            --notes "This is a pre-release build of hyper-jump from the latest main branch commit."
+            --notes "This is a pre-release build of hyper-jump."
 
           gh release upload nightly dist/*.tar.gz
           gh release edit nightly --draft=false
