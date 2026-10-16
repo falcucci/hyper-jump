@@ -1,9 +1,9 @@
 [package]
 name = "hyper-jump"
-version = "0.10.1"
+version = "0.11.0"
 edition = "2021"
 license = "Apache-2.0"
-readme = "README.md"
+readme = "readme.md"
 authors = ["Alexsander Falcucci <alex.falcucci@gmail.com>"]
 description = "A generalist all-in-one command-line version manager toolset for a more efficient development workflow."
 categories = ["command-line-utilities"]
